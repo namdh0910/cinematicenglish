@@ -13,7 +13,8 @@ import {
   Volume2,
   Settings,
   Info,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
