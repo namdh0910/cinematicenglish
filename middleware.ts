@@ -61,18 +61,20 @@ export async function middleware(req: NextRequest) {
 
   // 2. Logged in but accessing admin routes → check role
     // Master Admin Bypass
-    if (session.user.email === 'admin@cinematicenglish.com') {
+    if (session?.user?.email === 'admin@cinematicenglish.com') {
       return res
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
+    if (session?.user?.id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
 
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url))
+      if (!profile || profile.role !== 'admin') {
+        return NextResponse.redirect(new URL('/', req.url))
+      }
     }
 
   // 3. Already logged in + going to /admin/login → redirect to dashboard

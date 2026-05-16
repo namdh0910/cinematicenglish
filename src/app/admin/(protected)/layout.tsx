@@ -26,7 +26,7 @@ export default async function AdminLayout({
 
   // 2. Fetch Profile & Role
   // Master Admin Bypass
-  if (session.user.email === 'admin@cinematicenglish.com') {
+  if (session?.user?.email === 'admin@cinematicenglish.com') {
     // We still try to get the profile for the UI, but don't redirect if it fails
     const { data: profile } = await supabase
       .from('profiles')
@@ -52,7 +52,7 @@ export default async function AdminLayout({
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
-    .eq('id', session.user.id)
+    .eq('id', session?.user?.id)
     .single();
 
   // 3. RBAC Check
