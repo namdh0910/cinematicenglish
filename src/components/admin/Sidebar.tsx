@@ -10,7 +10,8 @@ import {
   BarChart2, 
   Settings, 
   LogOut, 
-  Zap
+  Zap,
+  GraduationCap
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
