@@ -190,6 +190,7 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
                     transcript={currentStory.transcript} 
                     currentTime={currentTime}
                     onLineClick={(time) => setCurrentTime(time)}
+                    isShadowing={isShadowing}
                   />
                 </motion.div>
               )}
