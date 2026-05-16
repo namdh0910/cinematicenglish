@@ -58,6 +58,14 @@
   --t-normal:    450ms var(--ease-out-expo);
   --t-slow:      800ms var(--ease-cinematic);
   --t-atmosphere: 2500ms var(--ease-in-out-soft);
+  --rhythm-relaxed: 2.5rem;
+  --rhythm-loose: 4rem;
+
+  /* Mobile Safe Areas & Touch Targets */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --touch-target: 44px;
+  --mobile-padding: 1.25rem;
 
   /* Visual Rhythm */
   --section-gap: clamp(4rem, 10vh, 10rem);

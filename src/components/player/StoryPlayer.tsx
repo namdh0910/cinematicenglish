@@ -138,40 +138,63 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
       </motion.header>
 
       {/* Main Experience Area */}
-      <main className="relative flex-1 z-50 flex flex-col items-center">
-        <AnimatePresence mode="wait">
-          {!isShadowing ? (
-            <motion.div
-              key="transcript"
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 1.02, y: -10 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full w-full"
+      <main className="flex-1 relative flex flex-col md:flex-row overflow-hidden pt-[var(--safe-top)]">
+        {/* Left: Atmospheric Visual & Controls */}
+        <div className={`relative flex flex-col transition-all duration-1000 ease-cinematic ${isFocusMode ? 'flex-[0.3] md:flex-[0.4] opacity-40 grayscale blur-md pointer-events-none' : 'flex-1 md:flex-[0.6]'}`}>
+          <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 text-center space-y-6 md:space-y-12">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="relative w-48 h-48 md:w-80 md:h-80 rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl group border border-white/10"
             >
-              <TranscriptPanel 
-                transcript={currentStory.transcript} 
-                currentTime={currentTime}
-                onLineClick={(time) => setCurrentTime(time)}
-                isShadowing={isShadowing}
-              />
+              <img src={currentStory.coverImage} alt={currentStory.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
             </motion.div>
-          ) : (
-            <motion.div
-              key="coach"
-              initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="h-full w-full max-w-5xl mx-auto flex items-center justify-center"
-            >
-              <AICoachPanel 
-                sentence={currentStory.challenge.sentence} 
-                translation={currentStory.challenge.translation} 
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+            <div className="space-y-3 md:space-y-6 max-w-lg">
+              <Badge variant="violet" className="px-3 py-1 text-[10px] tracking-[0.2em]">{currentStory.category}</Badge>
+              <h1 className="text-3xl md:text-6xl font-display font-black tracking-tighter leading-[0.95]">{currentStory.title}</h1>
+              <p className="text-secondary italic text-sm md:text-lg font-light leading-relaxed px-4 md:px-0">"{currentStory.hookLine}"</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Interactive Transcript / Coach Panel */}
+        <div className={`relative flex flex-col transition-all duration-1000 ease-cinematic bg-black/40 backdrop-blur-xl border-l border-white/5 z-50 ${isFocusMode || isShadowing ? 'flex-1 md:flex-[0.6]' : 'flex-0 md:flex-[0.4] h-0 md:h-auto overflow-hidden opacity-0 translate-y-20'}`}>
+          <div className="flex-1 overflow-hidden relative flex flex-col">
+            <AnimatePresence mode="wait">
+              {isShadowing ? (
+                <motion.div
+                  key="coach"
+                  initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-full w-full flex items-center justify-center"
+                >
+                  <AICoachPanel 
+                    sentence={currentStory.challenge.sentence} 
+                    translation={currentStory.challenge.translation} 
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="transcript"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  className="h-full w-full"
+                >
+                  <TranscriptPanel 
+                    transcript={currentStory.transcript} 
+                    currentTime={currentTime}
+                    onLineClick={(time) => setCurrentTime(time)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </main>
 
       {/* Cinematic State Transition Overlay */}
