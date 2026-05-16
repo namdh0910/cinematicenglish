@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Zap, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");

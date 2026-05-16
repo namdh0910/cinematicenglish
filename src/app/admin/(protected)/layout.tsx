@@ -1,7 +1,7 @@
 import Sidebar from "@/components/admin/Sidebar";
 import TopBar from "@/components/admin/TopBar";
 import { redirect } from "next/navigation";
-import { createSupabaseServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "Admin Dashboard | Cinematic English",

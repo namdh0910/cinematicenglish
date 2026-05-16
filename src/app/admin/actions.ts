@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from 'next/cache';
-import { createSupabaseServerClient } from '@/lib/supabase';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 // --- STORIES ACTIONS ---
 
@@ -11,7 +11,7 @@ export async function getStories(filters?: {
   status?: string,
   sort?: string 
 }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   let query = supabase.from('stories').select('*');
 
   if (filters?.query) {
@@ -35,7 +35,7 @@ export async function getStories(filters?: {
 }
 
 export async function createStory(data: any) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: story, error } = await supabase
     .from('stories')
     .insert([data])
@@ -48,7 +48,7 @@ export async function createStory(data: any) {
 }
 
 export async function updateStory(id: string, data: any) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { data: story, error } = await supabase
     .from('stories')
     .update(data)
@@ -62,7 +62,7 @@ export async function updateStory(id: string, data: any) {
 }
 
 export async function deleteStory(id: string) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const { error } = await supabase
     .from('stories')
     .delete()
@@ -76,7 +76,7 @@ export async function deleteStory(id: string) {
 // --- USERS ACTIONS ---
 
 export async function getUsers(filters?: { query?: string, plan?: string, status?: string }) {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   let query = supabase.from('profiles').select('*');
 
   if (filters?.query) {
@@ -97,7 +97,7 @@ export async function getUsers(filters?: { query?: string, plan?: string, status
 // --- ANALYTICS ACTIONS ---
 
 export async function getAnalytics(dateRange: string = '30') {
-  const supabase = createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   
   // Aggregate stats using SQL functions or multiple queries
   // For simplicity, we fetch totals

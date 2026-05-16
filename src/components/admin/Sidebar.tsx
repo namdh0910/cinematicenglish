@@ -13,7 +13,7 @@ import {
   Zap
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { createSupabaseBrowserClient } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface SidebarProps {
   adminProfile?: {
