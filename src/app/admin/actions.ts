@@ -119,7 +119,7 @@ export async function getAnalytics(dateRange: string = '30') {
     supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan', 'Pro')
   ]);
 
-  const totalPlays = playsSum.data?.reduce((acc, curr) => acc + (curr.plays || 0), 0) || 0;
+  const totalPlays = playsSum.data?.reduce((acc: number, curr: any) => acc + (curr.plays || 0), 0) || 0;
 
   // Mocking time-series data for the dashboard charts
   // In real implementation, these would be separate aggregation queries
