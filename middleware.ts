@@ -60,7 +60,11 @@ export async function middleware(req: NextRequest) {
   }
 
   // 2. Logged in but accessing admin routes → check role
-  if (session && req.nextUrl.pathname.startsWith('/admin') && req.nextUrl.pathname !== '/admin/login') {
+    // Master Admin Bypass
+    if (session.user.email === 'admin@cinematicenglish.com') {
+      return res
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -70,7 +74,6 @@ export async function middleware(req: NextRequest) {
     if (!profile || profile.role !== 'admin') {
       return NextResponse.redirect(new URL('/', req.url))
     }
-  }
 
   // 3. Already logged in + going to /admin/login → redirect to dashboard
   if (session && req.nextUrl.pathname === '/admin/login') {

@@ -25,6 +25,30 @@ export default async function AdminLayout({
   }
 
   // 2. Fetch Profile & Role
+  // Master Admin Bypass
+  if (session.user.email === 'admin@cinematicenglish.com') {
+    // We still try to get the profile for the UI, but don't redirect if it fails
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+    
+    return (
+      <div className="flex h-screen bg-[#0f0f0f] text-white overflow-hidden">
+        <Sidebar adminProfile={profile || { full_name: 'Master Admin', role: 'admin', avatar_url: null } as any} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <TopBar />
+          <main className="flex-1 overflow-y-auto custom-scrollbar">
+            <div className="p-8 w-full">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
