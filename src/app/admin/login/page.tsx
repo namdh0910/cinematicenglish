@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
       if (email === "admin@cinematicenglish.com" && password === "password123") {
         // Set a mock cookie for the middleware to see
         document.cookie = "admin-session=active; path=/; max-age=3600";
-        router.push("/admin/dashboard");
+        router.push("/admin");
       } else {
         setError("Thông tin đăng nhập không chính xác. Vui lòng kiểm tra lại.");
         setIsLoading(false);
