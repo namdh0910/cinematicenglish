@@ -16,7 +16,8 @@ import {
   X,
   PlusCircle,
   Clock,
-  Layout
+  Layout,
+  Sparkles
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import QuizBuilder from "./QuizBuilder";
