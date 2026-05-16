@@ -110,7 +110,7 @@ export default function CharacterModal({ isOpen, onClose, onSave, character }: C
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[90vh] bg-[#1a1a1a] border border-white/10 rounded-[40px] shadow-2xl flex flex-col overflow-hidden"
+          className="relative w-full max-w-5xl h-[85vh] bg-[#1a1a1a] border border-white/10 rounded-[40px] shadow-2xl flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="p-8 border-b border-white/5 flex items-center justify-between">
