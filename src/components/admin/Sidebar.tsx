@@ -13,7 +13,7 @@ import {
   Zap
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { createBrowserClient } from "@/lib/supabase";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 interface SidebarProps {
   adminProfile?: {
@@ -36,7 +36,7 @@ const navItems = [
 export default function Sidebar({ adminProfile }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createBrowserClient();
+  const supabase = createSupabaseBrowserClient();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

@@ -1,7 +1,7 @@
 import Sidebar from "@/components/admin/Sidebar";
 import TopBar from "@/components/admin/TopBar";
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase";
 
 export const metadata = {
   title: "Admin Dashboard | Cinematic English",
@@ -13,7 +13,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createServerClient();
+  const supabase = createSupabaseServerClient();
   
   // 1. Get Session
   const { data: { session } } = await supabase.auth.getSession();
