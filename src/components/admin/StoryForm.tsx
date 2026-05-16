@@ -19,6 +19,7 @@ import {
   Layout
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import QuizBuilder from "./QuizBuilder";
 
 const storySchema = z.object({
   title: z.string().min(5, "Tiêu đề phải ít nhất 5 ký tự"),
@@ -37,7 +38,6 @@ const storySchema = z.object({
 type StoryFormValues = z.infer<typeof storySchema>;
 
 export default function StoryForm() {
-  const [quizzes, setQuizzes] = useState<{ id: string; question: string; type: string }[]>([]);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
 
@@ -60,21 +60,8 @@ export default function StoryForm() {
   });
 
   const onSubmit = (data: StoryFormValues) => {
-    console.log("Submitting Story Data:", { ...data, quizzes });
+    console.log("Submitting Story Data:", data);
     alert("Story submitted! Check console for details.");
-  };
-
-  const addQuiz = () => {
-    const newQuiz = {
-      id: Math.random().toString(36).substr(2, 9),
-      question: "New quiz question placeholder...",
-      type: "Multiple Choice"
-    };
-    setQuizzes([...quizzes, newQuiz]);
-  };
-
-  const removeQuiz = (id: string) => {
-    setQuizzes(quizzes.filter(q => q.id !== id));
   };
 
   return (
@@ -152,56 +139,8 @@ export default function StoryForm() {
           </div>
 
           {/* QUIZ SECTION */}
-          <div className="p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5 space-y-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold flex items-center gap-3">
-                <HelpCircle size={20} className="text-blue-400" /> Attached Quiz
-              </h3>
-              <button 
-                type="button"
-                onClick={addQuiz}
-                className="px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500/20 transition-all flex items-center gap-2"
-              >
-                <PlusCircle size={14} /> Add Quiz Question
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {quizzes.length === 0 ? (
-                <div className="py-12 border-2 border-dashed border-white/5 rounded-[32px] flex flex-col items-center justify-center text-center px-6">
-                  <HelpCircle className="text-white/10 mb-4" size={48} />
-                  <p className="text-sm text-white/20">Chưa có câu hỏi nào được gắn. Thêm quiz để tăng tính tương tác.</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {quizzes.map((q, i) => (
-                    <motion.div 
-                      key={q.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold shrink-0">
-                          {i + 1}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-medium text-white truncate">{q.question}</span>
-                          <span className="text-[10px] text-white/20 uppercase font-bold tracking-widest mt-1">{q.type}</span>
-                        </div>
-                      </div>
-                      <button 
-                        type="button"
-                        onClick={() => removeQuiz(q.id)}
-                        className="p-2 text-white/20 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5">
+            <QuizBuilder transcript={watch("transcript")} />
           </div>
         </div>
 
