@@ -98,7 +98,9 @@ export default function DetailedDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            {/* Suble Glow Background */}
+            className="p-6 rounded-[32px] bg-[#1a1a1a] border border-white/5 hover:border-white/10 transition-all group relative overflow-hidden"
+          >
+            {/* Subtle Glow Background */}
             <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/5 blur-3xl rounded-full group-hover:bg-white/10 transition-all" />
             
             <div className="flex justify-between items-start mb-6 relative z-10">
