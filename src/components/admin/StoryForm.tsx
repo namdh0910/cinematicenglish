@@ -69,13 +69,22 @@ export default function StoryForm() {
 
   const onSubmit = async (data: StoryFormValues) => {
     try {
-      await createStory({
+      // Defensive duration parsing
+      let durationSeconds = 0;
+      if (data.duration && data.duration.includes(":")) {
+        const parts = data.duration.split(":");
+        durationSeconds = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+      } else {
+        durationSeconds = parseInt(data.duration) || 0;
+      }
+
+      const result = await createStory({
         title: data.title,
         synopsis: data.description,
         script: data.transcript,
         category: data.category.toLowerCase().replace(" & influence", ""),
         difficulty: data.difficulty.toLowerCase(),
-        duration_seconds: parseInt(data.duration.split(":")[0]) * 60 + parseInt(data.duration.split(":")[1]),
+        duration_seconds: durationSeconds,
         xp_value: data.xp,
         is_premium: data.isPremium,
         is_featured: data.isFeatured,
@@ -83,10 +92,15 @@ export default function StoryForm() {
         thumbnail_url: data.thumbnailUrl,
         audio_url: data.audioUrl,
       });
-      router.push("/admin/stories");
-    } catch (err) {
+
+      if (result.success) {
+        router.push("/admin/stories");
+      } else {
+        alert(`Lỗi từ Database: ${result.error}\n\n(Vui lòng kiểm tra xem bạn đã chạy SQL tạo bảng 'stories' chưa ạ)`);
+      }
+    } catch (err: any) {
       console.error("Failed to create story:", err);
-      alert("Lỗi khi tạo story. Vui lòng kiểm tra console.");
+      alert("Lỗi không xác định: " + err.message);
     }
   };
 

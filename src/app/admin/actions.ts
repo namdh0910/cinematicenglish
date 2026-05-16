@@ -43,16 +43,25 @@ export async function getStories(filters?: {
 }
 
 export async function createStory(data: any) {
-  const supabase = await createSupabaseServerClient();
-  const { data: story, error } = await supabase
-    .from('stories')
-    .insert([data])
-    .select()
-    .single();
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: story, error } = await supabase
+      .from('stories')
+      .insert([data])
+      .select()
+      .single();
 
-  if (error) throw error;
-  revalidatePath('/admin/stories');
-  return story;
+    if (error) {
+      console.error("Supabase Error:", error);
+      return { success: false, error: error.message };
+    }
+    
+    revalidatePath('/admin/stories');
+    return { success: true, data: story };
+  } catch (err: any) {
+    console.error("Server Action Error:", err);
+    return { success: false, error: err.message || "Unknown server error" };
+  }
 }
 
 export async function updateStory(id: string, data: any) {
