@@ -1,16 +1,25 @@
 import Sidebar from "@/components/admin/Sidebar";
 import TopBar from "@/components/admin/TopBar";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Admin Dashboard | Cinematic English",
   description: "Internal management platform for Cinematic English content and users.",
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const isAdmin = cookieStore.get("admin-session");
+
+  if (!isAdmin) {
+    redirect("/admin/login");
+  }
+
   return (
     <div className="flex min-h-screen bg-[#0f0f0f] text-white">
       {/* Fixed Sidebar */}
