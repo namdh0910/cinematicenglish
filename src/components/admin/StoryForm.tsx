@@ -37,6 +37,8 @@ const storySchema = z.object({
   status: z.enum(["Draft", "Published"]),
   isPremium: z.boolean(),
   isFeatured: z.boolean(),
+  thumbnailUrl: z.string().optional(),
+  audioUrl: z.string().optional(),
 });
 
 type StoryFormValues = z.infer<typeof storySchema>;
@@ -78,6 +80,8 @@ export default function StoryForm() {
         is_premium: data.isPremium,
         is_featured: data.isFeatured,
         status: data.status.toLowerCase(),
+        thumbnail_url: data.thumbnailUrl,
+        audio_url: data.audioUrl,
       });
       router.push("/admin/stories");
     } catch (err) {
@@ -165,6 +169,7 @@ export default function StoryForm() {
                   placeholder="power, mindset, leadership"
                   className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 px-6 text-white focus:outline-none focus:border-amber-500/50 transition-all text-sm"
                 />
+                {errors.tags && <p className="text-red-400 text-[10px] font-bold ml-4">{errors.tags.message}</p>}
               </div>
             </div>
           </div>
@@ -180,34 +185,40 @@ export default function StoryForm() {
           <div className="p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5 space-y-8 sticky top-[100px]">
             {/* Media Uploads */}
             <div className="space-y-6">
-              {/* Thumbnail */}
+              {/* Thumbnail URL */}
               <div className="space-y-3">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Thumbnail Image</label>
-                <div className="aspect-square rounded-[32px] border-2 border-dashed border-white/10 flex flex-col items-center justify-center relative overflow-hidden group hover:border-amber-500/50 transition-all cursor-pointer bg-white/[0.02]">
-                  {thumbnailPreview ? (
-                    <img src={thumbnailPreview} className="w-full h-full object-cover" alt="Preview" />
-                  ) : (
-                    <>
-                      <ImageIcon className="text-white/10 mb-2" size={32} />
-                      <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Click to upload</span>
-                    </>
-                  )}
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Thumbnail URL</label>
+                <div className="space-y-3">
+                  <input 
+                    {...register("thumbnailUrl")}
+                    placeholder="Dán link ảnh (https://...)"
+                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:border-amber-500/50 transition-all"
+                  />
+                  <div className="aspect-video rounded-2xl border border-white/10 overflow-hidden bg-black/20 flex items-center justify-center">
+                    {watch("thumbnailUrl") ? (
+                      <img src={watch("thumbnailUrl")} className="w-full h-full object-cover" alt="Preview" />
+                    ) : (
+                      <ImageIcon className="text-white/10" size={24} />
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Audio */}
+              {/* Audio URL */}
               <div className="space-y-3">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Audio File</label>
-                <div className="p-6 rounded-2xl border-2 border-dashed border-white/10 flex items-center gap-4 hover:border-amber-500/50 transition-all cursor-pointer bg-white/[0.02]">
-                  <div className="p-3 rounded-xl bg-amber-500/10 text-amber-500">
-                    <Music size={24} />
+                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Audio URL (Direct Link)</label>
+                <div className="space-y-3">
+                  <input 
+                    {...register("audioUrl")}
+                    placeholder="Dán link audio (mp3/wav)"
+                    className="w-full bg-white/5 border border-white/5 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:border-amber-500/50 transition-all"
+                  />
+                  <div className="p-4 rounded-xl bg-amber-500/5 border border-white/5 flex items-center gap-3">
+                    <Music className="text-amber-500" size={18} />
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                      {watch("audioUrl") ? "Audio link detected" : "No audio link"}
+                    </span>
                   </div>
-                  <div className="flex-1 flex flex-col">
-                    <span className="text-xs font-bold text-white/60">Upload MP3/WAV</span>
-                    <span className="text-[10px] text-white/20 uppercase font-bold tracking-widest">Max size: 50MB</span>
-                  </div>
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="audio/*" />
                 </div>
               </div>
             </div>
@@ -224,6 +235,7 @@ export default function StoryForm() {
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all font-mono"
                   />
                 </div>
+                {errors.duration && <p className="text-red-400 text-[10px] font-bold ml-4">{errors.duration.message}</p>}
               </div>
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">XP Reward</label>
@@ -235,6 +247,7 @@ export default function StoryForm() {
                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all font-mono"
                   />
                 </div>
+                {errors.xp && <p className="text-red-400 text-[10px] font-bold ml-4">{errors.xp.message}</p>}
               </div>
             </div>
 
