@@ -98,12 +98,10 @@ export default function DetailedDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="p-6 rounded-[32px] bg-[#1a1a1a] border border-white/5 hover:border-white/10 transition-all group relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
-              <stat.icon size={120} />
-            </div>
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            {/* Suble Glow Background */}
+            <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/5 blur-3xl rounded-full group-hover:bg-white/10 transition-all" />
+            
+            <div className="flex justify-between items-start mb-6 relative z-10">
               <div className={`p-3 rounded-2xl bg-white/5 ${stat.color}`}>
                 <stat.icon size={24} />
               </div>
@@ -115,8 +113,8 @@ export default function DetailedDashboard() {
               )}
             </div>
             <div className="space-y-1 relative z-10">
-              <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-white/30">{stat.label}</div>
-              <div className="text-3xl font-display font-black tracking-tighter text-white">{stat.value}</div>
+              <div className="text-[10px] uppercase font-black tracking-[0.25em] text-white/50">{stat.label}</div>
+              <div className="text-4xl font-display font-black tracking-tighter text-white drop-shadow-sm">{stat.value}</div>
             </div>
           </motion.div>
         ))}
