@@ -29,7 +29,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[240px] bg-[#1a1a1a] border-r border-white/5 flex flex-col h-screen fixed left-0 top-0 z-[100]">
+    <aside className="w-[240px] bg-[#1a1a1a] border-r border-white/5 flex flex-col h-screen z-[100] shrink-0">
       {/* Logo Section */}
       <div className="p-6 border-b border-white/5">
         <Link href="/" className="flex items-center gap-3 group">

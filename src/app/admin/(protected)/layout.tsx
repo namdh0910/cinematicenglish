@@ -21,12 +21,12 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0f0f0f] text-white">
-      {/* Fixed Sidebar */}
+    <div className="flex h-screen bg-[#0f0f0f] text-white overflow-hidden">
+      {/* Sidebar - tự chiếm không gian */}
       <Sidebar />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col pl-[240px]">
+      {/* Main Content Area - phần còn lại */}
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Sticky Header */}
         <TopBar />
 

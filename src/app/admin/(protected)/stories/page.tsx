@@ -9,6 +9,7 @@ import {
   List,
   SortDesc
 } from "lucide-react";
+import Link from "next/link";
 import StoryTable, { StoryItem } from "@/components/admin/StoryTable";
 
 const MOCK_STORIES: StoryItem[] = [
@@ -41,9 +42,11 @@ export default function StoriesPage() {
           <p className="text-white/40 font-medium italic">Quản lý và biên tập nội dung Cinematic English.</p>
         </div>
         
-        <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-black font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
-          <Plus size={20} strokeWidth={3} /> Create New Story
-        </button>
+        <Link href="/admin/stories/new">
+          <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-black font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
+            <Plus size={20} strokeWidth={3} /> Create New Story
+          </button>
+        </Link>
       </div>
 
       {/* 2. Filters & Toolbar */}
