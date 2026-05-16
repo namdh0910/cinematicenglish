@@ -162,3 +162,107 @@ export async function getAnalytics(dateRange: string = '30') {
     ]
   };
 }
+
+// --- CURRICULUM ACTIONS ---
+
+export async function getGrades() {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('grades')
+    .select('*')
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching grades:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function getGradeWithDetails(gradeId: string) {
+  const supabase = await createSupabaseServerClient();
+  
+  // Lấy Grade kèm Semesters và Units của nó
+  const { data: grade, error } = await supabase
+    .from('grades')
+    .select(`
+      *,
+      semesters (
+        *,
+        units (
+          *
+        )
+      )
+    `)
+    .eq('id', gradeId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching grade details:", error);
+    return null;
+  }
+  return grade;
+}
+
+export async function createGrade(data: { title: string, description: string, order_index: number }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: grade, error } = await supabase
+    .from('grades')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath('/admin/curriculum');
+  return grade;
+}
+
+export async function createUnit(data: { semester_id: string, title: string, description: string, order_index: number }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: unit, error } = await supabase
+    .from('units')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum`);
+  return unit;
+}
+
+export async function getUnitWithDetails(unitId: string) {
+  const supabase = await createSupabaseServerClient();
+  
+  const { data: unit, error } = await supabase
+    .from('units')
+    .select(`
+      *,
+      lessons (
+        *,
+        activities (
+          *
+        )
+      )
+    `)
+    .eq('id', unitId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching unit details:", error);
+    return null;
+  }
+  return unit;
+}
+
+export async function createLesson(data: { unit_id: string, title: string, type: string, order_index: number }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum/unit/${data.unit_id}`);
+  return lesson;
+}

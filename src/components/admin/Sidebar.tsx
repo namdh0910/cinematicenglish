@@ -26,6 +26,7 @@ interface SidebarProps {
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: BookOpen, label: "Stories", href: "/admin/stories" },
+  { icon: GraduationCap, label: "Curriculum", href: "/admin/curriculum" },
   { icon: HelpCircle, label: "Quizzes", href: "/admin/quizzes" },
   { icon: Bot, label: "AI Characters", href: "/admin/characters" },
   { icon: Users, label: "Users", href: "/admin/users" },
