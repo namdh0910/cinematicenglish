@@ -29,9 +29,17 @@ export async function getStories(filters?: {
   const [column, order] = sort.split('.');
   query = query.order(column, { ascending: order === 'asc' });
 
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
+  try {
+    const { data, error } = await query;
+    if (error) {
+      console.error("Supabase error fetching stories:", error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error("Failed to fetch stories:", err);
+    return [];
+  }
 }
 
 export async function createStory(data: any) {

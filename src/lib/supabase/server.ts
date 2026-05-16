@@ -6,19 +6,28 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export async function createSupabaseServerClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a proxy or a dummy object that doesn't crash on common calls
+    // Return a robust proxy that handles any chained calls
+    const createProxy = () => {
+      const target = () => {};
+      const proxy: any = new Proxy(target, {
+        get: (t, prop) => {
+          if (prop === 'then') return undefined; // Not a promise until called
+          return createProxy();
+        },
+        apply: (t, thisArg, args) => {
+          // If the final call is awaited, return empty data
+          return Promise.resolve({ data: [], error: null, count: 0 });
+        }
+      });
+      return proxy;
+    };
+
     return {
       auth: {
         getSession: async () => ({ data: { session: null }, error: null }),
         getUser: async () => ({ data: { user: null }, error: null }),
       },
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            single: async () => ({ data: null, error: null }),
-          }),
-        }),
-      }),
+      from: createProxy,
     } as any;
   }
 
