@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import QuizBuilder from "./QuizBuilder";
+import AIStoryGenerator from "./AIStoryGenerator";
 
 const storySchema = z.object({
   title: z.string().min(5, "Tiêu đề phải ít nhất 5 ký tự"),
@@ -40,6 +41,7 @@ type StoryFormValues = z.infer<typeof storySchema>;
 export default function StoryForm() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   const {
     register,
@@ -70,9 +72,18 @@ export default function StoryForm() {
         {/* LEFT COLUMN: CONTENT (60%) */}
         <div className="xl:col-span-3 space-y-8">
           <div className="p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5 space-y-6">
-            <h3 className="text-xl font-bold flex items-center gap-3">
-              <Layout size={20} className="text-amber-500" /> Nội dung chính
-            </h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold flex items-center gap-3">
+                <Layout size={20} className="text-amber-500" /> Nội dung chính
+              </h3>
+              <button 
+                type="button"
+                onClick={() => setIsAIModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-black hover:bg-amber-500/20 transition-all group"
+              >
+                <Sparkles size={14} className="group-hover:rotate-12 transition-transform" /> Generate with AI
+              </button>
+            </div>
             
             <div className="space-y-6">
               {/* Title */}
@@ -299,6 +310,18 @@ export default function StoryForm() {
           </div>
         </div>
       </div>
+      <AIStoryGenerator 
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onUse={(aiData) => {
+          setValue("title", aiData.title);
+          setValue("description", aiData.description);
+          setValue("transcript", aiData.transcript);
+          setValue("tags", aiData.tags);
+          setValue("xp", aiData.xp);
+          setIsAIModalOpen(false);
+        }}
+      />
     </form>
   );
 }
