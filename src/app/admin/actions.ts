@@ -64,6 +64,21 @@ export async function createStory(data: any) {
   }
 }
 
+export async function getStoryById(id: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('stories')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching story:", error);
+    return null;
+  }
+  return data;
+}
+
 export async function updateStory(id: string, data: any) {
   const supabase = await createSupabaseServerClient();
   const { data: story, error } = await supabase

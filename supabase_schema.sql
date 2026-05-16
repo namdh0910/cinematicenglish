@@ -58,8 +58,21 @@ alter table quizzes enable row level security;
 alter table user_progress enable row level security;
 alter table profiles enable row level security;
 
--- ADMIN POLICIES (Simplified for demonstration)
+-- ADMIN POLICIES
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid()
+      and role = 'admin'
+    )
+  );
+end;
+$$ language plpgsql security definer;
+
 create policy "Admins can do anything" on stories for all to authenticated using (
-  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+  is_admin()
 );
 -- ... add more policies as needed

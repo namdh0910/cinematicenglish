@@ -22,7 +22,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import QuizBuilder from "./QuizBuilder";
 import AIStoryGenerator from "./AIStoryGenerator";
-import { createStory } from "@/app/admin/actions";
+import { createStory, updateStory } from "@/app/admin/actions";
 import { useRouter } from "next/navigation";
 
 const storySchema = z.object({
@@ -43,7 +43,7 @@ const storySchema = z.object({
 
 type StoryFormValues = z.infer<typeof storySchema>;
 
-export default function StoryForm() {
+export default function StoryForm({ initialData }: { initialData?: any }) {
   const router = useRouter();
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
@@ -58,12 +58,19 @@ export default function StoryForm() {
   } = useForm<StoryFormValues>({
     resolver: zodResolver(storySchema),
     defaultValues: {
-      category: "Psychology",
-      xp: 250,
-      difficulty: "Intermediate",
-      status: "Draft",
-      isPremium: false,
-      isFeatured: false,
+      title: initialData?.title || "",
+      category: initialData?.category || "Psychology",
+      description: initialData?.synopsis || "",
+      transcript: initialData?.script || "",
+      tags: initialData?.tags || "",
+      duration: initialData?.duration_seconds ? `${Math.floor(initialData.duration_seconds / 60)}:${(initialData.duration_seconds % 60).toString().padStart(2, '0')}` : "",
+      xp: initialData?.xp_value || 250,
+      difficulty: initialData?.difficulty ? (initialData.difficulty.charAt(0).toUpperCase() + initialData.difficulty.slice(1)) as any : "Intermediate",
+      status: initialData?.status ? (initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1)) as any : "Draft",
+      isPremium: initialData?.is_premium || false,
+      isFeatured: initialData?.is_featured || false,
+      thumbnailUrl: initialData?.thumbnail_url || "",
+      audioUrl: initialData?.audio_url || "",
     },
   });
 
@@ -78,7 +85,7 @@ export default function StoryForm() {
         durationSeconds = parseInt(data.duration) || 0;
       }
 
-      const result = await createStory({
+      const storyData = {
         title: data.title,
         synopsis: data.description,
         script: data.transcript,
@@ -91,12 +98,21 @@ export default function StoryForm() {
         status: data.status.toLowerCase(),
         thumbnail_url: data.thumbnailUrl,
         audio_url: data.audioUrl,
-      });
+      };
+
+      let result;
+      if (initialData?.id) {
+        const updated = await updateStory(initialData.id, storyData);
+        result = { success: !!updated, data: updated };
+      } else {
+        result = await createStory(storyData);
+      }
 
       if (result.success) {
         router.push("/admin/stories");
+        router.refresh();
       } else {
-        alert(`Lỗi từ Database: ${result.error}\n\n(Vui lòng kiểm tra xem bạn đã chạy SQL tạo bảng 'stories' chưa ạ)`);
+        alert(`Lỗi: ${result.error || "Không thể lưu story"}`);
       }
     } catch (err: any) {
       console.error("Failed to create story:", err);

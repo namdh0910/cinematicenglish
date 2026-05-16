@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { 
   Edit2, 
   Eye, 
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Badge from "../ui/Badge";
+import { deleteStory } from "@/app/admin/actions";
 
 export interface StoryItem {
   id: string;
@@ -48,6 +50,18 @@ export default function StoryTable({ stories }: StoryTableProps) {
       setSelectedIds(selectedIds.filter(i => i !== id));
     } else {
       setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (confirm(`Bạn có chắc chắn muốn xóa story "${title}" không?`)) {
+      try {
+        await deleteStory(id);
+        // Page will revalidate via server action
+      } catch (err) {
+        console.error("Failed to delete story:", err);
+        alert("Có lỗi xảy ra khi xóa story.");
+      }
     }
   };
 
@@ -160,13 +174,26 @@ export default function StoryTable({ stories }: StoryTableProps) {
                   </td>
                   <td className="p-5">
                     <div className="flex items-center justify-end gap-2">
-                      <button title="Edit" className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                      <Link 
+                        href={`/admin/stories/edit/${story.id}`}
+                        title="Edit" 
+                        className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                      >
                         <Edit2 size={16} />
-                      </button>
-                      <button title="Preview" className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-amber-500 hover:bg-amber-500/10 transition-all">
+                      </Link>
+                      <Link 
+                        href={`/stories/${story.id}`}
+                        target="_blank"
+                        title="Preview" 
+                        className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-amber-500 hover:bg-amber-500/10 transition-all"
+                      >
                         <Eye size={16} />
-                      </button>
-                      <button title="Delete" className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-all">
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(story.id, story.title)}
+                        title="Delete" 
+                        className="p-2 rounded-lg bg-white/5 border border-white/5 text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
