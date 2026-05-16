@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Bookmark, Play, Pause, RotateCcw, Settings2, ChevronDown, Volume2, Zap } from "lucide-react";
 import { STORIES } from "@/lib/data";
+import { useEffect } from "react";
+import InteractiveOverlay from "@/components/stories/interactive/InteractiveOverlay";
 
 const STORY_PARAGRAPHS = [
   {
@@ -39,6 +41,58 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [highlightMode, setHighlightMode] = useState(false);
   const [activeVocab, setActiveVocab] = useState<typeof VOCAB[0] | null>(null);
   const [progress, setProgress] = useState(42);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [activeCheckpoint, setActiveCheckpoint] = useState<any>(null);
+  const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
+
+  // Mock Checkpoints
+  const checkpoints = [
+    {
+      id: "cp1",
+      timestamp_seconds: 5,
+      type: "prediction",
+      question_data: {
+        context: "Context: Intentional Power",
+        question: "Why does the narrator suggest power should be taken 'quietly'?",
+        options: [
+          "To avoid immediate resistance",
+          "Because they are afraid",
+          "To save energy for later",
+          "It's just a tradition"
+        ],
+        correctIndex: 0
+      }
+    }
+  ];
+
+  // Simulated Timer for demo
+  useEffect(() => {
+    let interval: any;
+    if (playing && !activeCheckpoint) {
+      interval = setInterval(() => {
+        setCurrentTime((prev) => {
+          const next = prev + 1;
+          // Check for checkpoint
+          const cp = checkpoints.find(c => c.timestamp_seconds === next && !completedCheckpoints.includes(c.id));
+          if (cp) {
+            setPlaying(false);
+            setActiveCheckpoint(cp);
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [playing, activeCheckpoint, completedCheckpoints]);
+
+  const handleCheckpointComplete = (isCorrect: boolean, responseTime: number) => {
+    if (activeCheckpoint) {
+      setCompletedCheckpoints([...completedCheckpoints, activeCheckpoint.id]);
+    }
+    setActiveCheckpoint(null);
+    setPlaying(true);
+    // In real app, we would send stats to Supabase here
+  };
 
   const toggleSave = (word: string) => {
     setSavedWords((prev) => prev.includes(word) ? prev.filter((w) => w !== word) : [...prev, word]);
@@ -279,6 +333,13 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
           </Link>
         </motion.div>
       </div>
+
+      {/* Interactive Quiz Overlay */}
+      <InteractiveOverlay 
+        isActive={!!activeCheckpoint} 
+        checkpoint={activeCheckpoint} 
+        onComplete={handleCheckpointComplete} 
+      />
     </div>
   );
 }
