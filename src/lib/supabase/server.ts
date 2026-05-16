@@ -6,7 +6,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export async function createSupabaseServerClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
-    return {} as any;
+    // Return a proxy or a dummy object that doesn't crash on common calls
+    return {
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: null, error: null }),
+          }),
+        }),
+      }),
+    } as any;
   }
 
   const cookieStore = await cookies()

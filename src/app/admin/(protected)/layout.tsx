@@ -3,6 +3,8 @@ import TopBar from "@/components/admin/TopBar";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Admin Dashboard | Cinematic English",
   description: "Internal management platform for Cinematic English content and users.",
