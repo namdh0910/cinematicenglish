@@ -10,6 +10,7 @@ import { STORIES, Story } from "@/lib/data";
 import SocialShareEngine from "../social/SocialShareEngine";
 import ReflectionEngine from "../journal/ReflectionEngine";
 import { Share2 } from "lucide-react";
+import Badge from "../ui/Badge";
 
 interface StoryPlayerProps {
   storyId: string;
