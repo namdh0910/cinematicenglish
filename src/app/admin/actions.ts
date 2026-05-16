@@ -5,10 +5,12 @@ import { revalidatePath } from 'next/cache';
 
 // NOTE: In production, use SUPABASE_SERVICE_ROLE_KEY for administrative actions
 // and ensure these are properly protected by checking the user role.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey)
+  : null as any;
 
 // --- STORIES ACTIONS ---
 
@@ -18,6 +20,7 @@ export async function getStories(filters?: {
   status?: string,
   sort?: string 
 }) {
+  if (!supabase) return [];
   let query = supabase.from('stories').select('*');
 
   if (filters?.query) {
@@ -41,6 +44,7 @@ export async function getStories(filters?: {
 }
 
 export async function createStory(data: any) {
+  if (!supabase) return null;
   const { data: story, error } = await supabase
     .from('stories')
     .insert([data])
@@ -53,6 +57,7 @@ export async function createStory(data: any) {
 }
 
 export async function updateStory(id: string, data: any) {
+  if (!supabase) return null;
   const { data: story, error } = await supabase
     .from('stories')
     .update(data)
@@ -66,6 +71,7 @@ export async function updateStory(id: string, data: any) {
 }
 
 export async function deleteStory(id: string) {
+  if (!supabase) return false;
   const { error } = await supabase
     .from('stories')
     .delete()
@@ -79,6 +85,7 @@ export async function deleteStory(id: string) {
 // --- USERS ACTIONS ---
 
 export async function getUsers(filters?: { query?: string, plan?: string, status?: string }) {
+  if (!supabase) return [];
   let query = supabase.from('profiles').select('*');
 
   if (filters?.query) {
@@ -99,6 +106,10 @@ export async function getUsers(filters?: { query?: string, plan?: string, status
 // --- ANALYTICS ACTIONS ---
 
 export async function getAnalytics(dateRange: string = '30') {
+  if (!supabase) return {
+    totals: { plays: 0, users: 0, stories: 0, proUsers: 0 },
+    dau: []
+  };
   // Aggregate stats using SQL functions or multiple queries
   // For simplicity, we fetch totals
   const [storiesCount, usersCount, playsSum, proUsers] = await Promise.all([
