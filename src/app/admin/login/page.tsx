@@ -34,6 +34,8 @@ export default function AdminLoginPage() {
         // Refresh router to ensure middleware picks up the new session
         router.refresh();
         router.push("/admin");
+      } else {
+        throw new Error("Login failed: No session received. Check your credentials.");
       }
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Make sure your account has admin access.");

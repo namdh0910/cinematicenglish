@@ -8,7 +8,10 @@ export function createSupabaseBrowserClient() {
     return {
       auth: {
         getSession: async () => ({ data: { session: null }, error: null }),
-        signInWithPassword: async () => ({ data: { session: null }, error: null }),
+        signInWithPassword: async () => ({ 
+          data: { session: null }, 
+          error: { message: "Supabase Environment Variables are missing. Please add them to Vercel Project Settings." } 
+        }),
       },
     } as any;
   }
