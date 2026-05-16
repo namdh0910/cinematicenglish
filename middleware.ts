@@ -1,34 +1,44 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// middleware.ts
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
 
-  // 1. Check if the path is an admin path
-  if (pathname.startsWith('/admin')) {
-    // 2. Exclude the login page from protection to avoid infinite loops
-    if (pathname === '/admin/login') {
-      return NextResponse.next();
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // 1. Not logged in → redirect to admin login if accessing admin routes
+  if (!session && req.nextUrl.pathname.startsWith('/admin')) {
+    if (req.nextUrl.pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', req.url))
     }
-
-    // 3. Mock Auth Check: Check for an auth cookie
-    // In production, this would be 'sb-access-token' or similar
-    const authCookie = request.cookies.get('admin-session');
-
-    if (!authCookie) {
-      // Not logged in -> redirect to admin login
-      const url = new URL('/admin/login', request.url);
-      return NextResponse.redirect(url);
-    }
-    
-    // Note: Checking specific role ('admin') usually happens inside the Layout
-    // or through an API call in the middleware for stricter security.
+    return res
   }
 
-  return NextResponse.next();
+  // 2. Logged in but accessing admin routes → check role
+  if (session && req.nextUrl.pathname.startsWith('/admin') && req.nextUrl.pathname !== '/admin/login') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile || profile.role !== 'admin') {
+      // Not admin → kick out to home
+      return NextResponse.redirect(new URL('/', req.url))
+    }
+  }
+
+  // 3. Already logged in + going to /admin/login → redirect to admin dashboard
+  if (session && req.nextUrl.pathname === '/admin/login') {
+    return NextResponse.redirect(new URL('/admin', req.url))
+  }
+
+  return res
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/admin/:path*'],
-};
+  matcher: ['/admin/:path*']
+}

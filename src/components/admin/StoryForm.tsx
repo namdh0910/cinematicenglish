@@ -22,6 +22,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import QuizBuilder from "./QuizBuilder";
 import AIStoryGenerator from "./AIStoryGenerator";
+import { createStory } from "@/app/admin/actions";
+import { useRouter } from "next/navigation";
 
 const storySchema = z.object({
   title: z.string().min(5, "Tiêu đề phải ít nhất 5 ký tự"),
@@ -40,6 +42,7 @@ const storySchema = z.object({
 type StoryFormValues = z.infer<typeof storySchema>;
 
 export default function StoryForm() {
+  const router = useRouter();
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -62,9 +65,25 @@ export default function StoryForm() {
     },
   });
 
-  const onSubmit = (data: StoryFormValues) => {
-    console.log("Submitting Story Data:", data);
-    alert("Story submitted! Check console for details.");
+  const onSubmit = async (data: StoryFormValues) => {
+    try {
+      await createStory({
+        title: data.title,
+        synopsis: data.description,
+        script: data.transcript,
+        category: data.category.toLowerCase().replace(" & influence", ""),
+        difficulty: data.difficulty.toLowerCase(),
+        duration_seconds: parseInt(data.duration.split(":")[0]) * 60 + parseInt(data.duration.split(":")[1]),
+        xp_value: data.xp,
+        is_premium: data.isPremium,
+        is_featured: data.isFeatured,
+        status: data.status.toLowerCase(),
+      });
+      router.push("/admin/stories");
+    } catch (err) {
+      console.error("Failed to create story:", err);
+      alert("Lỗi khi tạo story. Vui lòng kiểm tra console.");
+    }
   };
 
   return (

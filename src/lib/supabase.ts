@@ -1,8 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Dùng trong Server Components & Server Actions
+export function createServerClient() {
+  return createServerComponentClient({ cookies })
+}
 
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null as any; // Fallback for build time
+// Dùng trong Client Components
+export function createBrowserClient() {
+  return createClientComponentClient()
+}

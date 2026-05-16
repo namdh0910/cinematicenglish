@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -10,10 +10,18 @@ import {
   BarChart2, 
   Settings, 
   LogOut, 
-  Zap,
-  ChevronRight
+  Zap
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { createBrowserClient } from "@/lib/supabase";
+
+interface SidebarProps {
+  adminProfile?: {
+    full_name?: string;
+    avatar_url?: string;
+    role?: string;
+  };
+}
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -25,8 +33,16 @@ const navItems = [
   { icon: Settings, label: "Settings", href: "/admin/settings" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ adminProfile }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createBrowserClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+    router.push("/admin/login");
+  };
 
   return (
     <aside className="w-[240px] bg-[#1a1a1a] border-r border-white/5 flex flex-col h-screen z-[100] shrink-0">
@@ -74,20 +90,27 @@ export default function Sidebar() {
       {/* Admin Profile & Logout */}
       <div className="p-4 border-t border-white/5 space-y-4 bg-[#141414]/50">
         <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-full border-2 border-amber-500/20 p-0.5 bg-gradient-to-tr from-amber-500 to-violet-500">
+          <div className="w-10 h-10 rounded-full border-2 border-amber-500/20 p-0.5 bg-gradient-to-tr from-amber-500 to-violet-500 overflow-hidden">
             <img 
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Nam" 
+              src={adminProfile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${adminProfile?.full_name || 'Admin'}`} 
               alt="Admin" 
-              className="w-full h-full rounded-full bg-[#1a1a1a]"
+              className="w-full h-full rounded-full bg-[#1a1a1a] object-cover"
             />
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-bold text-white truncate">Nam Architect</span>
-            <span className="text-[10px] text-white/30 uppercase tracking-wider font-bold">Lead Director</span>
+            <span className="text-sm font-bold text-white truncate">
+              {adminProfile?.full_name || 'Nam Architect'}
+            </span>
+            <span className="text-[10px] text-white/30 uppercase tracking-wider font-bold">
+              {adminProfile?.role === 'admin' ? 'Lead Director' : 'Student'}
+            </span>
           </div>
         </div>
         
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-400/5 transition-all duration-300 group">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-400/5 transition-all duration-300 group"
+        >
           <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Đăng xuất</span>
         </button>

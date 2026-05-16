@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Zap, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -10,23 +11,32 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Simulate Auth Logic
-    setTimeout(() => {
-      if (email === "admin@cinematicenglish.com" && password === "password123") {
-        // Set a mock cookie for the middleware to see
-        document.cookie = "admin-session=active; path=/; max-age=3600";
-        router.push("/admin");
-      } else {
-        setError("Thông tin đăng nhập không chính xác. Vui lòng kiểm tra lại.");
-        setIsLoading(false);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        throw new Error(authError.message);
       }
-    }, 1500);
+
+      if (data.session) {
+        // Refresh router to ensure middleware picks up the new session
+        router.refresh();
+        router.push("/admin");
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials. Make sure your account has admin access.");
+      setIsLoading(false);
+    }
   };
 
   return (
