@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { Zap, Lock, Mail, Loader2, ArrowRight } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
