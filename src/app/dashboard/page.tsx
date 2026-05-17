@@ -2,16 +2,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles, Trophy, Clock, GraduationCap, TrendingUp } from "lucide-react";
+import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles, Trophy, Clock, GraduationCap, TrendingUp, BookOpen, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import MissionHub from "@/components/dashboard/MissionHub";
-import LeaguesHub from "@/components/dashboard/LeaguesHub";
 import Section from "@/components/ui/Section";
-import { INITIAL_USER_PROGRESS } from "@/lib/data";
+import HomeZone from "@/components/dashboard/HomeZone";
+import LearnZone from "@/components/dashboard/LearnZone";
+import ProgressZone from "@/components/dashboard/ProgressZone";
+import SocialZone from "@/components/dashboard/SocialZone";
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState("missions");
+  const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
     setMounted(true);
@@ -61,11 +62,10 @@ export default function DashboardPage() {
           {/* Navigation Tabs */}
           <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/5 w-fit mb-10 overflow-x-auto no-scrollbar">
             {[
-              { id: 'missions', label: 'Nhiệm vụ', icon: Sparkles },
-              { id: 'leagues', label: 'Bảng đấu', icon: Trophy },
-              { id: 'library', label: 'Thư viện', icon: LayoutGrid },
-              { id: 'explore', label: 'Khám phá', icon: Compass },
-              { id: 'profile', label: 'Hồ sơ', icon: User },
+              { id: 'home', label: 'Trung tâm', icon: LayoutGrid },
+              { id: 'learn', label: 'Học tập', icon: BookOpen },
+              { id: 'progress', label: 'Tiến trình', icon: TrendingUp },
+              { id: 'social', label: 'Cộng đồng', icon: Users },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -82,23 +82,41 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
             <div className="lg:col-span-3">
               <AnimatePresence mode="wait">
-                {activeTab === 'missions' ? (
+                {activeTab === 'home' ? (
                   <motion.div
-                    key="missions-content"
+                    key="home-content"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                   >
-                    <MissionHub progress={INITIAL_USER_PROGRESS} />
+                    <HomeZone />
                   </motion.div>
-                ) : activeTab === 'leagues' ? (
+                ) : activeTab === 'learn' ? (
                   <motion.div
-                    key="leagues-content"
+                    key="learn-content"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                   >
-                    <LeaguesHub />
+                    <LearnZone />
+                  </motion.div>
+                ) : activeTab === 'progress' ? (
+                  <motion.div
+                    key="progress-content"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <ProgressZone />
+                  </motion.div>
+                ) : activeTab === 'social' ? (
+                  <motion.div
+                    key="social-content"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <SocialZone />
                   </motion.div>
                 ) : (
                   <motion.div
