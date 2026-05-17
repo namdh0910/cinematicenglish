@@ -46,7 +46,7 @@ export default function CreateAssignments() {
     <div className="bg-primary min-h-screen text-white">
       <Navbar />
       
-      <main className="pt-[120px] md:pt-[140px] pb-20">
+      <main className="page-top pb-20">
         <Section container={true} className="space-y-10">
           
           {/* Top navigation path */}

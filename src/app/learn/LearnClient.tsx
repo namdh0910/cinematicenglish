@@ -71,7 +71,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
     <div className="bg-primary min-h-screen pb-20">
       <Navbar />
 
-      <main className="pt-[120px] md:pt-[140px] container-custom space-y-12">
+      <main className="page-top container-custom space-y-12">
         {/* Welcome Hero banner */}
         <div className="relative rounded-[40px] overflow-hidden bg-gradient-to-r from-violet-950/80 to-slate-900 border border-white/5 p-8 md:p-12">
           {/* Decorative neon lights */}

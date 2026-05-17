@@ -107,7 +107,7 @@ export default function DashboardPage() {
     <div className="bg-primary min-h-screen text-white">
       <Navbar />
       
-      <main className="pt-24 pb-20">
+      <main className="page-top pb-20">
         <Section container={true}>
           
           {/* Header Area */}

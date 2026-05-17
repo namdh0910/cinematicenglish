@@ -295,7 +295,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
       </header>
 
       {/* Main player workspace */}
-      <main className="pt-[120px] md:pt-[140px] container-custom max-w-4xl min-h-[calc(100vh-140px)] flex flex-col justify-between gap-8">
+      <main className="page-top container-custom max-w-4xl min-h-[calc(100vh-140px)] flex flex-col justify-between gap-8">
         <AnimatePresence mode="wait">
           {!quizFinished ? (
             <motion.div 
