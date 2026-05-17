@@ -39,6 +39,7 @@ export const metadata: Metadata = {
 
 import { AdaptiveProvider } from "@/context/AdaptiveContext";
 import AdaptiveSwitcher from "@/components/debug/AdaptiveSwitcher";
+import ObservabilityInitializer from "@/components/observability/ObservabilityInitializer";
 
 export default function RootLayout({
   children,
@@ -66,12 +67,13 @@ export default function RootLayout({
                 "@type": "Offer",
                 price: "0",
                 priceCurrency: "USD",
-              },
-            }),
-          }}
-        />
+                },
+              }),
+            }}
+          />
       </head>
       <body className="antialiased">
+        <ObservabilityInitializer />
         <AdaptiveProvider>
           {children}
           <AdaptiveSwitcher />

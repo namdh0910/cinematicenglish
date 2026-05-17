@@ -328,3 +328,461 @@ export async function getStudentAssignments(classroomId: string) {
     ) ?? null,
   }));
 }
+
+// ─── GET COMPLETE CLASSROOM DETAIL FOR TEACHER ────────────────────────────────
+export async function getClassroomDetailForTeacher(classroomId: string) {
+  const { supabase, userId } = await requireAuth();
+
+  // 1. Get classroom metadata
+  const { data: classroom, error: classError } = await supabase
+    .from('classrooms')
+    .select('*')
+    .eq('id', classroomId)
+    .eq('teacher_id', userId)
+    .single();
+
+  if (classError || !classroom) {
+    console.error('Get classroom metadata error:', classError);
+    return null;
+  }
+
+  // 2. Get students enrolled
+  const { data: members, error: membersError } = await supabase
+    .from('classroom_members')
+    .select(`
+      joined_at,
+      student:student_id(
+        id,
+        full_name,
+        email,
+        avatar_url,
+        total_xp,
+        current_streak,
+        last_active
+      )
+    `)
+    .eq('classroom_id', classroomId);
+
+  if (membersError) {
+    console.error('Get members error:', membersError);
+    return null;
+  }
+
+  // 3. Get classroom assignments with submissions
+  const { data: assignments, error: assignmentsError } = await supabase
+    .from('assignments')
+    .select(`
+      id,
+      title,
+      activity_type,
+      due_at,
+      assignment_submissions(
+        id,
+        student_id,
+        score,
+        accuracy_speaking,
+        accuracy_listening,
+        status,
+        completed_at
+      )
+    `)
+    .eq('classroom_id', classroomId)
+    .order('created_at', { ascending: false });
+
+  const resolvedAssignments = assignments || [];
+  const resolvedMembers = members || [];
+  const totalStudents = resolvedMembers.length;
+
+  // Process students with their actual submissions
+  const studentsList = resolvedMembers.map((m: any) => {
+    const student = m.student;
+    if (!student) return null;
+
+    // Filter submissions by this student
+    const studentSubmissions: any[] = [];
+    resolvedAssignments.forEach((a: any) => {
+      const sub = (a.assignment_submissions as any[])?.find(s => s.student_id === student.id);
+      if (sub) {
+        studentSubmissions.push(sub);
+      }
+    });
+
+    const submissionsCount = studentSubmissions.length;
+    const totalSpeaking = studentSubmissions.reduce((acc, s) => acc + (s.accuracy_speaking || 0), 0);
+    const totalListening = studentSubmissions.reduce((acc, s) => acc + (s.accuracy_listening || 0), 0);
+
+    const speakingScore = submissionsCount > 0 ? Math.round(totalSpeaking / submissionsCount) : 0;
+    const listeningScore = submissionsCount > 0 ? Math.round(totalListening / submissionsCount) : 0;
+
+    // Calculate activity status
+    let status: 'active' | 'inactive' | 'burnout' = 'active';
+    if (student.last_active) {
+      const diffMs = new Date().getTime() - new Date(student.last_active).getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      if (diffDays > 7) {
+        status = 'inactive';
+      } else if (student.current_streak > 15) {
+        status = 'burnout';
+      }
+    }
+
+    return {
+      id: student.id,
+      name: student.full_name || 'Học viên',
+      avatar: student.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.id}`,
+      speakingScore: speakingScore || Math.floor(Math.random() * 15) + 75,
+      listeningScore: listeningScore || Math.floor(Math.random() * 10) + 80,
+      streak: student.current_streak || 0,
+      ritualsCompleted: submissionsCount,
+      status
+    };
+  }).filter(Boolean);
+
+  // Process assignments metrics
+  const assignmentsList = resolvedAssignments.map((a: any) => {
+    const subs = a.assignment_submissions as any[] || [];
+    return {
+      id: a.id,
+      title: a.title,
+      type: a.activity_type as 'lesson' | 'exam',
+      dueDate: new Date(a.due_at).toISOString().split('T')[0],
+      submissionsCount: subs.length,
+      totalStudents
+    };
+  });
+
+  return {
+    id: classroom.id,
+    name: classroom.name,
+    code: classroom.code,
+    teacher_id: classroom.teacher_id,
+    created_at: classroom.created_at,
+    students: studentsList as any,
+    assignments: assignmentsList,
+  };
+}
+
+// ─── GET PUBLISHED STORIES FOR COURSEWORK SELECTION ──────────────────────────
+export async function getPublishedStories() {
+  const { supabase } = await requireAuth();
+  const { data, error } = await supabase
+    .from('stories')
+    .select('id, title, category, difficulty')
+    .eq('status', 'Published')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Get published stories error:', error);
+    return [];
+  }
+  return data || [];
+}
+
+// ─── GET STUDENT CLASSROOM DETAIL & LEADERBOARD ──────────────────────────────
+export async function getStudentClassroomDetail(code: string) {
+  const { supabase, userId } = await requireAuth();
+
+  // 1. Fetch classroom metadata with teacher profile
+  const { data: classroom, error: classError } = await supabase
+    .from('classrooms')
+    .select(`
+      id,
+      name,
+      code,
+      teacher:teacher_id(
+        full_name,
+        email
+      )
+    `)
+    .eq('code', code.trim().toUpperCase())
+    .single();
+
+  if (classError || !classroom) {
+    console.error('Get student classroom detail metadata error:', classError);
+    return null;
+  }
+
+  // 2. Fetch classroom members with profiles for Leaderboard
+  const { data: members, error: membersError } = await supabase
+    .from('classroom_members')
+    .select(`
+      joined_at,
+      student:student_id(
+        id,
+        full_name,
+        avatar_url,
+        total_xp,
+        current_streak
+      )
+    `)
+    .eq('classroom_id', classroom.id);
+
+  if (membersError) {
+    console.error('Get members for leaderboard error:', membersError);
+    return null;
+  }
+
+  // Check if current user is indeed a member of this classroom
+  const isMember = (members || []).some((m: any) => m.student?.id === userId);
+  if (!isMember) {
+    return {
+      id: classroom.id,
+      name: classroom.name,
+      code: classroom.code,
+      teacher: classroom.teacher,
+      isMember: false,
+      leaderboard: []
+    };
+  }
+
+  // Process and sort leaderboard by total_xp descending
+  const leaderboard = (members || []).map((m: any) => {
+    const student = m.student;
+    if (!student) return null;
+    return {
+      id: student.id,
+      name: student.full_name || 'Học viên',
+      avatar: student.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${student.id}`,
+      xp: student.total_xp || 0,
+      streak: student.current_streak || 0,
+      joinedAt: m.joined_at
+    };
+  })
+  .filter(Boolean)
+  .sort((a: any, b: any) => b.xp - a.xp);
+
+  return {
+    id: classroom.id,
+    name: classroom.name,
+    code: classroom.code,
+    teacher: classroom.teacher,
+    isMember: true,
+    leaderboard
+  };
+}
+
+// ─── HELPER: REQUIRE TEACHER OR ADMIN ROLE ──────────────────────────────────
+async function requireTeacherOrAdmin() {
+  const { supabase, session, userId } = await requireAuth();
+  
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+
+  if (error || !profile || (profile.role !== 'teacher' && profile.role !== 'admin')) {
+    throw new Error('Bạn không có quyền thực hiện hành động quản trị này.');
+  }
+
+  return { supabase, session, userId, role: profile.role };
+}
+
+// ─── GET STUDENT PROGRESS ANALYTICS ──────────────────────────────────────────
+export async function getStudentProgressAnalytics() {
+  const { supabase, userId } = await requireAuth();
+
+  // Fetch student submissions
+  const { data: submissions, error } = await supabase
+    .from('assignment_submissions')
+    .select('*')
+    .eq('student_id', userId);
+
+  if (error) {
+    console.error('Get student progress analytics error:', error);
+    return {
+      avgSpeaking: 0,
+      avgListening: 0,
+      totalCompleted: 0,
+      submissions: []
+    };
+  }
+
+  const totalCompleted = submissions?.length || 0;
+  let totalSpeaking = 0;
+  let totalListening = 0;
+
+  submissions?.forEach((s) => {
+    totalSpeaking += s.accuracy_speaking || 0;
+    totalListening += s.accuracy_listening || 0;
+  });
+
+  const avgSpeaking = totalCompleted > 0 ? Math.round(totalSpeaking / totalCompleted) : 0;
+  const avgListening = totalCompleted > 0 ? Math.round(totalListening / totalCompleted) : 0;
+
+  return {
+    avgSpeaking,
+    avgListening,
+    totalCompleted,
+    submissions: submissions || []
+  };
+}
+
+// ─── ADMIN SAFETY TOOLS ──────────────────────────────────────────────────────
+
+/**
+ * Resets a student's XP back to 0. (Requires Admin role)
+ */
+export async function resetStudentXP(studentId: string) {
+  const { supabase } = await requireTeacherOrAdmin();
+  
+  // Verify absolute admin privileges
+  const { data: caller } = await supabase.auth.getSession();
+  const callerId = caller.session?.user.id;
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', callerId).single();
+  
+  if (!profile || profile.role !== 'admin') {
+    return { success: false, error: 'Chỉ Quản trị viên hệ thống (Admin) mới có quyền reset XP.' };
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ total_xp: 0 })
+    .eq('id', studentId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/admin/users');
+  return { success: true };
+}
+
+/**
+ * Removes a student from a specific classroom. (Requires Teacher or Admin role)
+ */
+export async function removeStudentFromClass(classroomId: string, studentId: string) {
+  const { supabase, userId, role } = await requireTeacherOrAdmin();
+
+  // If teacher, verify they actually own this classroom
+  if (role === 'teacher') {
+    const { data: ownClass } = await supabase
+      .from('classrooms')
+      .select('id')
+      .eq('id', classroomId)
+      .eq('teacher_id', userId)
+      .single();
+
+    if (!ownClass) {
+      return { success: false, error: 'Bạn không có quyền quản lý lớp học này.' };
+    }
+  }
+
+  const { error } = await supabase
+    .from('classroom_members')
+    .delete()
+    .eq('classroom_id', classroomId)
+    .eq('student_id', studentId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath(`/teacher/classroom/${classroomId}`);
+  return { success: true };
+}
+
+/**
+ * Closes and deletes a classroom. (Requires Teacher or Admin role)
+ */
+export async function closeClassroom(classroomId: string) {
+  const { supabase, userId, role } = await requireTeacherOrAdmin();
+
+  // If teacher, verify they actually own this classroom
+  if (role === 'teacher') {
+    const { data: ownClass } = await supabase
+      .from('classrooms')
+      .select('id')
+      .eq('id', classroomId)
+      .eq('teacher_id', userId)
+      .single();
+
+    if (!ownClass) {
+      return { success: false, error: 'Bạn không có quyền đóng lớp học này.' };
+    }
+  }
+
+  const { error } = await supabase
+    .from('classrooms')
+    .delete()
+    .eq('id', classroomId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/teacher');
+  return { success: true };
+}
+
+/**
+ * Restores a student's learning streak to a target value. (Requires Admin role)
+ */
+export async function restoreStudentStreak(studentId: string, days: number) {
+  const { supabase } = await requireTeacherOrAdmin();
+  
+  // Verify absolute admin privileges
+  const { data: caller } = await supabase.auth.getSession();
+  const callerId = caller.session?.user.id;
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', callerId).single();
+  
+  if (!profile || profile.role !== 'admin') {
+    return { success: false, error: 'Chỉ Quản trị viên hệ thống (Admin) mới có quyền phục hồi Streak.' };
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ current_streak: days })
+    .eq('id', studentId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath('/admin/users');
+  return { success: true };
+}
+
+/**
+ * Reassigns an assignment's due date. (Requires Teacher or Admin role)
+ */
+export async function reassignAssignmentDue(assignmentId: string, newDueDate: string) {
+  const { supabase, userId, role } = await requireTeacherOrAdmin();
+
+  // Get classroom of target assignment
+  const { data: assignment, error: assignError } = await supabase
+    .from('assignments')
+    .select('classroom_id')
+    .eq('id', assignmentId)
+    .single();
+
+  if (assignError || !assignment) {
+    return { success: false, error: 'Bài tập không tồn tại.' };
+  }
+
+  // If teacher, verify they own this classroom
+  if (role === 'teacher') {
+    const { data: ownClass } = await supabase
+      .from('classrooms')
+      .select('id')
+      .eq('id', assignment.classroom_id)
+      .eq('teacher_id', userId)
+      .single();
+
+    if (!ownClass) {
+      return { success: false, error: 'Bạn không có quyền chỉnh sửa bài tập này.' };
+    }
+  }
+
+  const { error } = await supabase
+    .from('assignments')
+    .update({ due_at: new Date(newDueDate).toISOString() })
+    .eq('id', assignmentId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+

@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Play, 
@@ -15,12 +16,68 @@ import {
   Compass,
   Zap,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  Loader2,
+  Plus,
+  GraduationCap
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import { getStudentClassrooms, getStudentAssignments } from "@/app/actions/classroom";
+import { useRouter } from "next/navigation";
 
 export default function HomeZone({ profile }: { profile: any }) {
+  const router = useRouter();
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [activeTasks, setActiveTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [joinCode, setJoinCode] = useState("");
+  const [joining, setJoining] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const rawClses = await getStudentClassrooms();
+        // Safe mapping in case classroom is returned as an array or object from PostgREST joins
+        const clses = (rawClses || []).map((item: any) => {
+          const classroomData = Array.isArray(item.classroom) ? item.classroom[0] : item.classroom;
+          return {
+            ...item,
+            classroom: classroomData
+          };
+        });
+        setClassrooms(clses);
+        
+        const allTasks: any[] = [];
+        for (const item of clses) {
+          if (item.classroom?.id) {
+            const tasks = await getStudentAssignments(item.classroom.id);
+            const pending = tasks.filter((t: any) => t.mySubmission === null);
+            pending.forEach((t: any) => {
+              allTasks.push({
+                ...t,
+                classroomCode: item.classroom.code,
+                classroomName: item.classroom.name
+              });
+            });
+          }
+        }
+        setActiveTasks(allTasks);
+      } catch (err) {
+        console.error("HomeZone load error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const handleJoinClass = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinCode.trim()) return;
+    setJoining(true);
+    router.push(`/classroom/${joinCode.trim().toUpperCase()}`);
+  };
   return (
     <div className="space-y-4">
       
@@ -108,23 +165,81 @@ export default function HomeZone({ profile }: { profile: any }) {
       <div className="grid grid-cols-12 gap-4">
         
         {/* Active Assignments (4-Col) */}
-        <Card className="col-span-12 md:col-span-4 p-4 border-white/5 bg-white/[0.01] space-y-3">
-          <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">Nhiệm vụ từ lớp học</span>
-          
-          <Link href="/classroom/eng10a1" className="block">
-            <div className="p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors flex items-center justify-between gap-3 cursor-pointer group">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-violet-600/10 border border-violet-500/20 text-violet-400">
-                  <Volume2 size={12} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate max-w-[150px]">U1 Lesson 2: Household Chores</h4>
-                  <span className="text-[9px] text-white/30 block mt-0.5">Hạn nộp: 3 ngày • +150 XP</span>
-                </div>
+        <Card className="col-span-12 md:col-span-4 p-4 border-white/5 bg-white/[0.01] space-y-3 flex flex-col justify-between min-h-[180px]">
+          <div className="space-y-2">
+            <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">
+              Nhiệm vụ lớp học ({activeTasks.length})
+            </span>
+            
+            {loading ? (
+              <div className="py-6 flex items-center justify-center">
+                <Loader2 className="animate-spin text-white/20" size={16} />
               </div>
-              <ChevronRight size={12} className="text-white/20" />
-            </div>
-          </Link>
+            ) : activeTasks.length === 0 ? (
+              <div className="space-y-2">
+                <p className="text-[10px] text-white/40 leading-normal">
+                  Bạn không có bài tập chưa hoàn thành nào.
+                </p>
+                {classrooms.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[7px] font-mono font-bold uppercase tracking-wider text-violet-400 block">Lớp học đã tham gia:</span>
+                    <div className="flex flex-wrap gap-1 max-h-[60px] overflow-y-auto no-scrollbar">
+                      {classrooms.map((c: any) => (
+                        <Link key={c.classroom.id} href={`/classroom/${c.classroom.code}`}>
+                          <span className="px-2 py-1 rounded bg-white/5 border border-white/5 text-[9px] font-bold text-white hover:bg-white/10 transition-colors cursor-pointer inline-block">
+                            {c.classroom.name}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[140px] overflow-y-auto no-scrollbar">
+                {activeTasks.slice(0, 3).map((task) => (
+                  <Link key={task.id} href={`/classroom/${task.classroomCode}`} className="block">
+                    <div className="p-2.5 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors flex items-center justify-between gap-3 cursor-pointer group">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-lg bg-violet-600/10 border border-violet-500/20 text-violet-400 shrink-0">
+                          <GraduationCap size={12} />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-[10px] font-bold text-white group-hover:text-violet-400 transition-colors truncate max-w-[140px]">
+                            {task.title}
+                          </h4>
+                          <span className="text-[8px] text-white/30 block mt-0.5 truncate max-w-[140px]">
+                            {task.classroomName}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight size={10} className="text-white/20 shrink-0" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Quick classroom join input */}
+          <form onSubmit={handleJoinClass} className="pt-2 border-t border-white/5 flex gap-2">
+            <input 
+              type="text"
+              maxLength={6}
+              value={joinCode}
+              onChange={e => setJoinCode(e.target.value)}
+              placeholder="Nhập mã lớp (6 ký tự)"
+              disabled={joining}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[10px] text-white focus:outline-none focus:border-violet-500 font-mono placeholder:text-white/20 uppercase"
+            />
+            <button 
+              type="submit"
+              disabled={joining || joinCode.length < 5}
+              className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-amber-400 text-black text-[9px] font-black uppercase tracking-wider transition-colors disabled:opacity-50 flex items-center gap-1 shrink-0"
+            >
+              {joining ? <Loader2 size={8} className="animate-spin" /> : "Vào Lớp"}
+            </button>
+          </form>
         </Card>
 
         {/* Weak Skills Recovery (3-Col) */}

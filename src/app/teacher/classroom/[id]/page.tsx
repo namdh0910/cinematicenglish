@@ -1,5 +1,5 @@
 "use client";
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import Link from "next/link";
 import { 
   Users, 
@@ -23,6 +23,8 @@ import AssignmentTimeline from "@/components/classroom/AssignmentTimeline";
 import StudentEvolutionProfile from "@/components/classroom/StudentEvolutionProfile";
 import { BulkContentIngestionPipeline } from "@/lib/content_operations/bulk_ingestion";
 import { TeacherFastWorkflowEngine } from "@/lib/content_operations/teacher_workflow";
+import { getClassroomDetailForTeacher } from "@/app/actions/classroom";
+import { Loader2 } from "lucide-react";
 
 interface Student {
   id: string;
@@ -60,16 +62,81 @@ const MOCK_ASSIGNMENTS: Assignment[] = [
 export default function TeacherClassroomDetails({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const classId = resolvedParams?.id || "";
-  const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
-  const [assignments, setAssignments] = useState<Assignment[]>(MOCK_ASSIGNMENTS);
+  
+  const [classroom, setClassroom] = useState<any>(null);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load classroom and student submissions from Supabase
+  useEffect(() => {
+    if (!classId) return;
+
+    const load = async () => {
+      try {
+        const data = await getClassroomDetailForTeacher(classId);
+        if (data) {
+          setClassroom(data);
+          setStudents(data.students);
+          setAssignments(data.assignments);
+        } else {
+          setError("Lớp học không tồn tại hoặc bạn không có quyền truy cập.");
+        }
+      } catch (err) {
+        console.error("Load classroom detail error:", err);
+        setError("Có lỗi xảy ra khi tải dữ liệu lớp học.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [classId]);
 
   // Classroom global stats
-  const avgSpeaking = Math.round(students.reduce((acc, s) => acc + s.speakingScore, 0) / students.length);
-  const avgListening = Math.round(students.reduce((acc, s) => acc + s.listeningScore, 0) / students.length);
-  const completionRate = Math.round(
-    (assignments.reduce((acc, a) => acc + a.submissionsCount, 0) / 
-    (assignments.length * students.length)) * 100
-  );
+  const avgSpeaking = students.length > 0 
+    ? Math.round(students.reduce((acc, s) => acc + s.speakingScore, 0) / students.length) 
+    : 0;
+  const avgListening = students.length > 0 
+    ? Math.round(students.reduce((acc, s) => acc + s.listeningScore, 0) / students.length) 
+    : 0;
+  const completionRate = (assignments.length > 0 && students.length > 0)
+    ? Math.round(
+        (assignments.reduce((acc, a) => acc + a.submissionsCount, 0) / 
+        (assignments.length * students.length)) * 100
+      )
+    : 0;
+
+  if (loading) {
+    return (
+      <div className="bg-primary min-h-screen text-white">
+        <Navbar />
+        <main className="page-top flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-3">
+            <Loader2 className="animate-spin text-violet-400 mx-auto" size={32} />
+            <p className="text-white/40 text-sm">Đang tải phân tích lớp học thực tế...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !classroom) {
+    return (
+      <div className="bg-primary min-h-screen text-white">
+        <Navbar />
+        <main className="page-top container-custom max-w-4xl py-20 text-center space-y-6">
+          <AlertCircle className="text-red-400 mx-auto" size={48} />
+          <h2 className="text-xl font-bold text-white">Lỗi truy cập lớp học</h2>
+          <p className="text-white/40 text-sm max-w-md mx-auto">{error || "Lớp học không tồn tại."}</p>
+          <Link href="/teacher" className="inline-block px-5 py-2.5 rounded-xl bg-white text-black font-black uppercase text-xs hover:bg-amber-400 transition-colors">
+            Quay về Trung tâm Giáo viên
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-primary min-h-screen text-white">
@@ -92,12 +159,12 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-display font-black text-white">
-                  {classId === "class-11b2" ? "Lớp 11B2 — Advanced Speaking" : "Lớp 10A1 — Lớp học tăng cường"}
+                  {classroom.name}
                 </h1>
-                <Badge variant="violet" className="py-0 px-2 font-mono">ENG10A1</Badge>
+                <Badge variant="violet" className="py-0 px-2 font-mono">{classroom.code}</Badge>
               </div>
               <p className="text-xs text-white/40 leading-relaxed">
-                Mã mời: <span className="font-mono font-bold text-amber-500">GS-ENG10A1</span> • Đã đăng ký: 5 học sinh
+                Mã mời học sinh: <span className="font-mono font-bold text-amber-500">{classroom.code}</span> • Đã đăng ký: {students.length} học sinh
               </p>
             </div>
 

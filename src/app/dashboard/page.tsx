@@ -211,7 +211,7 @@ export default function DashboardPage() {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
                   >
-                    <ProgressZone />
+                    <ProgressZone profile={profile} />
                   </motion.div>
                 ) : activeTab === 'social' ? (
                   <motion.div

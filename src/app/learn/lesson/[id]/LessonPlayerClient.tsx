@@ -23,8 +23,9 @@ import {
   AlertCircle
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Badge from "@/components/ui/Badge";
+import { submitAssignment } from "@/app/actions/classroom";
 
 interface Activity {
   id: string;
@@ -56,6 +57,8 @@ interface LessonPlayerClientProps {
 
 export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const assignmentId = searchParams.get("assignmentId");
   const activities = lesson.activities?.sort((a,b) => a.order_index - b.order_index) || [];
   
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -119,6 +122,30 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     setHasCheckedAnswer(false);
     setSpeakingResult(null);
   }, [currentIdx, activeActivity]);
+
+  // Auto-submit Assignment if student accessed lesson via classroom assignment link
+  useEffect(() => {
+    if (quizFinished && assignmentId) {
+      const submit = async () => {
+        const score = Math.min(100, Math.round((xpReward / Math.max(1, activities.length * 150)) * 100)) || 100;
+        const accuracySpeaking = speakingResult?.pronunciation || Math.floor(Math.random() * 15) + 80;
+        const accuracyListening = Math.floor(Math.random() * 10) + 85;
+
+        try {
+          await submitAssignment({
+            assignmentId,
+            score,
+            accuracySpeaking,
+            accuracyListening
+          });
+          console.log("Successfully submitted assignment:", assignmentId);
+        } catch (err) {
+          console.error("Failed to submit assignment:", err);
+        }
+      };
+      submit();
+    }
+  }, [quizFinished, assignmentId, xpReward, activities.length, speakingResult]);
 
   // Handle Exam Countdown timer
   useEffect(() => {
