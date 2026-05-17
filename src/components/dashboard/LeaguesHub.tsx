@@ -38,11 +38,11 @@ const GLOBAL_LEAGUE_DATA: Competitor[] = [];
 const CLASSROOM_LEAGUE_DATA: Competitor[] = [];
 
 const LEAGUE_TIERS = [
-  { id: "bronze", name: "Giọng Đồng Bền Bỉ", color: "#b45309", bg: "rgba(180, 83, 9, 0.05)", border: "rgba(180, 83, 9, 0.2)" },
-  { id: "silver", name: "Giọng Bạc Tự Tin", color: "#64748b", bg: "rgba(100, 116, 139, 0.05)", border: "rgba(100, 116, 139, 0.2)" },
-  { id: "gold", name: "Hành Giả Vàng", color: "#eab308", bg: "rgba(234, 179, 8, 0.05)", border: "rgba(234, 179, 8, 0.2)", active: true },
-  { id: "platinum", name: "Nhà Sản Xuất Bạch Kim", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.05)", border: "rgba(6, 182, 212, 0.2)" },
-  { id: "aura", name: "Bậc Thầy Hào Quang", color: "#a855f7", bg: "rgba(168, 85, 247, 0.05)", border: "rgba(168, 85, 247, 0.2)" },
+  { id: "bronze", name: "Hạng Đồng", color: "#b45309", bg: "rgba(180, 83, 9, 0.05)", border: "rgba(180, 83, 9, 0.2)" },
+  { id: "silver", name: "Hạng Bạc", color: "#64748b", bg: "rgba(100, 116, 139, 0.05)", border: "rgba(100, 116, 139, 0.2)" },
+  { id: "gold", name: "Hạng Vàng", color: "#eab308", bg: "rgba(234, 179, 8, 0.05)", border: "rgba(234, 179, 8, 0.2)", active: true },
+  { id: "platinum", name: "Hạng Bạch Kim", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.05)", border: "rgba(6, 182, 212, 0.2)" },
+  { id: "aura", name: "Hạng Kim Cương", color: "#a855f7", bg: "rgba(168, 85, 247, 0.05)", border: "rgba(168, 85, 247, 0.2)" },
 ];
 
 export default function LeaguesHub() {
@@ -193,7 +193,7 @@ export default function LeaguesHub() {
 
                         {/* XP */}
                         <div>
-                          <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Hào quang tuần</span>
+                          <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Điểm tuần</span>
                           <span className="text-sm font-mono font-black text-white flex items-center justify-end gap-1">
                             <Zap size={12} className="text-amber-500" fill="currentColor" /> {competitor.xp} XP
                           </span>
@@ -220,7 +220,7 @@ export default function LeaguesHub() {
               <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest">Nhóm đang hoạt động</span>
               <h4 className="text-md font-bold text-white">Lớp 11A1 — Giáo trình mới Group</h4>
               <p className="text-xs text-secondary leading-relaxed">
-                Hợp tác cùng cả lớp tích luỹ XP hàng tuần để mở khoá **Lá Chắn Hào Quang** bảo vệ chuỗi Streak cho tất cả thành viên.
+                Hợp tác cùng cả lớp tích luỹ XP hàng tuần để mở khoá **Lá Chắn Bảo Vệ** bảo vệ chuỗi học tập cho tất cả thành viên.
               </p>
             </div>
 

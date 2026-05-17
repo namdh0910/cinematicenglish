@@ -61,7 +61,7 @@ export default function ProgressZone({ profile }: { profile: any }) {
           { label: "Đánh giá CEFR", value: totalCompleted > 0 ? cefrLevel : "Đang đánh giá", sub: "Dựa trên bài nộp thật", trend: totalCompleted > 0 ? "Real-time" : "Chưa có bài nộp", trendColor: totalCompleted > 0 ? "text-emerald-400" : "text-white/40" },
           { label: "Độ chuẩn phát âm", value: totalCompleted > 0 ? `${avgSpeaking}%` : "--", sub: "Độ chính xác AI Coach", trend: totalCompleted > 0 ? "Ổn định" : "Chưa đo lường", trendColor: totalCompleted > 0 ? "text-emerald-400" : "text-white/40" },
           { label: "Nghe chính tả", value: totalCompleted > 0 ? `${avgListening}%` : "--", sub: "Độ chính xác nghe chép", trend: totalCompleted > 0 ? "Ổn định" : "Chưa đo lường", trendColor: totalCompleted > 0 ? "text-emerald-400" : "text-white/40" },
-          { label: "Nhiệm vụ hoàn thành", value: `${totalCompleted} bài`, sub: "Lớp học thực tế", trend: `Hào quang: ${profile?.total_xp || 0} XP`, trendColor: "text-violet-400" },
+          { label: "Nhiệm vụ hoàn thành", value: `${totalCompleted} bài`, sub: "Lớp học thực tế", trend: `Tích lũy: ${profile?.total_xp || 0} XP`, trendColor: "text-violet-400" },
         ].map((stat, idx) => (
           <Card key={idx} className="p-4 border-white/5 bg-white/[0.01] space-y-1">
             <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">{stat.label}</span>
@@ -141,21 +141,21 @@ export default function ProgressZone({ profile }: { profile: any }) {
                 
                 <div className="space-y-1">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-mono font-bold text-white">Luyện Shadowing</span>
-                    <span className="font-mono text-violet-400">{totalCompleted > 0 ? "CEFR Match" : "--"}</span>
+                    <span className="font-mono font-bold text-white">Luyện nói nhại âm</span>
+                    <span className="font-mono text-violet-400">{totalCompleted > 0 ? "Phù hợp" : "--"}</span>
                   </div>
                   <p className="text-[9px] text-white/40 leading-snug">
                     {totalCompleted > 0 
                       ? "Nghe kỹ ngữ điệu của người nói trước khi bắt đầu ghi âm."
-                      : "Trình phát Shadowing sẽ tự động ghi điểm số."}
+                      : "Trình phát luyện nói sẽ tự động ghi điểm số."}
                   </p>
                 </div>
               </div>
 
               <div className="pt-2 border-t border-white/5">
-                <Link href="/dashboard" className="block text-center">
+                <Link href="/classroom" className="block text-center">
                   <span className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer">
-                    Quay về Trung tâm <ChevronRight size={10} />
+                    Vào phòng học <ChevronRight size={10} />
                   </span>
                 </Link>
               </div>

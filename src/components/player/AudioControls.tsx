@@ -105,7 +105,7 @@ export default function AudioControls({
             <button 
               onClick={onToggleShadowing}
               className={`p-3 rounded-xl transition-all ${isShadowing ? 'bg-amber-500 text-black' : 'text-white/60 hover:text-white'}`}
-              title="Chế độ Shadowing"
+              title="Chế độ Luyện nói nhại âm"
             >
               <Mic size={20} />
             </button>

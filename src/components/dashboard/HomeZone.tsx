@@ -97,7 +97,7 @@ export default function HomeZone({ profile }: { profile: any }) {
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-mono text-white/30">Tiếp theo: Shadowing thực hành</span>
+            <span className="text-[9px] font-mono text-white/30">Tiếp theo: Luyện nói nhại âm</span>
             <Link href="/learn/lesson/lesson-u1l2">
               <span className="px-3 py-1.5 rounded-lg bg-white hover:bg-amber-400 text-black text-[9px] font-black uppercase tracking-widest transition-colors flex items-center gap-1 cursor-pointer">
                 Học tiếp <Play size={8} fill="currentColor" />
@@ -109,13 +109,13 @@ export default function HomeZone({ profile }: { profile: any }) {
         {/* Daily Ritual Progress (3-Col) */}
         <Card className="col-span-12 md:col-span-3 p-4 border-white/5 bg-white/[0.01] flex flex-col justify-between min-h-[140px] space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase">Nghi thức học ngày</span>
+            <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase">Nhiệm vụ trong ngày</span>
             <span className="text-[9px] font-mono text-amber-500 font-bold">Xong 2/3</span>
           </div>
 
           <div className="space-y-1.5">
             <div className="flex justify-between text-[10px] text-white/60">
-              <span className="truncate">Luyện nói Shadowing</span>
+              <span className="truncate">Luyện nói nhại âm</span>
               <span className="text-emerald-400">100%</span>
             </div>
             <div className="flex justify-between text-[10px] text-white/60">
@@ -136,14 +136,14 @@ export default function HomeZone({ profile }: { profile: any }) {
         {/* Upcoming Exam (2-Col) */}
         <Card className="col-span-6 md:col-span-2 p-4 border-white/5 bg-white/[0.01] flex flex-col justify-between min-h-[140px]">
           <div className="space-y-1">
-            <span className="text-[8px] font-mono font-bold tracking-widest text-rose-400 uppercase">Khảo thí & Đánh giá</span>
+            <span className="text-[8px] font-mono font-bold tracking-widest text-rose-400 uppercase">Bài kiểm tra</span>
             <h4 className="text-xs font-bold text-white truncate leading-snug">Mock IELTS Foundation</h4>
             <span className="text-[9px] text-white/30 block mt-0.5">30 phút • Có tính giờ</span>
           </div>
 
           <Link href="/exam/ielts-foundation-test">
             <span className="text-[9px] font-mono font-bold text-white/40 group-hover:text-white flex items-center gap-0.5 cursor-pointer hover:underline">
-              Vào đấu trường <ChevronRight size={10} />
+              Làm bài ngay <ChevronRight size={10} />
             </span>
           </Link>
         </Card>
@@ -151,12 +151,12 @@ export default function HomeZone({ profile }: { profile: any }) {
         {/* Aura Momentum (2-Col) */}
         <Card className="col-span-6 md:col-span-2 p-4 border-white/5 bg-white/[0.01] flex flex-col justify-between min-h-[140px]">
           <div className="space-y-1">
-            <span className="text-[8px] font-mono font-bold tracking-widest text-emerald-400 uppercase">Điểm Hào quang</span>
+            <span className="text-[8px] font-mono font-bold tracking-widest text-emerald-400 uppercase">Tỷ lệ chuyên cần</span>
             <h4 className="text-xl font-mono font-black text-white">92.4%</h4>
             <span className="text-[9px] text-emerald-400/80 font-mono font-bold block mt-0.5">+1.2% tuần này</span>
           </div>
 
-          <span className="text-[8px] font-mono text-white/30 uppercase tracking-wider block">Trạng thái kiên trì</span>
+          <span className="text-[8px] font-mono text-white/30 uppercase tracking-wider block">Duy trì thói quen</span>
         </Card>
 
       </div>

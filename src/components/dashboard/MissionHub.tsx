@@ -256,9 +256,9 @@ export default function MissionHub({ progress }: MissionHubProps) {
                 <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-4">
                   <ShieldCheck size={32} />
                 </div>
-                <h4 className="font-bold text-white mb-2">Hào quang bảo vệ Chuỗi</h4>
+                <h4 className="font-bold text-white mb-2">Lá chắn bảo vệ Chuỗi</h4>
                 <p className="text-xs text-secondary leading-relaxed">
-                  Lá chắn đang kích hoạt để bảo vệ động lực của em. Nghỉ một ngày sẽ không làm mất chuỗi hào quang học tập tích lũy.
+                  Lá chắn đang kích hoạt để bảo vệ động lực của em. Nghỉ một ngày sẽ không làm mất chuỗi ngày học tập tích lũy.
                 </p>
               </Card>
             </div>
@@ -268,20 +268,20 @@ export default function MissionHub({ progress }: MissionHubProps) {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-72 bg-violet-500/10 rounded-full blur-[120px] pointer-events-none" />
 
               <div className="max-w-md mx-auto space-y-4">
-                <Badge variant="gold" className="px-3 py-1">Mệnh lệnh Ngày hôm nay</Badge>
-                <h3 className="text-3xl font-display font-black text-white leading-tight">Nghi thức Tiếng Anh hàng ngày đã sẵn sàng</h3>
+                <Badge variant="gold" className="px-3 py-1">Mục tiêu Hôm nay</Badge>
+                <h3 className="text-3xl font-display font-black text-white leading-tight">Nhiệm vụ Tiếng Anh hàng ngày đã sẵn sàng</h3>
                 <p className="text-secondary text-sm leading-relaxed italic">
-                  Một luồng tập trung 10 phút được cá nhân hóa: Luyện nghe sâu, Nói đuổi (Shadowing) chấm điểm AI, và Trắc nghiệm phản xạ từ vựng.
+                  Một lộ trình tập trung 10 phút được cá nhân hóa: Luyện nghe sâu, Luyện nói nhại âm chấm điểm AI, và Trắc nghiệm phản xạ.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4 text-xs font-bold text-white/30 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
-                  <Volume2 size={16} className="text-amber-500" /> Nghi thức Luyện nghe
+                  <Volume2 size={16} className="text-amber-500" /> Nhiệm vụ Luyện nghe
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-2">
-                  <Mic size={16} className="text-violet-400" /> Tiêu điểm Nói đuổi
+                  <Mic size={16} className="text-violet-400" /> Trọng tâm Luyện nói
                 </div>
                 <span>•</span>
                 <div className="flex items-center gap-2">
@@ -415,8 +415,8 @@ export default function MissionHub({ progress }: MissionHubProps) {
                       /* NODE 2: Speaking Shadowing Ritual */
                       <div className="space-y-6">
                         <div className="space-y-2 text-center">
-                          <Badge variant="gold" className="py-1 px-3">Tiết 2: Nhịp điệu & Nói đuổi</Badge>
-                          <h2 className="text-2xl md:text-3xl font-display font-black text-white">Luyện nói Shadowing</h2>
+                          <Badge variant="gold" className="py-1 px-3">Tiết 2: Nhịp điệu & Luyện nói</Badge>
+                          <h2 className="text-2xl md:text-3xl font-display font-black text-white">Luyện nói nhại âm</h2>
                           <p className="text-secondary text-sm italic">Nghe câu thoại mẫu và nhắc lại với đúng nhịp điệu cảm xúc tự nhiên.</p>
                         </div>
 
@@ -536,8 +536,8 @@ export default function MissionHub({ progress }: MissionHubProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <Badge variant="violet" className="py-1 px-3">Hào quang được sạc đầy</Badge>
-                      <h2 className="text-3xl font-display font-black text-white">Nghi thức Đã Hoàn Thành</h2>
+                      <Badge variant="violet" className="py-1 px-3">Chuỗi ngày học được duy trì</Badge>
+                      <h2 className="text-3xl font-display font-black text-white">Nhiệm vụ Đã Hoàn Thành</h2>
                       <p className="text-secondary text-sm max-w-md mx-auto italic">
                         "{tomorrowMode.reminder}"
                       </p>

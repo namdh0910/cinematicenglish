@@ -164,7 +164,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/5 w-fit mb-10 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/5 w-full md:w-fit mb-10 overflow-x-auto no-scrollbar">
             {[
               { id: 'home', label: 'Trung tâm', icon: LayoutGrid },
               { id: 'learn', label: 'Học tập', icon: BookOpen },
@@ -174,7 +174,7 @@ export default function DashboardPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-black shadow-glow-gold' : 'text-white/40 hover:text-white'}`}
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white text-black shadow-glow-gold' : 'text-white/40 hover:text-white'}`}
               >
                 <tab.icon size={16} />
                 {tab.label}
@@ -238,7 +238,7 @@ export default function DashboardPage() {
             {/* Sidebar / Quick Stats */}
             <aside className="space-y-6">
               <div className="p-6 rounded-[32px] glass border border-white/5 space-y-6">
-                <h3 className="font-display font-bold text-lg">Thống kê hào quang</h3>
+                <h3 className="font-display font-bold text-lg">Tiến độ học tập</h3>
                 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
