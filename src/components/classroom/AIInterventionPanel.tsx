@@ -5,15 +5,15 @@ import Badge from "@/components/ui/Badge";
 
 export default function AIInterventionPanel() {
   const alerts = [
-    { student: "Lê Anh Tuấn", issue: "Streak collapse & burnout risk", desc: "No active signals for 3 consecutive days. Pacing index dropped 12%.", recommendation: "Deploy streak protection shield or allocate rest day.", priority: "critical", color: "text-rose-400", bg: "bg-rose-500/10" },
-    { student: "Vũ Bảo Nam", issue: "Phoneme θ decay", desc: "Average accuracy fell below 80% on /θ/ sound clusters.", recommendation: "Assign 'Shadow the /θ/ sound cluster' recovery drill.", priority: "high", color: "text-amber-500", bg: "bg-amber-500/10" }
+    { student: "Lê Anh Tuấn", issue: "Nguy cơ mất động lực & đứt chuỗi học", desc: "Không có hoạt động trong 3 ngày liên tiếp. Chỉ số tiến trình giảm 12%.", recommendation: "Kích hoạt khiên bảo vệ chuỗi học hoặc phân bổ ngày nghỉ ngơi.", priority: "Nguy cấp", color: "text-rose-400", bg: "bg-rose-500/10" },
+    { student: "Vũ Bảo Nam", issue: "Phát âm cụm /θ/ giảm sút", desc: "Độ chính xác trung bình giảm dưới 80% với nhóm âm /θ/.", recommendation: "Giao bài luyện phục hồi 'Shadowing cụm âm /θ/'.", priority: "Cao", color: "text-amber-500", bg: "bg-amber-500/10" }
   ];
 
   return (
     <Card className="p-5 border-white/5 bg-gradient-to-br from-violet-950/10 to-black space-y-4">
       <div className="flex items-center gap-2 border-b border-white/5 pb-3">
         <Sparkles size={16} className="text-violet-400 animate-pulse" />
-        <h4 className="text-xs font-bold text-violet-400 uppercase tracking-widest">AI Academic Intervention System</h4>
+        <h4 className="text-xs font-bold text-violet-400 uppercase tracking-widest">Gợi ý hỗ trợ học viên</h4>
       </div>
 
       <div className="space-y-4">
@@ -22,7 +22,7 @@ export default function AIInterventionPanel() {
             <div className="flex justify-between items-center">
               <span className="text-xs font-black text-white">{alert.student}</span>
               <Badge variant="outline" className={`py-0.5 px-2 text-[8px] font-mono font-bold ${alert.color} ${alert.bg}`}>
-                {alert.priority.toUpperCase()} PRIORITY
+                {alert.priority.toUpperCase()}
               </Badge>
             </div>
 
@@ -32,7 +32,7 @@ export default function AIInterventionPanel() {
             </div>
 
             <div className="pt-2 border-t border-white/5 space-y-1 text-[10px] leading-relaxed">
-              <span className="font-mono text-violet-400 font-bold block">Intervention Action:</span>
+              <span className="font-mono text-violet-400 font-bold block">Hành động đề xuất:</span>
               <p className="text-white/60">{alert.recommendation}</p>
             </div>
           </div>

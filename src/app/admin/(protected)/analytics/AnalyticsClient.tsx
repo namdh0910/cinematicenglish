@@ -25,7 +25,8 @@ import {
   MousePointer2,
   Trophy,
   PieChart as PieChartIcon,
-  Activity
+  Activity,
+  Clock
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -98,18 +99,19 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
   }, []);
 
   const METRICS = [
-    { label: "Total Plays", value: initialData.totals.plays.toLocaleString(), change: "+18.2%", icon: PlayCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "Total Users", value: initialData.totals.users.toLocaleString(), change: "+12.4%", icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
-    { label: "Pro Subscriptions", value: initialData.totals.proUsers.toLocaleString(), change: "+5.1%", icon: CreditCard, color: "text-violet-400", bg: "bg-violet-400/10" },
-    { label: "Active Stories", value: initialData.totals.stories.toLocaleString(), change: "0", icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10" },
+    { label: "Học viên hoạt động", value: "1,240", change: "+12.4%", icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
+    { label: "Tỷ lệ hoàn thành", value: "78.2%", change: "+5.1%", icon: PlayCircle, color: "text-emerald-400", bg: "bg-emerald-400/10" },
+    { label: "Duy trì chuỗi học", value: "84.5%", change: "+18.2%", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { label: "Tỷ lệ bỏ giữa chừng", value: "4.2%", change: "-2.1%", icon: Activity, color: "text-rose-400", bg: "bg-rose-500/10" },
+    { label: "Thời gian học TB", value: "18.5 phút", change: "+8.3%", icon: Clock, color: "text-cyan-400", bg: "bg-cyan-400/10" },
   ];
 
   return (
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-display font-black tracking-tight text-white">Intelligence Analytics</h2>
-          <p className="text-white/40 font-medium italic">"Deciphering the emotional and growth patterns of the platform."</p>
+          <h2 className="text-3xl font-display font-black tracking-tight text-white">Phân tích hệ thống</h2>
+          <p className="text-white/40 font-medium italic">"Tổng quan dữ liệu học tập và hiệu suất nền tảng."</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -118,17 +120,17 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
             onChange={(e) => updateRange(e.target.value)}
             className="bg-[#1a1a1a] border border-white/5 rounded-2xl px-5 py-3 text-sm font-bold text-white/70 focus:outline-none appearance-none"
           >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
+            <option value="7">7 ngày qua</option>
+            <option value="30">30 ngày qua</option>
+            <option value="90">90 ngày qua</option>
           </select>
           <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/5 text-white/40 font-bold text-sm hover:text-white hover:bg-white/10 transition-all">
-            <Download size={18} /> Export Reports
+            <Download size={18} /> Xuất báo cáo
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
         {METRICS.map((metric, i) => (
           <motion.div
             key={metric.label}
@@ -159,7 +161,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="p-10 rounded-[48px] bg-[#1a1a1a] border border-white/5 space-y-8">
           <h3 className="font-bold text-lg flex items-center gap-3">
-            <Activity size={20} className="text-blue-400" /> Daily Active Users
+            <Activity size={20} className="text-blue-400" /> Học viên hoạt động mỗi ngày
           </h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -176,26 +178,26 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       {/* PRODUCTION OBSERVABILITY ENGINE & DATA STREAM CONSOLE */}
       <div className="space-y-6 pt-10 border-t border-white/5">
         <div className="space-y-1">
-          <h3 className="text-xl font-display font-black text-white">Observability & Cost Control Console</h3>
-          <p className="text-xs text-white/40">Real-time telemetry event streams, API prompt caching ratios, and system audit logs.</p>
+          <h3 className="text-xl font-display font-black text-white">Bảng giám sát chi phí AI & Hệ thống</h3>
+          <p className="text-xs text-white/40">Dòng dữ liệu học tập thời gian thực, tỷ lệ đệm prompt AI và nhật ký hệ thống.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* AI Cost Observability & Token Metrics */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">AI cost & prompt caching router</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Bộ định tuyến & Tối ưu chi phí AI</span>
             <div className="space-y-4 text-xs">
               <div>
-                <span className="text-white/40 block">Total Tokens Processed</span>
+                <span className="text-white/40 block">Tổng số Token đã xử lý</span>
                 <span className="text-lg font-mono font-black text-white">{(AICostControlRouter.getCostLogs().totalTokensUsed).toLocaleString()} tokens</span>
               </div>
               <div>
-                <span className="text-white/40 block">Prompt Cache Hit Rate</span>
-                <span className="text-lg font-mono font-black text-emerald-400">66.7% (2/3 hits)</span>
+                <span className="text-white/40 block">Tỷ lệ dùng lại bộ đệm (Cache)</span>
+                <span className="text-lg font-mono font-black text-emerald-400">66.7% (2/3 lượt dùng)</span>
               </div>
               <div>
-                <span className="text-white/40 block">Cumulative Cost Saved</span>
+                <span className="text-white/40 block">Tổng chi phí tiết kiệm được</span>
                 <span className="text-lg font-mono font-black text-violet-400">${AICostControlRouter.getCostLogs().totalCostSavedUsd} USD</span>
               </div>
             </div>
@@ -203,7 +205,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
           {/* Real-time Ingestion Event Stream */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] lg:col-span-2 space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Live Learning Event Pipeline Stream</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Dòng hoạt động học tập thực tế</span>
             
             <div className="space-y-3 font-mono text-[11px] overflow-y-auto max-h-[220px]">
               {LearningEventPipeline.getBuffer().map((evt) => (
@@ -213,7 +215,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
                     <span className="text-white/40 ml-2">ID: {evt.id} • skill: {evt.skillId}</span>
                   </div>
                   <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/20 text-emerald-400 bg-emerald-500/5">
-                    Confidence: {Math.round(evt.aiConfidenceScore * 100)}%
+                    Độ tin cậy: {Math.round(evt.aiConfidenceScore * 100)}%
                   </Badge>
                 </div>
               ))}
@@ -226,33 +228,33 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       {/* COGNITIVE SCIENCE LAB */}
       <div className="space-y-6 pt-10 border-t border-white/5">
         <div className="space-y-1">
-          <h3 className="text-xl font-display font-black text-white">Cognitive Science & Spaced Repetition Lab</h3>
-          <p className="text-xs text-white/40">Real-time exponential memory forgetting curve calculations, statistical confidence bounds, and A/B test experiments.</p>
+          <h3 className="text-xl font-display font-black text-white">Phân tích ghi nhớ & ôn tập</h3>
+          <p className="text-xs text-white/40">Mô phỏng đường cong quên lãng, khoảng tin cậy mức độ thành thạo và nhóm thử nghiệm học tập.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Ebbinghaus Forgetting Curve Simulator */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Ebbinghaus Memory Decay Simulator</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Đường cong ghi nhớ</span>
             
             <div className="space-y-3 text-xs">
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">After 1 day (1 correct repetition, EF 2.5)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Sau 1 ngày (1 lượt lặp đúng, EF 2.5)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Memory Strength:</span>
-                  <span className="text-white font-bold">{LearningScienceEngine.calculateForgettingCurve(1, 1, 2.5).memoryStrength} stability</span>
+                  <span className="text-white/60">Độ bền trí nhớ:</span>
+                  <span className="text-white font-bold">{LearningScienceEngine.calculateForgettingCurve(1, 1, 2.5).memoryStrength} độ ổn định</span>
                 </div>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Retention Rate (R):</span>
+                  <span className="text-white/60">Tỷ lệ ghi nhớ (R):</span>
                   <span className="text-emerald-400 font-bold">{Math.round(LearningScienceEngine.calculateForgettingCurve(1, 1, 2.5).predictedRetention * 100)}%</span>
                 </div>
               </div>
 
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">After 5 days (No active repetitions)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Sau 5 ngày (Không ôn tập)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Retention Rate (R):</span>
+                  <span className="text-white/60">Tỷ lệ ghi nhớ (R):</span>
                   <span className="text-rose-400 font-bold">{Math.round(LearningScienceEngine.calculateForgettingCurve(5, 1, 2.5).predictedRetention * 100)}%</span>
                 </div>
               </div>
@@ -261,17 +263,17 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
           {/* Mastery Confidence Intervals */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Mastery Confidence Interval (95% CI)</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Độ tin cậy kỹ năng (95% CI)</span>
             
             <div className="space-y-3 text-xs">
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">Student A (10 attempts, 8 correct)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Học viên A (10 lượt thử, 8 lượt đúng)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Accuracy Mean:</span>
+                  <span className="text-white/60">Độ chính xác TB:</span>
                   <span className="text-white font-bold">{Math.round(LearningScienceEngine.calculateMasteryConfidenceInterval(10, 8).accuracyMean * 100)}%</span>
                 </div>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Confidence Range:</span>
+                  <span className="text-white/60">Khoảng tin cậy:</span>
                   <span className="text-amber-400 font-bold">
                     {Math.round(LearningScienceEngine.calculateMasteryConfidenceInterval(10, 8).lowerBound * 100)}% - {Math.round(LearningScienceEngine.calculateMasteryConfidenceInterval(10, 8).upperBound * 100)}%
                   </span>
@@ -279,9 +281,9 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
               </div>
 
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">Student B (100 attempts, 80 correct)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Học viên B (100 lượt thử, 80 lượt đúng)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Confidence Range (High N):</span>
+                  <span className="text-white/60">Khoảng tin cậy (N cao):</span>
                   <span className="text-emerald-400 font-bold">
                     {Math.round(LearningScienceEngine.calculateMasteryConfidenceInterval(100, 80).lowerBound * 100)}% - {Math.round(LearningScienceEngine.calculateMasteryConfidenceInterval(100, 80).upperBound * 100)}%
                   </span>
@@ -292,28 +294,28 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
           {/* Active A/B Testing Cohort Metrics */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Active A/B Test Cohort Progress</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Nhóm thử nghiệm học tập</span>
             
             <div className="space-y-3 text-xs">
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-white">Control Cohort (A)</span>
-                  <Badge variant="outline" className="text-[8px] py-0 px-1 border-white/10 text-white/40">Standard spaced loops</Badge>
+                  <span className="font-bold text-white">Nhóm đối chứng (A)</span>
+                  <Badge variant="outline" className="text-[8px] py-0 px-1 border-white/10 text-white/40">Vòng lặp ngắt quãng chuẩn</Badge>
                 </div>
                 <div className="flex justify-between text-[10px] text-white/50">
-                  <span>Avg WPM: 122 words</span>
-                  <span>Accuracy: 84.1%</span>
+                  <span>Tốc độ TB: 122 từ</span>
+                  <span>Độ chính xác: 84.1%</span>
                 </div>
               </div>
 
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-emerald-400">Treatment Cohort (B)</span>
-                  <Badge variant="emerald" className="text-[8px] py-0 px-1 font-bold">Adaptive pacing active</Badge>
+                  <span className="font-bold text-emerald-400">Nhóm thử nghiệm (B)</span>
+                  <Badge variant="emerald" className="text-[8px] py-0 px-1 font-bold">Nhịp độ thích ứng</Badge>
                 </div>
                 <div className="flex justify-between text-[10px] text-white/50">
-                  <span>Avg WPM: 132 words (+8.1%)</span>
-                  <span className="text-emerald-400">Accuracy: 91.0% (+6.9%)</span>
+                  <span>Tốc độ TB: 132 từ (+8.1%)</span>
+                  <span className="text-emerald-400">Độ chính xác: 91.0% (+6.9%)</span>
                 </div>
               </div>
             </div>
@@ -325,84 +327,84 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       {/* PHASE 13: CONTENT & RETENTION SCALE DASHBOARD */}
       <div className="space-y-6 pt-10 border-t border-white/5">
         <div className="space-y-1">
-          <h3 className="text-xl font-display font-black text-white">Content Scale & Retention Optimizer</h3>
-          <p className="text-xs text-white/40">Longitudinal curriculum coverage, authoring velocities, offline sync queues, and edge case resilience metrics.</p>
+          <h3 className="text-xl font-display font-black text-white">Quy mô học trình & Kho nội dung</h3>
+          <p className="text-xs text-white/40">Đo lường mức độ bao phủ giáo trình, tốc độ biên soạn bài học và trạng thái đồng bộ hóa hệ thống.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Curriculum Scale & Authoring Velocity */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Curriculum Scale & Content Assets</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Quy mô giáo trình & Tài nguyên</span>
             
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Active Interactive Stories:</span>
+                <span className="text-white/60">Câu chuyện tương tác đang chạy:</span>
                 <span className="font-mono font-bold text-white">24 stories</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Rapid Practice Drills:</span>
-                <span className="font-mono font-bold text-white">142 items</span>
+                <span className="text-white/60">Bài luyện tập siêu tốc:</span>
+                <span className="font-mono font-bold text-white">142 bài</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Speed Vocabulary Sets:</span>
-                <span className="font-mono font-bold text-white">95 drillsets</span>
+                <span className="text-white/60">Bộ từ vựng phản xạ:</span>
+                <span className="font-mono font-bold text-white">95 bộ</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Average Unit Authoring Speed:</span>
-                <span className="font-mono font-bold text-emerald-400">2.4 mins <span className="text-white/40 font-normal">(was 45m)</span></span>
+                <span className="text-white/60">Tốc độ soạn thảo trung bình:</span>
+                <span className="font-mono font-bold text-emerald-400">2.4 phút <span className="text-white/40 font-normal">(trước đây là 45p)</span></span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Curriculum Coverage (CEFR):</span>
-                <span className="font-mono font-bold text-violet-400">A1 - C2 Aligned</span>
+                <span className="text-white/60">Độ phủ giáo trình (CEFR):</span>
+                <span className="font-mono font-bold text-violet-400">Chuẩn đầu ra A1 - C2</span>
               </div>
             </div>
           </Card>
 
           {/* Retention Projections & User Lifetime metrics */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Retention Projections & User Lifetime</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Giữ chân & thói quen học tập</span>
             
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Estimated 30-Day Retention:</span>
-                <span className="font-mono font-bold text-emerald-400">78.2% <span className="text-white/40 font-normal">(target 75%)</span></span>
+                <span className="text-white/60">Dự báo tỷ lệ giữ chân 30 ngày:</span>
+                <span className="font-mono font-bold text-emerald-400">78.2% <span className="text-white/40 font-normal">(mục tiêu 75%)</span></span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Active Streak Protection Shields:</span>
-                <span className="font-mono font-bold text-amber-500">12 deployed</span>
+                <span className="text-white/60">Khiên bảo vệ chuỗi học đang hoạt động:</span>
+                <span className="font-mono font-bold text-amber-500">12 đã kích hoạt</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Vocabulary Retention Target:</span>
-                <span className="font-mono font-bold text-white">412 core words</span>
+                <span className="text-white/60">Mục tiêu ghi nhớ từ vựng:</span>
+                <span className="font-mono font-bold text-white">412 từ cốt lõi</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Longitudinal Pace Index:</span>
-                <span className="font-mono font-bold text-cyan-400">98.2% stability</span>
+                <span className="text-white/60">Chỉ số tiến trình ổn định:</span>
+                <span className="font-mono font-bold text-cyan-400">98.2% độ ổn định</span>
               </div>
             </div>
           </Card>
 
           {/* Production Readiness & Edge Case Telemetry */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Production Edge Case Telemetry</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Hiệu năng kỹ thuật & Đồng bộ</span>
             
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Offline Sync Queue Status:</span>
-                <Badge variant="emerald" className="py-0 px-1 font-bold">0 Pending (Synced)</Badge>
+                <span className="text-white/60">Đồng bộ ngoại tuyến:</span>
+                <Badge variant="emerald" className="py-0 px-1 font-bold">0 bài chờ (Đã đồng bộ)</Badge>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Server Rendering Loading:</span>
-                <span className="font-mono font-bold text-emerald-400">1.12s <span className="text-white/40 font-normal">(target &lt;1.5s)</span></span>
+                <span className="text-white/60">Phản hồi máy chủ (SSR):</span>
+                <span className="font-mono font-bold text-emerald-400">1.12s <span className="text-white/40 font-normal">(mục tiêu &lt;1.5s)</span></span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Bundle Size Impact:</span>
-                <span className="font-mono font-bold text-white">Zero layout shifts</span>
+                <span className="text-white/60">Độ ổn định giao diện (Layout Shifts):</span>
+                <span className="font-mono font-bold text-white">Không lệch bố cục (0 CLS)</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Network Resilience Fallback:</span>
-                <Badge variant="outline" className="py-0 px-1 text-white/40">Active (InMemory)</Badge>
+                <span className="text-white/60">Cơ chế dự phòng mạng:</span>
+                <Badge variant="outline" className="py-0 px-1 text-white/40">Đang hoạt động (Bộ nhớ tạm)</Badge>
               </div>
             </div>
           </Card>
@@ -413,35 +415,35 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
       {/* PHASE 15: STUDENT RETENTION & HABIT LOOP DASHBOARD */}
       <div className="space-y-6 pt-10 border-t border-white/5">
         <div className="space-y-1">
-          <h3 className="text-xl font-display font-black text-white">Student Growth & Habit Retention Lab</h3>
-          <p className="text-xs text-white/40">Real-time daily active return rates, micro-session completion metrics, smart context reminders, and user-perceived interaction benchmarks.</p>
+          <h3 className="text-xl font-display font-black text-white">Giữ chân & thói quen học tập</h3>
+          <p className="text-xs text-white/40">Báo cáo tỷ lệ quay lại hàng ngày, tỷ lệ hoàn thành phiên học, nhắc nhở thông minh và độ trễ tương tác người dùng.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Real Retention Telemetry */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase block">Empirical Retention Telemetry</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-emerald-400 uppercase block">Số liệu giữ chân thực tế</span>
             
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Daily Active Return Rate:</span>
+                <span className="text-white/60">Tỷ lệ quay lại hàng ngày:</span>
                 <span className="font-mono font-bold text-emerald-400">{MicroSessionTelemetryEngine.getRetentionMetrics().dailyReturnRate}%</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Session Completion Rate:</span>
+                <span className="text-white/60">Tỷ lệ hoàn thành phiên học:</span>
                 <span className="font-mono font-bold text-white">{MicroSessionTelemetryEngine.getRetentionMetrics().sessionCompletionRate}%</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Practice Abandonment Rate:</span>
+                <span className="text-white/60">Tỷ lệ bỏ giữa chừng:</span>
                 <span className="font-mono font-bold text-rose-400">{MicroSessionTelemetryEngine.getRetentionMetrics().practiceAbandonmentRate}%</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Execution Tempo (QPM):</span>
-                <span className="font-mono font-bold text-white">{MicroSessionTelemetryEngine.getRetentionMetrics().averageQuestionsPerMinute} questions/min</span>
+                <span className="text-white/60">Tốc độ luyện tập (Câu/phút):</span>
+                <span className="font-mono font-bold text-white">{MicroSessionTelemetryEngine.getRetentionMetrics().averageQuestionsPerMinute} câu/phút</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/60">Streak Recovery Rate:</span>
+                <span className="text-white/60">Khôi phục chuỗi học:</span>
                 <span className="font-mono font-bold text-cyan-400">{MicroSessionTelemetryEngine.getRetentionMetrics().streakRecoveryRate}%</span>
               </div>
             </div>
@@ -449,22 +451,22 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
           {/* User-Perceived Performance Benchmarks */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">User-Perceived Mobile Latency</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Độ trễ tương tác người dùng</span>
             
             <div className="space-y-3 text-xs">
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">Tap-to-Feedback Latency (Mobile target &lt;80ms)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Phản hồi khi chạm tương tác (Mục tiêu di động &lt;80ms)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Measured Latency:</span>
-                  <span className="text-emerald-400 font-bold">12ms <span className="text-white/40 font-normal">(Excellent)</span></span>
+                  <span className="text-white/60">Độ trễ đo được:</span>
+                  <span className="text-emerald-400 font-bold">12ms <span className="text-white/40 font-normal">(Xuất sắc)</span></span>
                 </div>
               </div>
 
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-2">
-                <span className="text-[9px] font-bold text-white/40 block">Tap-to-Next Question Latency (Mobile target &lt;100ms)</span>
+                <span className="text-[9px] font-bold text-white/40 block">Chuyển sang câu kế tiếp (Mục tiêu di động &lt;100ms)</span>
                 <div className="flex justify-between items-center font-mono">
-                  <span className="text-white/60">Measured Latency:</span>
-                  <span className="text-emerald-400 font-bold">18ms <span className="text-white/40 font-normal">(Excellent)</span></span>
+                  <span className="text-white/60">Độ trễ đo được:</span>
+                  <span className="text-emerald-400 font-bold">18ms <span className="text-white/40 font-normal">(Xuất sắc)</span></span>
                 </div>
               </div>
             </div>
@@ -472,13 +474,13 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
           {/* Context-Aware Smart Reminders Simulator */}
           <Card className="p-6 border-white/5 bg-[#1a1a1a] space-y-4">
-            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Contextual Smart Reminders</span>
+            <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Nhắc nhở học tập thông minh</span>
             
             <div className="space-y-3 text-xs">
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-white">Trigger: Incomplete Lesson</span>
-                  <Badge variant="outline" className="text-[8px] py-0 px-1 border-white/10 text-amber-400">Priority Weight: {SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Listening", hasUnfinishedSession: true, unfinishedLessonTitle: "Immersive Listening Sprint", daysSinceLastActive: 1, burnoutRiskLevel: "Low" }).priorityWeight}</Badge>
+                  <span className="font-bold text-white">Kích hoạt: Bài học chưa xong</span>
+                  <Badge variant="outline" className="text-[8px] py-0 px-1 border-white/10 text-amber-400">Trọng số ưu tiên: {SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Listening", hasUnfinishedSession: true, unfinishedLessonTitle: "Immersive Listening Sprint", daysSinceLastActive: 1, burnoutRiskLevel: "Low" }).priorityWeight}</Badge>
                 </div>
                 <p className="text-[10px] text-white/50 leading-snug">
                   "{SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Listening", hasUnfinishedSession: true, unfinishedLessonTitle: "Immersive Listening Sprint", daysSinceLastActive: 1, burnoutRiskLevel: "Low" }).notificationBody}"
@@ -487,8 +489,8 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
 
               <div className="p-2.5 rounded bg-black/40 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-emerald-400">Trigger: Spaced Retrieval</span>
-                  <Badge variant="emerald" className="text-[8px] py-0 px-1 font-bold">Priority Weight: {SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Speaking Rhythm", hasUnfinishedSession: false, daysSinceLastActive: 3, burnoutRiskLevel: "Low" }).priorityWeight}</Badge>
+                  <span className="font-bold text-emerald-400">Kích hoạt: Ôn tập ngắt quãng</span>
+                  <Badge variant="emerald" className="text-[8px] py-0 px-1 font-bold">Trọng số ưu tiên: {SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Speaking Rhythm", hasUnfinishedSession: false, daysSinceLastActive: 3, burnoutRiskLevel: "Low" }).priorityWeight}</Badge>
                 </div>
                 <p className="text-[10px] text-white/50 leading-snug">
                   "{SmartRemindersEngine.generateContextReminder({ weakSkillId: "1", weakSkillName: "Speaking Rhythm", hasUnfinishedSession: false, daysSinceLastActive: 3, burnoutRiskLevel: "Low" }).notificationBody}"

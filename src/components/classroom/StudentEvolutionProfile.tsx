@@ -7,16 +7,16 @@ export default function StudentEvolutionProfile() {
   return (
     <Card className="p-5 border-white/5 bg-white/[0.01] space-y-4">
       <div className="flex justify-between items-center border-b border-white/5 pb-3">
-        <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">Student Evolution Profile</h4>
-        <span className="text-[9px] text-white/20 uppercase font-mono">Genetics Indexer</span>
+        <h4 className="text-xs font-bold text-white/40 uppercase tracking-widest">Tiến bộ học viên</h4>
+        <span className="text-[9px] text-white/20 uppercase font-mono">Chỉ số chi tiết</span>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         {[
-          { label: "CEFR Growth", value: "B2 -> C1", desc: "Cohort Progression rate", icon: TrendingUp, color: "text-violet-400" },
-          { label: "Vocabulary Mastery", value: "412 words", desc: "Spaced repetition target", icon: Award, color: "text-amber-500" },
-          { label: "Avg Speaking Rhythm", value: "88%", desc: "Natural conversational", icon: Activity, color: "text-cyan-400" },
-          { label: "Participation Rhythm", value: "98.2%", desc: "Daily active aura protected", icon: Flame, color: "text-emerald-400" }
+          { label: "Tiến độ CEFR", value: "B2 -> C1", desc: "Tỷ lệ thăng hạng nhóm", icon: TrendingUp, color: "text-violet-400" },
+          { label: "Từ vựng thành thạo", value: "412 từ", desc: "Mục tiêu ôn tập ngắt quãng", icon: Award, color: "text-amber-500" },
+          { label: "Nhịp điệu nói TB", value: "88%", desc: "Giao tiếp tự nhiên", icon: Activity, color: "text-cyan-400" },
+          { label: "Tần suất tham gia", value: "98.2%", desc: "Duy trì hoạt động mỗi ngày", icon: Flame, color: "text-emerald-400" }
         ].map((stat, idx) => (
           <div key={idx} className="p-3 rounded-xl border border-white/5 bg-white/[0.01] space-y-1">
             <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">
