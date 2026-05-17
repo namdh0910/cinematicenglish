@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, Play, RefreshCw, CheckCircle2, MessageSquareHeart, Sparkles } from "lucide-react";
+import { trackTelemetry } from "@/lib/observability/observability";
 
 interface VoiceRecorderProps {
   sentence: string;
@@ -56,9 +57,11 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
       setIsRecording(true);
       setFeedback(null);
       setMicError(null);
+      trackTelemetry('speaking_started', { sentence });
     } catch (err) {
       console.error("Microphone access denied:", err);
       setMicError("Vui lòng cấp quyền truy cập Micro trên trình duyệt để luyện nói nhé!");
+      trackTelemetry('mic_permission_denied', { error: String(err) });
     }
   };
 
@@ -75,6 +78,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
     setTimeout(() => {
       setFeedback("Phát âm của em rất tốt và tự nhiên! Cố gắng duy trì nhịp điệu này ở các câu sau nhé.");
       setIsAnalyzing(false);
+      trackTelemetry('speaking_completed', { sentence });
     }, 2000);
   };
 
@@ -142,7 +146,11 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
         ) : (
           <div className="flex items-center gap-6">
             <button 
-              onClick={() => { setAudioUrl(null); setFeedback(null); }}
+              onClick={() => { 
+                setAudioUrl(null); 
+                setFeedback(null); 
+                trackTelemetry('retry_recording');
+              }}
               className="w-16 h-16 rounded-full glass border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
             >
               <RefreshCw size={24} />

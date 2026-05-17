@@ -1,15 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { GraduationCap, ArrowRight, Star, ChevronLeft } from "lucide-react";
 import VoiceRecorder from "@/components/coach/VoiceRecorder";
+import { trackTelemetry } from "@/lib/observability/observability";
 
 export default function DemoPage() {
   const [completed, setCompleted] = useState(false);
 
+  useEffect(() => {
+    trackTelemetry('guest_demo_started');
+  }, []);
+
   const handleComplete = (blob: Blob, feedback: string) => {
     setCompleted(true);
+    trackTelemetry('guest_demo_completed');
   };
 
   return (

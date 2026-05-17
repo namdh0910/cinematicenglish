@@ -10,6 +10,7 @@ import LearnZone from "@/components/dashboard/LearnZone";
 import ProgressZone from "@/components/dashboard/ProgressZone";
 import SocialZone from "@/components/dashboard/SocialZone";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { trackTelemetry, setObservabilityUser } from "@/lib/observability/observability";
 
 const AVATAR_PRESETS = [
   { name: "Felix (Học viên nam)", seed: "Felix", url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" },
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   useEffect(() => {
     setMounted(true);
     fetchProfile();
+    trackTelemetry('daily_return');
   }, []);
 
   const fetchProfile = async () => {
@@ -52,6 +54,7 @@ export default function DashboardPage() {
           setProfile(userProfile);
           setEditName(userProfile.full_name || "");
           setEditAvatar(userProfile.avatar_url || "");
+          setObservabilityUser(session.user.id);
         }
       }
     } catch (err) {

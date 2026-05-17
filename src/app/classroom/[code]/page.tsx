@@ -22,6 +22,7 @@ import Navbar from "@/components/Navbar";
 import Section from "@/components/ui/Section";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import { trackTelemetry } from "@/lib/observability/observability";
 
 function ClassroomHubContent() {
   const params = useParams();
@@ -52,6 +53,7 @@ function ClassroomHubContent() {
           const joinRes = await joinClassroomByCode(classCode);
           if (joinRes.success && joinRes.data) {
             setStatus('success');
+            trackTelemetry('classroom_joined', { classCode });
             // Re-fetch after successful join to load full dashboard
             setTimeout(async () => {
               const updatedDetail = await getStudentClassroomDetail(classCode);

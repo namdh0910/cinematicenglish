@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Loader2, GraduationCap, CheckCircle2 } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { trackTelemetry } from '@/lib/observability/observability';
+import { useEffect } from 'react';
 
 function SignupForm() {
   const router = useRouter();
@@ -14,6 +16,10 @@ function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'user' | 'teacher'>(defaultRole as 'user' | 'teacher');
+
+  useEffect(() => {
+    trackTelemetry('signup_started', { role: defaultRole });
+  }, [defaultRole]);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,11 +62,13 @@ function SignupForm() {
 
       // If email confirmation is disabled in Supabase, session is immediate
       if (data.session) {
+        trackTelemetry('signup_completed', { role });
         router.push('/dashboard');
         router.refresh();
       } else {
-        // Email confirmation required
+        // Require email confirmation
         setSuccess(true);
+        trackTelemetry('signup_completed', { role, requiresEmailConfirmation: true });
       }
     } catch (err: any) {
       setError('Có lỗi xảy ra. Vui lòng thử lại.');
