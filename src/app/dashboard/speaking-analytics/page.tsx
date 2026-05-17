@@ -79,6 +79,47 @@ export default function SpeakingAnalytics() {
             </div>
           </div>
 
+          {/* LEARNING DNA PROFILE & AI REASONING SYSTEM */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Learning DNA Card */}
+            <Card className="p-5 border-white/5 bg-gradient-to-br from-violet-950/10 to-black lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles size={14} className="text-violet-400" />
+                <span className="text-[9px] font-mono font-bold tracking-widest text-violet-400 uppercase">Learner DNA Profile</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-display font-black text-white">Rhythm-Driven Speaker (C1)</h3>
+                <p className="text-xs text-white/60 leading-relaxed">
+                  Bạn có phản xạ nhịp điệu (Rhythm & Stress) cực mạnh đạt 88%, giúp giọng nói luôn có nhạc điệu tự nhiên. Tuy nhiên, AI phát hiện bạn có xu hướng chững lại (vocal hesitation) khoảng 850ms trước các cụm từ chuyên ngành nhiều âm tiết (như "ecological"). Đây là cơ chế tự nhiên khi não bộ ưu tiên lục tìm từ vựng chất lượng cao trước khi cơ phát âm thực hiện hành động.
+                </p>
+              </div>
+              <div className="pt-2 flex gap-4 text-[9px] font-mono text-white/30 border-t border-white/5">
+                <span>Memory Retention: 95%</span>
+                <span>Burnout Index: Low</span>
+              </div>
+            </Card>
+
+            {/* AI Reasoning Insight Card */}
+            <Card className="p-5 border-white/5 bg-white/[0.01] space-y-3">
+              <span className="text-[9px] font-mono font-bold tracking-widest text-amber-500 uppercase block">AI Reasoning Insights</span>
+              
+              <div className="space-y-2.5">
+                {[
+                  { title: "Pause Penalty", desc: "Rhythm falls by 12% after silent periods exceeding 800ms." },
+                  { title: "Numerical Surge", desc: "Listening accuracy drops 14% on rapid number clusters." },
+                  { title: "Emotional Retain", desc: "Retain emotional vocabulary 32% longer in spaced-repetition." }
+                ].map((insight, idx) => (
+                  <div key={idx} className="space-y-0.5 text-[11px]">
+                    <h5 className="font-bold text-white flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-amber-500" /> {insight.title}
+                    </h5>
+                    <p className="text-[9px] text-white/40 leading-snug">{insight.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
           {/* Matrix Core Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {[
