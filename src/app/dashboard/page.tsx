@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles, Trophy } from "lucide-react";
+import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles, Trophy, Clock, GraduationCap, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MissionHub from "@/components/dashboard/MissionHub";
 import LeaguesHub from "@/components/dashboard/LeaguesHub";
@@ -144,6 +144,53 @@ export default function DashboardPage() {
                     className="w-full py-4 rounded-xl bg-violet-500 text-white font-bold flex items-center justify-center gap-2 hover:bg-violet-400 transition-all shadow-glow-violet"
                   >
                     <Mic size={18} /> Luyện nói ngay
+                  </Link>
+                </div>
+              </div>
+
+              {/* Lối tắt các phòng tính năng */}
+              <div className="p-6 rounded-[32px] glass border-white/5 space-y-4">
+                <h3 className="font-display font-bold text-sm text-white/40 uppercase tracking-widest">Phòng tính năng</h3>
+                
+                <div className="space-y-2">
+                  <Link href="/dashboard/speaking-analytics" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer block">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                      <TrendingUp size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors block">Phân tích phát âm AI</span>
+                      <span className="text-[9px] text-white/30 font-bold uppercase block">CEFR & Fluency Matrix</span>
+                    </div>
+                  </Link>
+
+                  <Link href="/exam/ielts-foundation-test" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer block">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                      <Clock size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors block">Đấu trường Khảo thí</span>
+                      <span className="text-[9px] text-white/30 font-bold uppercase block">IELTS & Timed Exams</span>
+                    </div>
+                  </Link>
+
+                  <Link href="/classroom/eng10a1" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer block">
+                    <div className="w-8 h-8 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center">
+                      <GraduationCap size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors block">Lớp học Học sinh</span>
+                      <span className="text-[9px] text-white/30 font-bold uppercase block">ENG10A1 Feed & streak</span>
+                    </div>
+                  </Link>
+
+                  <Link href="/teacher" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group cursor-pointer block">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+                      <User size={16} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors block">Cổng Giáo viên</span>
+                      <span className="text-[9px] text-white/30 font-bold uppercase block">Teacher Command Hub</span>
+                    </div>
                   </Link>
                 </div>
               </div>
