@@ -17,7 +17,7 @@ export default function AdaptiveSwitcher() {
   const { mode, setMode, atmosphere } = useAdaptive();
 
   return (
-    <div className="fixed bottom-6 left-6 z-[200]">
+    <div className="hidden md:block fixed bottom-6 left-6 z-30">
       <motion.div 
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
