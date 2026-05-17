@@ -73,23 +73,57 @@ export default function HomePage() {
         demoAudioRef.current.pause();
         demoAudioRef.current = null;
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
 
+  const playClientSpeech = (text: string, onEnd?: () => void) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 1.0;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const premiumVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))
+      );
+      if (premiumVoice) utterance.voice = premiumVoice;
+      if (onEnd) utterance.onend = onEnd;
+      
+      window.speechSynthesis.speak(utterance);
+      return true;
+    }
+    return false;
+  };
+
   const handlePlayDemo = async () => {
+    const teaserText = "Power is not given. It is taken — quietly, patiently, and with the grace of someone who never reveals their intention. Robert Greene studied history's most dangerous men and found a disturbing truth: the rules of power have never changed — only the players.";
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setDemoPlaying(false);
+      return;
+    }
+
     if (demoAudioUrl) {
       if (demoPlaying) {
         demoAudioRef.current?.pause();
         setDemoPlaying(false);
       } else {
-        demoAudioRef.current?.play().catch(console.error);
+        demoAudioRef.current?.play().catch(() => {
+          setDemoPlaying(true);
+          playClientSpeech(teaserText, () => setDemoPlaying(false));
+        });
         setDemoPlaying(true);
       }
       return;
     }
 
     setLoadingDemo(true);
-    const teaserText = "Power is not given. It is taken — quietly, patiently, and with the grace of someone who never reveals their intention. Robert Greene studied history's most dangerous men and found a disturbing truth: the rules of power have never changed — only the players.";
     const res = await getOrGenerateAudio({
       text: teaserText,
       category: 'stories',
@@ -100,12 +134,30 @@ export default function HomePage() {
     if (res.success && res.audioUrl) {
       setDemoAudioUrl(res.audioUrl);
       const audio = new Audio(res.audioUrl);
+      
+      const fallbackToSpeech = () => {
+        setDemoPlaying(true);
+        playClientSpeech(teaserText, () => setDemoPlaying(false));
+      };
+
+      audio.addEventListener('error', () => {
+        fallbackToSpeech();
+      });
+
       audio.addEventListener('ended', () => {
         setDemoPlaying(false);
       });
+      
       demoAudioRef.current = audio;
-      audio.play().catch(console.error);
+      audio.play().catch((err) => {
+        console.warn("Play failed, trying client speech:", err);
+        fallbackToSpeech();
+      });
       setDemoPlaying(true);
+    } else {
+      // Direct offline/CORS fallback
+      setDemoPlaying(true);
+      playClientSpeech(teaserText, () => setDemoPlaying(false));
     }
   };
 

@@ -77,29 +77,62 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
         activeAudioRef.current.pause();
         activeAudioRef.current = null;
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
     };
   }, []);
 
+  const playClientSpeech = (text: string, onEnd?: () => void) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 1.0;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const premiumVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))
+      );
+      if (premiumVoice) utterance.voice = premiumVoice;
+      if (onEnd) utterance.onend = onEnd;
+      
+      window.speechSynthesis.speak(utterance);
+      return true;
+    }
+    return false;
+  };
+
   const handleTogglePlay = async () => {
+    if (!currentStory) return;
+
+    const fullText = currentStory.transcript.length > 0
+      ? currentStory.transcript.map(l => l.text).join(" ")
+      : currentStory.description;
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
     if (activeAudioRef.current) {
       if (isPlaying) {
         activeAudioRef.current.pause();
         setIsPlaying(false);
       } else {
-        activeAudioRef.current.play().catch(console.error);
+        activeAudioRef.current.play().catch(() => {
+          setIsPlaying(true);
+          playClientSpeech(fullText, () => setIsPlaying(false));
+        });
         setIsPlaying(true);
       }
       return;
     }
 
-    if (!currentStory) return;
-
     setLoadingAudio(true);
-    const fullText = currentStory.transcript.length > 0
-      ? currentStory.transcript.map(l => l.text).join(" ")
-      : currentStory.description;
-
     const res = await getOrGenerateAudio({
       text: fullText,
       category: 'stories',
@@ -110,6 +143,15 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
     if (res.success && res.audioUrl) {
       setAudioUrl(res.audioUrl);
       const audio = new Audio(res.audioUrl);
+
+      const fallbackToSpeech = () => {
+        setIsPlaying(true);
+        playClientSpeech(fullText, () => setIsPlaying(false));
+      };
+
+      audio.addEventListener('error', () => {
+        fallbackToSpeech();
+      });
 
       audio.addEventListener('loadedmetadata', () => {
         setDuration(audio.duration);
@@ -125,8 +167,14 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
       });
 
       activeAudioRef.current = audio;
-      audio.play().catch(console.error);
+      audio.play().catch((err) => {
+        console.warn("Play failed, using speech synthesis fallback:", err);
+        fallbackToSpeech();
+      });
       setIsPlaying(true);
+    } else {
+      setIsPlaying(true);
+      playClientSpeech(fullText, () => setIsPlaying(false));
     }
   };
 

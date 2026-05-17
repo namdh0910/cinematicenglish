@@ -86,8 +86,32 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
+
+  const playClientSpeech = (text: string, onEnd?: () => void) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = speed;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const premiumVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))
+      );
+      if (premiumVoice) utterance.voice = premiumVoice;
+      if (onEnd) utterance.onend = onEnd;
+      
+      window.speechSynthesis.speak(utterance);
+      return true;
+    }
+    return false;
+  };
 
   const handleCheckpointComplete = (isCorrect: boolean, responseTime: number) => {
     if (activeCheckpoint) {
@@ -101,9 +125,19 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   };
 
   const handlePlayPause = async () => {
+    const fullText = STORY_PARAGRAPHS.map(p => p.text).join(" ");
+
+    // If using speechSynthesis
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking && playingParagraphId === null) {
+      window.speechSynthesis.cancel();
+      setPlaying(false);
+      return;
+    }
+
     // If playing a paragraph, pause it first
     if (playingParagraphId !== null) {
       if (audioRef.current) audioRef.current.pause();
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
       setPlayingParagraphId(null);
     }
 
@@ -112,7 +146,10 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
         audioRef.current?.pause();
         setPlaying(false);
       } else {
-        audioRef.current?.play().catch(console.error);
+        audioRef.current?.play().catch(() => {
+          setPlaying(true);
+          playClientSpeech(fullText, () => setPlaying(false));
+        });
         setPlaying(true);
       }
       return;
@@ -120,7 +157,6 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
 
     // Load full story audio
     setLoadingAudio(true);
-    const fullText = STORY_PARAGRAPHS.map(p => p.text).join(" ");
     const res = await getOrGenerateAudio({
       text: fullText,
       category: 'stories',
@@ -132,6 +168,15 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       setAudioUrl(res.audioUrl);
       const audio = new Audio(res.audioUrl);
       audio.playbackRate = speed;
+
+      const fallbackToSpeech = () => {
+        setPlaying(true);
+        playClientSpeech(fullText, () => setPlaying(false));
+      };
+
+      audio.addEventListener('error', () => {
+        fallbackToSpeech();
+      });
 
       audio.addEventListener('timeupdate', () => {
         const cur = audio.currentTime;
@@ -156,13 +201,23 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       });
 
       audioRef.current = audio;
-      audio.play().catch(console.error);
+      audio.play().catch((err) => {
+        console.warn("Play failed, using speech synthesis fallback:", err);
+        fallbackToSpeech();
+      });
       setPlaying(true);
+    } else {
+      setPlaying(true);
+      playClientSpeech(fullText, () => setPlaying(false));
     }
   };
 
   const handlePlayParagraph = async (paraId: number, text: string) => {
-    // If full audio is playing, pause it
+    // If full audio is playing or speech is active
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+
     if (playingParagraphId === null && playing) {
       audioRef.current?.pause();
       setPlaying(false);
@@ -171,9 +226,16 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
     if (playingParagraphId === paraId) {
       if (playing) {
         audioRef.current?.pause();
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
         setPlaying(false);
       } else {
-        audioRef.current?.play().catch(console.error);
+        audioRef.current?.play().catch(() => {
+          setPlaying(true);
+          playClientSpeech(text, () => {
+            setPlaying(false);
+            setPlayingParagraphId(null);
+          });
+        });
         setPlaying(true);
       }
       return;
@@ -198,6 +260,18 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       const audio = new Audio(res.audioUrl);
       audio.playbackRate = speed;
 
+      const fallbackToSpeech = () => {
+        setPlaying(true);
+        playClientSpeech(text, () => {
+          setPlaying(false);
+          setPlayingParagraphId(null);
+        });
+      };
+
+      audio.addEventListener('error', () => {
+        fallbackToSpeech();
+      });
+
       audio.addEventListener('timeupdate', () => {
         setCurrentTime(Math.round(audio.currentTime));
       });
@@ -208,10 +282,17 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
       });
 
       audioRef.current = audio;
-      audio.play().catch(console.error);
+      audio.play().catch((err) => {
+        console.warn("Play failed, using speech synthesis fallback:", err);
+        fallbackToSpeech();
+      });
       setPlaying(true);
     } else {
-      setPlayingParagraphId(null);
+      setPlaying(true);
+      playClientSpeech(text, () => {
+        setPlaying(false);
+        setPlayingParagraphId(null);
+      });
     }
   };
 
