@@ -335,70 +335,8 @@ export const IDENTITY_STAGES = [
   "Voice Architect"
 ];
 
-export const INITIAL_USER_PROGRESS: UserProgress = {
-  streak: 12,
-  streakActive: true,
-  xp: 4250,
-  level: 8,
-  identity: "Storywalker",
-  nextIdentity: "Protagonist",
-  auraColor: "#8b5cf6", // Violet
-  missions: [
-    { id: 'm1', title: 'Hoàn thành 1 câu chuyện', description: 'Đắm mình trong một thế giới mới.', xpReward: 100, progress: 0, target: 1, icon: 'BookOpen', isCompleted: false },
-    { id: 'm2', title: 'Shadowing 5 phút', description: 'Tìm lại nhịp điệu giọng nói của bạn.', xpReward: 150, progress: 3, target: 5, icon: 'Mic', isCompleted: false },
-    { id: 'm3', title: 'Học 8 cụm từ cảm xúc', description: 'Mở rộng vốn từ vựng nội tâm.', xpReward: 80, progress: 8, target: 8, icon: 'Sparkles', isCompleted: true },
-  ],
-  memories: [
-    {
-      id: 'mem1',
-      type: 'quote',
-      title: 'Sức mạnh của sự im lặng',
-      content: 'Authority is not a shout. It is the vacuum you create... when you refuse to speak.',
-      date: '2026-05-15',
-      mood: 'the-void',
-      identityStage: 'Seeker'
-    },
-    {
-      id: 'mem2',
-      type: 'voice',
-      title: 'Đột phá phát âm: Strategic',
-      content: 'Cảm nhận rõ sự khác biệt giữa trọng âm và nhịp điệu. Giọng nói bắt đầu có sức nặng.',
-      date: '2026-05-14',
-      mood: 'the-pulse',
-      audioUrl: '/audio/samples/strategic.mp3',
-      identityStage: 'Silent Observer'
-    },
-    {
-      id: 'mem3',
-      type: 'milestone',
-      title: 'Chạm mốc Storywalker',
-      content: 'Không còn chỉ là người nghe, tôi đã bắt đầu đi xuyên qua các câu chuyện.',
-      date: '2026-05-16',
-      mood: 'the-calm',
-      identityStage: 'Storywalker'
-    }
-  ],
-  emotionalProfile: {
-    dominantMood: 'the-void',
-    traits: {
-      reflective: 0.8,
-      ambitious: 0.6,
-      vulnerable: 0.4,
-      confident: 0.7
-    },
-    preferredCategories: ['POWER & INFLUENCE', 'TRIẾT HỌC'],
-    recentTags: ['inspired', 'reflective', 'powerful'],
-    pacingPreference: 'normal'
-  }
-};
 
-export const LEADERBOARD = [
-  { id: '1', rank: 1, name: 'Hoàng Nam', xp: 12500, identity: 'Director', avatar: 'HN', isYou: true, country: '🇻🇳', streak: 45 },
-  { id: '2', rank: 2, name: 'Minh Thư', xp: 10200, identity: 'Protagonist', avatar: 'MT', isYou: false, country: '🇻🇳', streak: 32 },
-  { id: '3', rank: 3, name: 'Quốc Bảo', xp: 9800, identity: 'Protagonist', avatar: 'QB', isYou: false, country: '🇻🇳', streak: 28 },
-  { id: '4', rank: 4, name: 'Linh Đan', xp: 8700, identity: 'Storywalker', avatar: 'LD', isYou: false, country: '🇻🇳', streak: 15 },
-  { id: '5', rank: 5, name: 'Anh Tuấn', xp: 7500, identity: 'Storywalker', avatar: 'AT', isYou: false, country: '🇻🇳', streak: 12 },
-];
+
 
 export const FEED_ITEMS = [
   {

@@ -70,13 +70,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   const analyzeSpeech = () => {
     setIsAnalyzing(true);
     setTimeout(() => {
-      const responses = [
-        "Cách bạn ngắt nghỉ ở giữa câu rất giống một người bản xứ đang kể chuyện. Rất tự nhiên!",
-        "Giọng nói của bạn mang theo sự ấm áp và tự tin tuyệt vời. Bạn đang làm chủ được ngữ điệu rồi đấy.",
-        "Trọng âm của bạn đặt rất đúng chỗ, tạo nên một nhịp điệu rất 'cinematic'. Hãy duy trì cảm giác này nhé.",
-        "Thật ấn tượng! Cách bạn phát âm các nguyên âm dài nghe rất sang và rõ ràng."
-      ];
-      setFeedback(responses[Math.floor(Math.random() * responses.length)]);
+      setFeedback("Hệ thống chấm điểm AI đang được nâng cấp cho phiên bản Beta. Hiện tại, bản thu âm của bạn đã được lưu lại cục bộ thành công.");
       setIsAnalyzing(false);
     }, 2000);
   };

@@ -219,10 +219,10 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
           setIsRecording(false);
           // Simulate advanced AI rhythm and confidence feedback
           setSpeakingResult({
-            pronunciation: Math.floor(Math.random() * 15) + 82, // 82 - 97
-            rhythm: Math.floor(Math.random() * 20) + 78,       // 78 - 98
-            confidence: Math.floor(Math.random() * 10) + 88,   // 88 - 98
-            coachFeedback: "Nhịp điệu tuyệt vời! Em đã bắt nhịp ngữ điệu tiếng Anh rất tốt, các âm gió đuôi (-s, -ed) phát âm rất rõ nét. Hãy tiếp tục duy trì nhịp thở tự nhiên này."
+            pronunciation: 0, // Đang chờ tích hợp Whisper API thật
+            rhythm: 0,
+            confidence: 0,
+            coachFeedback: "Hệ thống phân tích giọng nói AI (Whisper) đang được nâng cấp cho bản Beta. Điểm số tạm thời hiển thị là 0 để đảm bảo minh bạch."
           });
           setXpReward(prev => prev + 100);
           return 100;

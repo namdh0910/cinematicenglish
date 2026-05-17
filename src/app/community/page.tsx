@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Section from "@/components/ui/Section";
-import { LEADERBOARD } from "@/lib/data";
+// TODO: LEADERBOARD will be fetched from Supabase using user total_xp and streaks
 
 const CHALLENGES = [
   { title: "Chuỗi Nói 7 Ngày", desc: "Ghi âm giọng nói của bạn mỗi ngày trong tuần này", progress: 4, total: 7, reward: "500 XP + 🎤 Huy hiệu", color: "var(--accent-cyan)" },
@@ -81,39 +81,14 @@ export default function CommunityPage() {
                   <span className="text-[10px] font-bold text-muted uppercase">Chốt vào Chủ Nhật</span>
                 </div>
 
-                {LEADERBOARD.map((u, i) => (
-                  <Card 
-                    key={u.rank} 
-                    padding="sm" 
-                    className={`flex items-center gap-4 transition-all ${
-                      u.isYou ? "border-accent shadow-glow-violet bg-accent-violet/5" : "border-white/5"
-                    }`}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <div className="w-10 text-center font-display font-black text-xl italic">
-                      {u.rank === 1 ? "🥇" : u.rank === 2 ? "🥈" : u.rank === 3 ? "🥉" : `${u.rank}`}
-                    </div>
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-base shadow-lg ${
-                      u.isYou ? "bg-gradient-to-br from-accent-violet to-indigo-600 text-white" : "glass"
-                    }`}>
-                      {u.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-sm truncate">{u.name}</span>
-                        <span className="text-sm">{u.country}</span>
-                        {u.isYou && <Badge variant="violet" className="text-[8px] px-1.5">Bạn</Badge>}
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted uppercase tracking-wider">
-                        <Zap size={10} className="text-accent-gold" />
-                        Chuỗi {u.streak} ngày
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-black font-display gradient-text-violet">{u.xp.toLocaleString()} XP</div>
-                    </div>
-                  </Card>
-                ))}
+                {/* Empty State / Loading State for Real Data */}
+                <div className="text-center py-12 border border-dashed border-white/10 rounded-[32px] glass-card mt-8">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-white/5 flex items-center justify-center mb-4">
+                    <Trophy size={24} className="text-white/20" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white/60">Bảng xếp hạng đang cập nhật</h3>
+                  <p className="text-sm text-white/40 mt-2 max-w-sm mx-auto">Hệ thống đang tổng hợp điểm kinh nghiệm và xếp hạng từ toàn bộ học viên.</p>
+                </div>
               </motion.div>
             )}
 

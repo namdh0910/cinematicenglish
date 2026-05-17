@@ -2,8 +2,7 @@
 import { motion } from "framer-motion";
 import { Sparkles, Trophy, BookOpen, Heart, Zap } from "lucide-react";
 import VoiceRecorder from "./VoiceRecorder";
-import { getAdaptiveCoachTone } from "@/lib/intelligence";
-import { INITIAL_USER_PROGRESS } from "@/lib/data";
+import { useAdaptive } from "@/context/AdaptiveContext";
 
 interface AICoachPanelProps {
   sentence: string;
@@ -12,7 +11,7 @@ interface AICoachPanelProps {
 }
 
 export default function AICoachPanel({ sentence, translation, onClose }: AICoachPanelProps) {
-  const coachTone = getAdaptiveCoachTone(INITIAL_USER_PROGRESS.emotionalProfile);
+  const { coachTone, profile } = useAdaptive();
 
   return (
     <div className="w-full flex flex-col items-center justify-center p-6 md:p-12 space-y-12">
@@ -62,8 +61,8 @@ export default function AICoachPanel({ sentence, translation, onClose }: AICoach
             <BookOpen size={16} />
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-white/30">Cấp độ trôi chảy</div>
-            <div className="text-sm font-bold">{INITIAL_USER_PROGRESS.identity}</div>
+            <div className="text-[10px] uppercase font-bold text-white/30">Thiên hướng</div>
+            <div className="text-sm font-bold capitalize">{profile?.dominantMood?.replace('the-', '') || 'Đang tải...'}</div>
           </div>
         </div>
       </div>

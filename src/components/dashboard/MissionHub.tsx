@@ -165,8 +165,8 @@ export default function MissionHub({ progress }: MissionHubProps) {
     setTimeout(() => {
       setIsRecording(false);
       setRecordingSuccess(true);
-      const acc = Math.floor(Math.random() * 10) + 88;
-      const rhy = Math.floor(Math.random() * 15) + 80;
+      const acc = 0; // Đang chờ tích hợp Whisper API thật
+      const rhy = 0;
       setSpeechScores({ accuracy: acc, rhythm: rhy });
       setEarnedXP(prev => prev + 150);
       setStreakCombo(prev => prev + 1);

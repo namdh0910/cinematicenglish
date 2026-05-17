@@ -1,8 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { EmotionalProfile, INITIAL_USER_PROGRESS } from '@/lib/data';
+import { EmotionalProfile } from '@/lib/data';
 import { getAtmosphereSettings, getAdaptiveCoachTone } from '@/lib/intelligence';
+// TODO: Import Supabase browser client here later to fetch real profile from DB
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export type AdaptiveMode = 'ambitious' | 'reflective' | 'momentum' | 'vulnerable' | 'focus';
 
@@ -14,11 +16,32 @@ interface AdaptiveContextType {
   coachTone: any;
 }
 
+const DEFAULT_EMOTIONAL_PROFILE: EmotionalProfile = {
+  dominantMood: 'the-void',
+  traits: { reflective: 0.6, ambitious: 0.5, vulnerable: 0.4, confident: 0.6 },
+  preferredCategories: [],
+  recentTags: [],
+  pacingPreference: 'normal'
+};
+
 const AdaptiveContext = createContext<AdaptiveContextType | undefined>(undefined);
 
 export function AdaptiveProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<AdaptiveMode>('focus');
-  const [profile, setProfile] = useState<EmotionalProfile>(INITIAL_USER_PROGRESS.emotionalProfile);
+  const [profile, setProfile] = useState<EmotionalProfile>(DEFAULT_EMOTIONAL_PROFILE);
+
+  // Fetch real user preferences from Supabase if logged in
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // Here we will eventually load the real 'emotional_profile' json from profiles table
+        // For now, keep the robust default to ensure UI stability.
+      }
+    };
+    fetchProfile();
+  }, []);
 
   // Update profile based on mode for demo purposes
   useEffect(() => {

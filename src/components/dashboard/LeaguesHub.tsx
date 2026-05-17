@@ -33,21 +33,9 @@ interface Competitor {
   tag?: { text: string; type: "comeback" | "rising" | "consistent" };
 }
 
-const GLOBAL_LEAGUE_DATA: Competitor[] = [
-  { rank: 1, name: "Hoàng Minh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hoang", identity: "Linguistic Director", xp: 1850, streak: 24, accuracy: 96, tag: { text: "Bền bỉ", type: "consistent" } },
-  { rank: 2, name: "Minh Thư", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thu", identity: "Storywalker Elite", xp: 1620, streak: 18, accuracy: 94 },
-  { rank: 3, name: "Bạn (Nhân vật chính)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Ngôi sao đang lên", type: "rising" } },
-  { rank: 4, name: "Anh Tuấn", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tuan", identity: "Clarity Architect", xp: 1350, streak: 5, accuracy: 89, tag: { text: "Trở lại: Chuỗi 5 ngày", type: "comeback" } },
-  { rank: 5, name: "Lan Phương", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Phuong", identity: "Cadence Weaver", xp: 1280, streak: 14, accuracy: 91 },
-  { rank: 6, name: "Bảo Nam", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nam", identity: "Tone Designer", xp: 1100, streak: 3, accuracy: 85 },
-];
+const GLOBAL_LEAGUE_DATA: Competitor[] = [];
 
-const CLASSROOM_LEAGUE_DATA: Competitor[] = [
-  { rank: 1, name: "Bạn (Nhân vật chính)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Dẫn đầu lớp", type: "rising" } },
-  { rank: 2, name: "Bảo Nam", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nam", identity: "Tone Designer", xp: 1100, streak: 3, accuracy: 85 },
-  { rank: 3, name: "Khánh Linh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Linh", identity: "Speaker Novice", xp: 950, streak: 8, accuracy: 88, tag: { text: "Chuỗi 8 ngày", type: "consistent" } },
-  { rank: 4, name: "Gia Huy", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Huy", identity: "Dialogue Crafter", xp: 820, streak: 2, accuracy: 81 },
-];
+const CLASSROOM_LEAGUE_DATA: Competitor[] = [];
 
 const LEAGUE_TIERS = [
   { id: "bronze", name: "Giọng Đồng Bền Bỉ", color: "#b45309", bg: "rgba(180, 83, 9, 0.05)", border: "rgba(180, 83, 9, 0.2)" },
@@ -131,83 +119,90 @@ export default function LeaguesHub() {
           {/* ─── LEADERBOARD TABLE ─── */}
           <div className="space-y-3">
             <AnimatePresence mode="wait">
-              {activeCompetitors.map((competitor, idx) => {
-                const isUser = competitor.name.includes("Bạn");
-                return (
-                  <motion.div
-                    key={competitor.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ delay: idx * 0.05 }}
-                    style={{ 
-                      borderColor: isUser ? currentTier.color : "rgba(255,255,255,0.05)",
-                      backgroundColor: isUser ? currentTier.bg : "rgba(255,255,255,0.01)"
-                    }}
-                    className={`rounded-xl border p-3 md:p-3.5 flex items-center justify-between gap-4 transition-all hover:border-white/10 ${
-                      isUser ? "shadow-glow-gold/5" : ""
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Rank Indicator */}
-                      <span className={`w-6 text-center font-mono font-black text-sm ${
-                        competitor.rank <= 3 ? "text-amber-500" : "text-white/20"
-                      }`}>
-                        #{competitor.rank}
-                      </span>
+              {activeCompetitors.length === 0 ? (
+                <div className="text-center py-8 rounded-xl border border-dashed border-white/10 glass">
+                  <Trophy size={20} className="mx-auto text-white/20 mb-2" />
+                  <p className="text-xs text-white/40 uppercase tracking-widest font-bold">Đang tổng hợp dữ liệu</p>
+                </div>
+              ) : (
+                activeCompetitors.map((competitor, idx) => {
+                  const isUser = competitor.name.includes("Bạn");
+                  return (
+                    <motion.div
+                      key={competitor.name}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ delay: idx * 0.05 }}
+                      style={{ 
+                        borderColor: isUser ? currentTier.color : "rgba(255,255,255,0.05)",
+                        backgroundColor: isUser ? currentTier.bg : "rgba(255,255,255,0.01)"
+                      }}
+                      className={`rounded-xl border p-3 md:p-3.5 flex items-center justify-between gap-4 transition-all hover:border-white/10 ${
+                        isUser ? "shadow-glow-gold/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Rank Indicator */}
+                        <span className={`w-6 text-center font-mono font-black text-sm ${
+                          competitor.rank <= 3 ? "text-amber-500" : "text-white/20"
+                        }`}>
+                          #{competitor.rank}
+                        </span>
 
-                      {/* Avatar */}
-                      <div className="w-10 h-10 rounded-xl overflow-hidden glass border-white/5 shrink-0">
-                        <img src={competitor.avatar} alt={competitor.name} className="w-full h-full object-cover" />
-                      </div>
-
-                      {/* Details */}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className={`text-sm font-bold ${isUser ? "text-white" : "text-white/80"}`}>
-                            {competitor.name}
-                          </h4>
-                          {competitor.tag && (
-                            <Badge 
-                              variant={competitor.tag.type === "comeback" ? "rose" : (competitor.tag.type === "rising" ? "gold" : "violet")} 
-                              className="text-[8px] py-0 px-2"
-                            >
-                              {competitor.tag.text}
-                            </Badge>
-                          )}
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-xl overflow-hidden glass border-white/5 shrink-0">
+                          <img src={competitor.avatar} alt={competitor.name} className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-[10px] text-white/30 uppercase font-bold tracking-wider block mt-0.5">
-                          {competitor.identity}
-                        </span>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-8 text-right">
-                      {/* Consistency score */}
-                      <div className="hidden sm:block">
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Độ chính xác</span>
-                        <span className="text-xs font-mono font-bold text-white/70">{competitor.accuracy}%</span>
-                      </div>
-                      
-                      {/* Streak */}
-                      <div className="hidden sm:block">
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Chuỗi ngày</span>
-                        <span className="text-xs font-mono font-bold text-amber-500 flex items-center justify-end gap-1">
-                          <Flame size={12} /> {competitor.streak} ngày
-                        </span>
+                        {/* Details */}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className={`text-sm font-bold ${isUser ? "text-white" : "text-white/80"}`}>
+                              {competitor.name}
+                            </h4>
+                            {competitor.tag && (
+                              <Badge 
+                                variant={competitor.tag.type === "comeback" ? "rose" : (competitor.tag.type === "rising" ? "gold" : "violet")} 
+                                className="text-[8px] py-0 px-2"
+                              >
+                                {competitor.tag.text}
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-white/30 uppercase font-bold tracking-wider block mt-0.5">
+                            {competitor.identity}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* XP */}
-                      <div>
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Hào quang tuần</span>
-                        <span className="text-sm font-mono font-black text-white flex items-center justify-end gap-1">
-                          <Zap size={12} className="text-amber-500" fill="currentColor" /> {competitor.xp} XP
-                        </span>
+                      <div className="flex items-center gap-8 text-right">
+                        {/* Consistency score */}
+                        <div className="hidden sm:block">
+                          <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Độ chính xác</span>
+                          <span className="text-xs font-mono font-bold text-white/70">{competitor.accuracy}%</span>
+                        </div>
+                        
+                        {/* Streak */}
+                        <div className="hidden sm:block">
+                          <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Chuỗi ngày</span>
+                          <span className="text-xs font-mono font-bold text-amber-500 flex items-center justify-end gap-1">
+                            <Flame size={12} /> {competitor.streak} ngày
+                          </span>
+                        </div>
+
+                        {/* XP */}
+                        <div>
+                          <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Hào quang tuần</span>
+                          <span className="text-sm font-mono font-black text-white flex items-center justify-end gap-1">
+                            <Zap size={12} className="text-amber-500" fill="currentColor" /> {competitor.xp} XP
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    </motion.div>
+                  );
+                })
+              )}
             </AnimatePresence>
           </div>
         </div>
