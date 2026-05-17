@@ -20,7 +20,7 @@ import {
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 
-export default function HomeZone() {
+export default function HomeZone({ profile }: { profile: any }) {
   return (
     <div className="space-y-4">
       
@@ -148,13 +148,16 @@ export default function HomeZone() {
           <div className="space-y-1">
             <span className="text-[8px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Chuỗi luyện phát âm</span>
             <h4 className="text-md font-bold text-white flex items-center gap-1">
-              <Flame size={14} className="text-amber-500" /> Bền bỉ 12 Ngày
+              <Flame size={14} className="text-amber-500" /> Bền bỉ {profile?.current_streak || 0} Ngày
             </h4>
             <p className="text-[9px] text-white/40">Đang được bảo vệ bởi chuỗi liên tục của lớp học.</p>
           </div>
 
           <div className="h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-            <div className="h-full bg-cyan-400 w-[80%]" />
+            <div 
+              className="h-full bg-cyan-400 transition-all duration-500" 
+              style={{ width: `${Math.min(100, ((profile?.current_streak || 0) / 10) * 100)}%` }}
+            />
           </div>
         </Card>
 
