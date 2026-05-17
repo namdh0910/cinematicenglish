@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   BookOpen, 
   ChevronRight, 
@@ -8,9 +8,12 @@ import {
   Layers, 
   GraduationCap,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  X
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createGrade } from "@/app/admin/actions";
 
 interface Grade {
   id: string;
@@ -24,12 +27,45 @@ interface CurriculumClientProps {
 }
 
 export default function CurriculumClient({ initialGrades }: CurriculumClientProps) {
+  const router = useRouter();
   const [grades, setGrades] = useState(initialGrades);
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [orderIndex, setOrderIndex] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title) return;
+    setIsSubmitting(true);
+    try {
+      await createGrade({
+        title,
+        description,
+        order_index: Number(orderIndex)
+      });
+      setTitle("");
+      setDescription("");
+      setOrderIndex(grades.length + 1);
+      setShowModal(false);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Error adding grade");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
       {/* Create New Grade Card */}
       <motion.button
+        onClick={() => {
+          setShowModal(true);
+          setOrderIndex(grades.length + 1);
+        }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="group relative h-48 rounded-[32px] border-2 border-dashed border-white/5 bg-white/2 hover:bg-white/5 hover:border-amber-500/50 transition-all flex flex-col items-center justify-center gap-3"
@@ -41,7 +77,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
       </motion.button>
 
       {/* Grade Cards */}
-      {grades.map((grade, index) => (
+      {initialGrades.map((grade, index) => (
         <motion.div
           key={grade.id}
           initial={{ opacity: 0, y: 20 }}
@@ -84,6 +120,65 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
           </div>
         </motion.div>
       ))}
+
+      {/* Add Grade Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-[32px] p-8 space-y-6 relative"
+          >
+            <button 
+              onClick={() => setShowModal(false)}
+              className="absolute top-6 right-6 text-white/40 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-2xl font-display font-black text-white">Thêm Khối Lớp Mới</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Tên Khối Lớp</label>
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ví dụ: Grade 10, Grade 11"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Mô Tả Chương Trình</label>
+                <textarea 
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Ví dụ: Chương trình Tiếng Anh Global Success mới nhất"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 h-24 resize-none"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Thứ tự hiển thị</label>
+                <input 
+                  type="number" 
+                  value={orderIndex}
+                  onChange={(e) => setOrderIndex(Number(e.target.value))}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50"
+                  required
+                />
+              </div>
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 rounded-2xl bg-amber-500 text-black font-black uppercase tracking-widest text-xs hover:scale-105 transition-transform"
+              >
+                {isSubmitting ? "Đang thêm..." : "Tạo Khối Lớp"}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

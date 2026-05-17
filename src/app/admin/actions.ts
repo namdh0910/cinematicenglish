@@ -182,7 +182,7 @@ export async function getGrades() {
 export async function getGradeWithDetails(gradeId: string) {
   const supabase = await createSupabaseServerClient();
   
-  // Lấy Grade kèm Semesters và Units của nó
+  // Lấy Grade kèm Semesters và Units và Lessons của nó
   const { data: grade, error } = await supabase
     .from('grades')
     .select(`
@@ -190,7 +190,10 @@ export async function getGradeWithDetails(gradeId: string) {
       semesters (
         *,
         units (
-          *
+          *,
+          lessons (
+            *
+          )
         )
       )
     `)
@@ -264,5 +267,121 @@ export async function createLesson(data: { unit_id: string, title: string, type:
 
   if (error) throw error;
   revalidatePath(`/admin/curriculum/unit/${data.unit_id}`);
+  return lesson;
+}
+
+export async function updateLesson(lessonId: string, unitId: string, data: any) {
+  const supabase = await createSupabaseServerClient();
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .update(data)
+    .eq('id', lessonId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum/unit/${unitId}`);
+  return lesson;
+}
+
+export async function deleteLesson(lessonId: string, unitId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('lessons')
+    .delete()
+    .eq('id', lessonId);
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum/unit/${unitId}`);
+  return true;
+}
+
+export async function createActivity(data: { lesson_id: string, title: string, type: string, instructions: string, content: any, order_index: number }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: activity, error } = await supabase
+    .from('activities')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return activity;
+}
+
+export async function updateActivity(activityId: string, lessonId: string, data: any) {
+  const supabase = await createSupabaseServerClient();
+  const { data: activity, error } = await supabase
+    .from('activities')
+    .update(data)
+    .eq('id', activityId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return activity;
+}
+
+export async function deleteActivity(activityId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('activities')
+    .delete()
+    .eq('id', activityId);
+
+  if (error) throw error;
+  return true;
+}
+
+export async function createSemester(data: { grade_id: string, title: string, order_index: number }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: semester, error } = await supabase
+    .from('semesters')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum`);
+  return semester;
+}
+
+export async function deleteUnit(unitId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('units')
+    .delete()
+    .eq('id', unitId);
+
+  if (error) throw error;
+  revalidatePath(`/admin/curriculum`);
+  return true;
+}
+
+export async function getLessonWithDetails(lessonId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .select(`
+      *,
+      unit:unit_id (
+        *,
+        semester:semester_id (
+          *,
+          grade:grade_id (
+            *
+          )
+        )
+      ),
+      activities (
+        *
+      )
+    `)
+    .eq('id', lessonId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching lesson details:", error);
+    return null;
+  }
   return lesson;
 }
