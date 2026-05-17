@@ -9,42 +9,46 @@ import {
   Flame,
   Activity,
   FileText,
-  Volume2
+  Volume2,
+  TrendingDown
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 
 export default function ProgressZone() {
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       
-      {/* ─── RADAR SKILLS METRIC MATRIX ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* ─── INTELLIGENT METRICS CONSOLE (4-COL GRID) ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "CEFR Rating", value: "C1 Level", sub: "Global Index", color: "text-violet-400" },
-          { label: "Weekly Growth", value: "+12.4%", sub: "Progress Rate", color: "text-emerald-400" },
-          { label: "Pronunciation Stability", value: "91%", sub: "Phoneme Accuracy", color: "text-amber-500" },
-          { label: "Speaking Streak", value: "12 Days", sub: "Aura Consistency", color: "text-cyan-400" },
+          { label: "CEFR Rating", value: "C1 Level", sub: "Global Indicator", trend: "+1 level", trendColor: "text-emerald-400" },
+          { label: "Pronunciation Stability", value: "91%", sub: "Phoneme Accuracy", trend: "+1.2% weekly", trendColor: "text-emerald-400" },
+          { label: "Fluency Pacing Index", value: "132 WPM", sub: "Natural Conversational", trend: "Stable", trendColor: "text-white/40" },
+          { label: "Consistency Index", value: "98.2%", sub: "Aura Streak protected", trend: "Max Shield", trendColor: "text-violet-400" },
         ].map((stat, idx) => (
-          <Card key={idx} className="p-6 border-white/5 bg-white/[0.01] space-y-1">
-            <span className="text-[9px] text-white/20 uppercase font-black tracking-widest block">{stat.label}</span>
-            <h4 className={`text-2xl font-mono font-black ${stat.color}`}>{stat.value}</h4>
-            <span className="text-[9px] text-white/30 block mt-1">{stat.sub}</span>
+          <Card key={idx} className="p-4 border-white/5 bg-white/[0.01] space-y-1">
+            <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">{stat.label}</span>
+            <h4 className="text-xl font-mono font-black text-white">{stat.value}</h4>
+            <div className="flex justify-between items-center pt-1 text-[9px] font-mono">
+              <span className="text-white/40">{stat.sub}</span>
+              <span className={stat.trendColor}>{stat.trend}</span>
+            </div>
           </Card>
         ))}
       </div>
 
-      {/* ─── SKILLS TIMELINE & HEATMAP PREVIEW ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      {/* ─── SKILL TELEMETRY & PHONEME MICRO MATRIX ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Weekly evolution reports */}
-        <div className="lg:col-span-2 space-y-4">
+        {/* Longitudinal progress graph */}
+        <div className="lg:col-span-2 space-y-3">
           <div className="flex justify-between items-center">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Weekly Evolution Timeline</h3>
-            <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest">Longitudinal Profiler</span>
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Fluency timeline</h3>
+            <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest">5-Week longitudinal telemetry</span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[
               { week: "Week 5 (Current)", accuracy: 91, fluency: 89, cefr: "C1", active: true },
               { week: "Week 4", accuracy: 89, fluency: 86, cefr: "C1" },
@@ -53,13 +57,13 @@ export default function ProgressZone() {
             ].map((p, idx) => (
               <div 
                 key={idx} 
-                className={`p-4 rounded-xl border flex items-center justify-between gap-4 transition-all ${
+                className={`p-3 rounded-xl border flex items-center justify-between gap-4 transition-colors ${
                   p.active ? "border-violet-500 bg-violet-600/5" : "border-white/5 bg-white/[0.01]"
                 }`}
               >
-                <div>
+                <div className="space-y-0.5">
                   <span className="text-xs font-bold text-white block">{p.week}</span>
-                  <span className="text-[9px] text-white/30 uppercase font-bold mt-0.5 block">CEFR Level: {p.cefr}</span>
+                  <span className="text-[9px] text-white/30 uppercase font-bold block">CEFR Index: {p.cefr}</span>
                 </div>
 
                 <div className="flex items-center gap-6 font-mono text-xs font-bold text-right">
@@ -71,25 +75,36 @@ export default function ProgressZone() {
           </div>
         </div>
 
-        {/* Pronunciation Heatmap micro preview */}
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Heatmap & Matrix Portals</h3>
+        {/* Phoneme Micro Matrix & Recovery Insights */}
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Phoneme Matrix & Recovery</h3>
 
-            <Card className="p-6 border-white/5 bg-white/[0.01] space-y-4">
-              <div className="space-y-2">
-                <span className="text-[9px] text-violet-400 uppercase font-black tracking-widest">Speaking Intelligence</span>
-                <h4 className="text-sm font-bold text-white">Full Phoneme Matrix</h4>
-                <p className="text-xs text-white/40 leading-relaxed">
-                  Xem bản đồ nhiệt phát âm chi tiết, các âm vị yếu (như θ, ð, ʃ) và nhận xét học thuật đầy đủ từ AI Coach.
-                </p>
+            <Card className="p-4 border-white/5 bg-white/[0.01] space-y-4">
+              <span className="text-[8px] font-mono font-bold tracking-widest text-violet-400 uppercase block">AI Recovery Insights</span>
+              
+              <div className="space-y-3">
+                {[
+                  { ph: "θ (th)", rate: "84%", trend: "Down 4%", color: "text-amber-500", desc: "Try placing your tongue between your teeth." },
+                  { ph: "ð (th)", rate: "88%", trend: "Stable", color: "text-white/40", desc: "Vibrate vocal cords naturally to form the ð." }
+                ].map((item, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="font-mono font-bold text-white">{item.ph}</span>
+                      <span className={`font-mono ${item.color}`}>{item.rate} ({item.trend})</span>
+                    </div>
+                    <p className="text-[9px] text-white/40 leading-snug">{item.desc}</p>
+                  </div>
+                ))}
               </div>
 
-              <Link href="/dashboard/speaking-analytics" className="block pt-2">
-                <span className="w-full py-3.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 cursor-pointer">
-                  Open Fluency Matrix <ChevronRight size={12} />
-                </span>
-              </Link>
+              <div className="pt-2 border-t border-white/5">
+                <Link href="/dashboard/speaking-analytics" className="block">
+                  <span className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-1 cursor-pointer">
+                    Open Full Matrix <ChevronRight size={10} />
+                  </span>
+                </Link>
+              </div>
             </Card>
           </div>
         </div>

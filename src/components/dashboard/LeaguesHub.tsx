@@ -65,10 +65,10 @@ export default function LeaguesHub() {
   const currentTier = LEAGUE_TIERS.find(t => t.id === selectedTier) || LEAGUE_TIERS[2];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* ─── LEAGUE PROGRESSION HEADER ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
-        <div className="lg:col-span-3 overflow-x-auto no-scrollbar py-2">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-center">
+        <div className="lg:col-span-3 overflow-x-auto no-scrollbar py-1">
           <div className="flex items-center gap-3">
             {LEAGUE_TIERS.map((tier) => {
               const isActive = tier.id === selectedTier;
@@ -144,7 +144,7 @@ export default function LeaguesHub() {
                       borderColor: isUser ? currentTier.color : "rgba(255,255,255,0.05)",
                       backgroundColor: isUser ? currentTier.bg : "rgba(255,255,255,0.01)"
                     }}
-                    className={`rounded-2xl border p-4 md:p-5 flex items-center justify-between gap-4 transition-all hover:border-white/10 ${
+                    className={`rounded-xl border p-3 md:p-3.5 flex items-center justify-between gap-4 transition-all hover:border-white/10 ${
                       isUser ? "shadow-glow-gold/5" : ""
                     }`}
                   >
