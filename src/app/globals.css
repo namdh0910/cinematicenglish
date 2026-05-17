@@ -319,7 +319,7 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
   /* ── Waveform ── */
   .waveform-bar {
     width: 3px; min-width: 3px;
-    background: linear-gradient(to top, var(--color-accent-violet), var(--color-accent-cyan));
+    background: linear-gradient(to top, var(--accent-violet), var(--accent-cyan));
     border-radius: 99px;
     animation: waveform-bounce 1.2s ease-in-out infinite;
     transform-origin: bottom;
