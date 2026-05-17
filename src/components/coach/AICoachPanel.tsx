@@ -32,7 +32,7 @@ export default function AICoachPanel({ sentence, translation, onClose }: AICoach
           "{sentence}"
         </h3>
         
-        <p className="text-xl text-white/40 italic font-sans">
+        <p className="text-lg md:text-xl text-white/40 italic font-sans">
           {translation}
         </p>
       </div>
@@ -46,23 +46,23 @@ export default function AICoachPanel({ sentence, translation, onClose }: AICoach
       />
 
       {/* Speaking Momentum / Progress */}
-      <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-        <div className="p-4 rounded-2xl glass border-white/5 flex items-center gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-md">
+        <div className="p-3 sm:p-4 rounded-2xl glass border-white/5 flex items-center gap-2 sm:gap-3">
           <div className="p-2 rounded-lg bg-violet-500/20 text-violet-400">
             <Trophy size={16} />
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-white/30">Chuỗi nói</div>
-            <div className="text-sm font-bold">12 Ngày</div>
+            <div className="text-[9px] sm:text-[10px] uppercase font-bold text-white/30">Chuỗi nói</div>
+            <div className="text-xs sm:text-sm font-bold">12 Ngày</div>
           </div>
         </div>
-        <div className="p-4 rounded-2xl glass border-white/5 flex items-center gap-3">
+        <div className="p-3 sm:p-4 rounded-2xl glass border-white/5 flex items-center gap-2 sm:gap-3">
           <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
             <BookOpen size={16} />
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-white/30">Thiên hướng</div>
-            <div className="text-sm font-bold capitalize">{profile?.dominantMood?.replace('the-', '') || 'Đang tải...'}</div>
+            <div className="text-[9px] sm:text-[10px] uppercase font-bold text-white/30">Thiên hướng</div>
+            <div className="text-xs sm:text-sm font-bold capitalize truncate max-w-[80px] sm:max-w-none">{profile?.dominantMood?.replace('the-', '') || 'Đang tải...'}</div>
           </div>
         </div>
       </div>

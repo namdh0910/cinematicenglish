@@ -78,14 +78,16 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   return (
     <div className="w-full max-w-2xl mx-auto space-y-10">
       {/* Waveform Visualization */}
-      <div className="h-40 flex items-center justify-center gap-1.5 px-6 bg-white/5 rounded-[40px] backdrop-blur-2xl border border-white/10 relative overflow-hidden group">
+      <div className="h-40 flex items-center justify-center gap-1 sm:gap-1.5 px-4 sm:px-6 bg-white/5 rounded-[32px] sm:rounded-[40px] backdrop-blur-2xl border border-white/10 relative overflow-hidden group w-full">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
         
         {waveform.map((h, i) => (
           <motion.div
             key={i}
             animate={{ height: h + "%" }}
-            className="w-1.5 rounded-full transition-colors duration-500"
+            className={`w-1 sm:w-1.5 rounded-full transition-colors duration-500 ${
+              i >= 20 ? "hidden sm:block" : ""
+            }`}
             style={{ 
               background: isRecording ? `linear-gradient(to top, ${accentColor}, #fff)` : 'rgba(255,255,255,0.1)',
               boxShadow: isRecording ? `0 0 20px ${accentColor}44` : 'none'
@@ -169,18 +171,18 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="p-8 rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden"
+            className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 backdrop-blur-xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Sparkles size={60} className="text-amber-400" />
             </div>
-            <div className="flex gap-6 items-start relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-black shadow-glow-gold shrink-0">
-                <MessageSquareHeart size={24} />
+            <div className="flex gap-4 md:gap-6 items-start relative z-10">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-black shadow-glow-gold shrink-0">
+                <MessageSquareHeart size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Người cố vấn AI</div>
-                <p className="text-xl md:text-2xl text-white leading-relaxed font-display font-medium">"{feedback}"</p>
+                <p className="text-lg md:text-2xl text-white leading-relaxed font-display font-medium">"{feedback}"</p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-widest">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Sự tự tin: Rất cao

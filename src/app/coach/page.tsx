@@ -32,7 +32,7 @@ export default function CoachPage() {
     <div className="bg-primary min-h-screen">
       <Navbar />
 
-      <main className="pt-32 pb-20">
+      <main className="page-top pb-20">
         <Section className="flex flex-col items-center">
           <div className="w-full max-w-4xl">
             <AnimatePresence mode="wait">
@@ -43,7 +43,7 @@ export default function CoachPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  <div className="flex items-center justify-between mb-12">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 md:mb-12">
                     <div className="flex items-center gap-4">
                       <Link href="/" className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all">
                         <ArrowLeft size={24} />
@@ -58,13 +58,13 @@ export default function CoachPage() {
                     </div>
                   </div>
 
-                  <div className="glass-card rounded-[48px] border-white/5 overflow-hidden shadow-glow-violet/10">
+                  <div className="glass-card rounded-[32px] md:rounded-[48px] border-white/5 overflow-hidden shadow-glow-violet/10">
                     <AICoachPanel 
                       sentence={SENTENCES[current].text} 
                       translation={SENTENCES[current].translation}
                       onClose={() => {}}
                     />
-                    <div className="p-12 pt-0 flex justify-center">
+                    <div className="p-6 md:p-12 pt-0 flex justify-center">
                       <button 
                         onClick={next}
                         className="flex items-center gap-2 text-white/40 hover:text-white font-bold uppercase tracking-[0.2em] text-xs transition-all"
