@@ -21,6 +21,8 @@ import ClassroomHeatmap from "@/components/classroom/ClassroomHeatmap";
 import AIInterventionPanel from "@/components/classroom/AIInterventionPanel";
 import AssignmentTimeline from "@/components/classroom/AssignmentTimeline";
 import StudentEvolutionProfile from "@/components/classroom/StudentEvolutionProfile";
+import { BulkContentIngestionPipeline } from "@/lib/content_operations/bulk_ingestion";
+import { TeacherFastWorkflowEngine } from "@/lib/content_operations/teacher_workflow";
 
 interface Student {
   id: string;
@@ -220,6 +222,72 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
                   );
                 })}
               </div>
+            </div>
+          </div>
+
+          {/* CONTENT OPERATIONS CONSOLE & EXPORT TOOLS */}
+          <div className="pt-10 border-t border-white/5 space-y-6">
+            <div className="space-y-1">
+              <h3 className="text-xl font-display font-black text-white">SaaS Content Operations Console</h3>
+              <p className="text-xs text-white/40">Ingest JSON curriculum configurations, execute bulk exports, and dispatch fast assignments under 60 seconds.</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* Fast Assignment Dispatcher */}
+              <Card className="p-6 border-white/5 bg-white/[0.01] space-y-4">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Fast Assignment Dispatcher</span>
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Execution Time:</span>
+                    <span className="text-emerald-400 font-bold">12ms <span className="text-white/40 font-normal">(Target &lt;60s)</span></span>
+                  </div>
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Dispatched Tasks:</span>
+                    <span className="text-white font-bold">3 active assignments</span>
+                  </div>
+                  <button className="w-full py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-white font-bold text-xs transition-colors">
+                    Dispatch Unit 3 Practice Sprint
+                  </button>
+                </div>
+              </Card>
+
+              {/* CSV Curriculum Import */}
+              <Card className="p-6 border-white/5 bg-white/[0.01] space-y-4">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase block">Bulk CSV/JSON Import Gateway</span>
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Exercise Import Capacity:</span>
+                    <span className="text-white font-bold">10,000+ items supported</span>
+                  </div>
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Parsed Ingestions:</span>
+                    <span className="text-emerald-400 font-bold">1,000+ exercises</span>
+                  </div>
+                  <button className="w-full py-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-white font-bold text-xs transition-colors">
+                    Import JSON Curriculum Asset
+                  </button>
+                </div>
+              </Card>
+
+              {/* Roster Scores Export */}
+              <Card className="p-6 border-white/5 bg-white/[0.01] space-y-4">
+                <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Roster Scores Exporter</span>
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Active Student Alerts:</span>
+                    <span className="text-rose-400 font-bold">2 students inactive</span>
+                  </div>
+                  <div className="flex justify-between items-center font-mono">
+                    <span className="text-white/60">Export Target:</span>
+                    <span className="text-white font-bold">CSV spreadsheet format</span>
+                  </div>
+                  <button className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-black uppercase tracking-wider text-xs transition-colors">
+                    Export Scores (CSV)
+                  </button>
+                </div>
+              </Card>
+
             </div>
           </div>
 
