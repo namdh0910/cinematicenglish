@@ -21,10 +21,9 @@ import ClassroomHeatmap from "@/components/classroom/ClassroomHeatmap";
 import AIInterventionPanel from "@/components/classroom/AIInterventionPanel";
 import AssignmentTimeline from "@/components/classroom/AssignmentTimeline";
 import StudentEvolutionProfile from "@/components/classroom/StudentEvolutionProfile";
-import { BulkContentIngestionPipeline } from "@/lib/content_operations/bulk_ingestion";
-import { TeacherFastWorkflowEngine } from "@/lib/content_operations/teacher_workflow";
 import { getClassroomDetailForTeacher } from "@/app/actions/classroom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy, Check } from "lucide-react";
+import { trackTelemetry } from "@/lib/observability/observability";
 
 interface Student {
   id: string;
@@ -115,7 +114,7 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
         <main className="page-top flex items-center justify-center min-h-[60vh]">
           <div className="text-center space-y-3">
             <Loader2 className="animate-spin text-violet-400 mx-auto" size={32} />
-            <p className="text-white/40 text-sm">Đang tải phân tích lớp học thực tế...</p>
+            <p className="text-white/40 text-sm">Đang tải thông tin lớp học...</p>
           </div>
         </main>
       </div>
@@ -139,7 +138,7 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="bg-primary min-h-screen text-white">
+    <div className="bg-primary min-h-[100dvh] text-white">
       <Navbar />
       
       <main className="page-top pb-20">
