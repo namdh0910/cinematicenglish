@@ -28,44 +28,44 @@ import {
 
 // --- MOCK DATA ---
 const stats = [
-  { label: "Total Users", value: "12,482", change: "+12%", icon: Users, color: "text-blue-400" },
-  { label: "Active Stories", value: "42", change: "0", icon: BookOpen, color: "text-emerald-400" },
-  { label: "Total Plays", value: "1,248,300", change: "+18%", icon: PlayCircle, color: "text-amber-500" },
-  { label: "Pro Subscribers", value: "1,240", change: "+5.4%", icon: CreditCard, color: "text-violet-400" },
+  { label: "Tổng học viên", value: "12,482", change: "+12%", icon: Users, color: "text-blue-400" },
+  { label: "Câu chuyện đang chạy", value: "42", change: "0", icon: BookOpen, color: "text-emerald-400" },
+  { label: "Tổng lượt luyện tập", value: "1,248,300", change: "+18%", icon: PlayCircle, color: "text-amber-500" },
+  { label: "Hội viên cao cấp", value: "1,240", change: "+5.4%", icon: CreditCard, color: "text-violet-400" },
 ];
 
 const activity = [
-  { id: 1, user: "Elena Gilbert", action: "listened to 'The Godfather'", time: "2m ago", avatar: "7x/avataaars/svg?seed=Elena" },
-  { id: 2, user: "Stefan Salvatore", action: "completed 'Stoicism 101' Quiz", time: "15m ago", avatar: "7x/avataaars/svg?seed=Stefan" },
-  { id: 3, user: "Damon Salvatore", action: "joined as Pro Subscriber", time: "42m ago", avatar: "7x/avataaars/svg?seed=Damon" },
-  { id: 4, user: "Bonnie Bennett", action: "saved 'The Dark Knight' quote", time: "1h ago", avatar: "7x/avataaars/svg?seed=Bonnie" },
-  { id: 5, user: "Caroline Forbes", action: "listened to 'The Pulse'", time: "3h ago", avatar: "7x/avataaars/svg?seed=Caroline" },
+  { id: 1, user: "Elena Gilbert", action: "đã luyện nói câu chuyện 'Bố già'", time: "2 phút trước", avatar: "7x/avataaars/svg?seed=Elena" },
+  { id: 2, user: "Stefan Salvatore", action: "đã hoàn thành bài luyện 'Khắc kỷ 101'", time: "15 phút trước", avatar: "7x/avataaars/svg?seed=Stefan" },
+  { id: 3, user: "Damon Salvatore", action: "đăng ký Hội viên cao cấp", time: "42 phút trước", avatar: "7x/avataaars/svg?seed=Damon" },
+  { id: 4, user: "Bonnie Bennett", action: "đã lưu trích dẫn 'Kỵ sĩ bóng đêm'", time: "1 giờ trước", avatar: "7x/avataaars/svg?seed=Bonnie" },
+  { id: 5, user: "Caroline Forbes", action: "đã luyện tập 'Nhịp đập cuộc sống'", time: "3 giờ trước", avatar: "7x/avataaars/svg?seed=Caroline" },
 ];
 
 const topStories = [
-  { title: "The Godfather", category: "Cinema", plays: "12,402", completion: "92%", xp: "250" },
-  { title: "Stoicism 101", category: "Philosophy", plays: "8,120", completion: "88%", xp: "300" },
-  { title: "Business Negotiation", category: "Business", plays: "7,840", completion: "74%", xp: "450" },
-  { title: "The Dark Knight", category: "Cinema", plays: "6,920", completion: "95%", xp: "200" },
-  { title: "Morning Rituals", category: "Psychology", plays: "5,400", completion: "82%", xp: "150" },
+  { title: "Bố già (The Godfather)", category: "Điện ảnh", plays: "12,402", completion: "92%", xp: "250" },
+  { title: "Khắc kỷ 101 (Stoicism 101)", category: "Triết học", plays: "8,120", completion: "88%", xp: "300" },
+  { title: "Đàm phán thương mại", category: "Kinh doanh", plays: "7,840", completion: "74%", xp: "450" },
+  { title: "Kỵ sĩ bóng đêm (The Dark Knight)", category: "Điện ảnh", plays: "6,920", completion: "95%", xp: "200" },
+  { title: "Nghi thức buổi sáng", category: "Tâm lý học", plays: "5,400", completion: "82%", xp: "150" },
 ];
 
 const dauData = [
-  { name: "Mon", dau: 4200 },
-  { name: "Tue", dau: 5100 },
-  { name: "Wed", dau: 4800 },
-  { name: "Thu", dau: 6200 },
-  { name: "Fri", dau: 5800 },
-  { name: "Sat", dau: 7500 },
-  { name: "Sun", dau: 8400 },
+  { name: "T2", dau: 4200 },
+  { name: "T3", dau: 5100 },
+  { name: "T4", dau: 4800 },
+  { name: "T5", dau: 6200 },
+  { name: "T6", dau: 5800 },
+  { name: "T7", dau: 7500 },
+  { name: "CN", dau: 8400 },
 ];
 
 const categoryData = [
-  { name: "Psychology", plays: 2400 },
-  { name: "Business", plays: 4567 },
-  { name: "Philosophy", plays: 1398 },
-  { name: "Cinema", plays: 9800 },
-  { name: "Drama", plays: 3908 },
+  { name: "Tâm lý học", plays: 2400 },
+  { name: "Kinh doanh", plays: 4567 },
+  { name: "Triết học", plays: 1398 },
+  { name: "Điện ảnh", plays: 9800 },
+  { name: "Đời sống", plays: 3908 },
 ];
 
 const COLORS = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444"];
@@ -76,16 +76,16 @@ export default function DetailedDashboard() {
       {/* 1. Header & Quick Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-display font-black tracking-tight text-white">System Pulse</h2>
-          <p className="text-white/40 font-medium italic">"Real-time visibility into the Cinematic English ecosystem."</p>
+          <h2 className="text-3xl font-display font-black tracking-tight text-white">Tổng quan hệ thống</h2>
+          <p className="text-white/40 font-medium italic">"Thông tin trực quan theo thời gian thực về hệ sinh thái Cinematic English."</p>
         </div>
         
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
-            <Plus size={18} strokeWidth={3} /> Create Story
+            <Plus size={18} strokeWidth={3} /> Tạo câu chuyện
           </button>
           <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-white/70 font-bold text-sm hover:bg-white/10 transition-all">
-            <HelpCircle size={18} /> Add Quiz
+            <HelpCircle size={18} /> Thêm bài luyện
           </button>
         </div>
       </div>
@@ -131,11 +131,11 @@ export default function DetailedDashboard() {
               <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
                 <TrendingUp size={18} />
               </div>
-              <h3 className="font-bold text-lg">Daily Active Users</h3>
+              <h3 className="font-bold text-lg">Học viên hoạt động mỗi ngày</h3>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Past 7 Days</span>
+              <span className="text-xs font-bold text-white/40 uppercase tracking-widest">7 ngày qua</span>
             </div>
           </div>
           
@@ -181,7 +181,7 @@ export default function DetailedDashboard() {
             <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
               <BarChart2 size={18} />
             </div>
-            <h3 className="font-bold text-lg">Plays by Category</h3>
+            <h3 className="font-bold text-lg">Lượt học theo danh mục</h3>
           </div>
           
           <div className="h-[300px] w-full">
@@ -221,19 +221,19 @@ export default function DetailedDashboard() {
               <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
                 <Trophy size={18} />
               </div>
-              <h3 className="font-bold text-lg">Top Stories This Week</h3>
+              <h3 className="font-bold text-lg">Câu chuyện nổi bật tuần này</h3>
             </div>
-            <button className="text-xs font-bold text-amber-500 uppercase tracking-widest hover:underline">View All</button>
+            <button className="text-xs font-bold text-amber-500 uppercase tracking-widest hover:underline">Xem tất cả</button>
           </div>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="text-[10px] uppercase tracking-[0.2em] text-white/20 border-b border-white/5">
-                  <th className="pb-4 font-bold">Story Title</th>
-                  <th className="pb-4 font-bold">Category</th>
-                  <th className="pb-4 font-bold">Plays</th>
-                  <th className="pb-4 font-bold text-right">Comp. Rate</th>
+                  <th className="pb-4 font-bold">Tên câu chuyện</th>
+                  <th className="pb-4 font-bold">Danh mục</th>
+                  <th className="pb-4 font-bold">Lượt học</th>
+                  <th className="pb-4 font-bold text-right">Tỷ lệ hoàn thành</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -271,7 +271,7 @@ export default function DetailedDashboard() {
               <div className="p-2 rounded-lg bg-violet-500/10 text-violet-400">
                 <Clock size={18} />
               </div>
-              <h3 className="font-bold text-lg">Pulse Activity</h3>
+              <h3 className="font-bold text-lg">Hoạt động hệ thống gần đây</h3>
             </div>
           </div>
           
@@ -296,7 +296,7 @@ export default function DetailedDashboard() {
           </div>
           
           <button className="w-full mt-8 py-3 rounded-2xl bg-white/5 border border-white/5 text-xs font-bold text-white/40 uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all">
-            Load More Activity
+            Tải thêm hoạt động
           </button>
         </div>
       </div>
