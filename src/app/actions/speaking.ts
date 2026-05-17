@@ -2,7 +2,8 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import crypto from 'crypto';
-import { checkSpeakingQuota } from '@/lib/auth/rbac';
+import { enforceSpeakingQuota, PaywallError, paywallResult } from '@/lib/monetization/guards';
+import { trackServerMonetizationEvent } from '@/lib/monetization/analytics';
 
 interface WordEvaluation {
   word: string;
@@ -86,20 +87,29 @@ export async function evaluateSpeaking({
   durationSeconds: number;
 }): Promise<SpeakingEvaluationResult> {
   try {
-    const quotaCheck = await checkSpeakingQuota(userId);
-    if (!quotaCheck.allowed) {
-      return { 
-        success: false, 
-        transcription: '', 
-        accuracy: 0, 
-        fluency: 0, 
-        completeness: 0, 
-        pacingWpm: 0, 
-        wordEvaluations: [], 
-        coachFeedback: '', 
-        error: quotaCheck.reason 
-      };
+    // ─── REAL SERVER PAYWALL (cannot be bypassed from client) ────────────────
+    try {
+      await enforceSpeakingQuota();
+    } catch (err) {
+      if (err instanceof PaywallError) {
+        return {
+          success: false,
+          gated: true,
+          transcription: '',
+          accuracy: 0,
+          fluency: 0,
+          completeness: 0,
+          pacingWpm: 0,
+          wordEvaluations: [],
+          coachFeedback: err.upgradePrompt.message,
+          error: err.upgradePrompt.message,
+          upgradePrompt: err.upgradePrompt,
+        } as any;
+      }
+      throw err;
     }
+
+    await trackServerMonetizationEvent({ event_type: 'feature_usage', feature: 'speaking_evaluation', user_id: userId });
 
     if (!audioBase64) {
       return { success: false, transcription: '', accuracy: 0, fluency: 0, completeness: 0, pacingWpm: 0, wordEvaluations: [], coachFeedback: 'Không nhận được dữ liệu âm thanh.' };
