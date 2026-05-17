@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 
 const navLinks = [
+  { label: "Luyện nhanh", href: "/practice" },
   { label: "Thư viện", href: "/stories" },
   { label: "Học tập", href: "/learn" },
   { label: "Lớp học", href: "/classroom/eng10a1" },
