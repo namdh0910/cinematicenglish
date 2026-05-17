@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Play, ChevronDown, Star, Flame, ArrowRight, Sparkles, Volume2, Zap } from "lucide-react";
@@ -12,6 +12,7 @@ import StoryPlayer from "@/components/player/StoryPlayer";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import { STORIES, TESTIMONIALS, PRICING, AI_CHARACTERS } from "@/lib/data";
 import { AnimatePresence } from "framer-motion";
+import { getOrGenerateAudio } from "@/app/actions/audio";
 
 /* ── Animated background orbs ── */
 function HeroBackground() {
@@ -52,6 +53,9 @@ function Waveform({ active }: { active: boolean }) {
 
 export default function HomePage() {
   const [demoPlaying, setDemoPlaying] = useState(false);
+  const [demoAudioUrl, setDemoAudioUrl] = useState<string | null>(null);
+  const [loadingDemo, setLoadingDemo] = useState(false);
+  const demoAudioRef = useRef<HTMLAudioElement | null>(null);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -61,6 +65,49 @@ export default function HomePage() {
       setShowOnboarding(true);
     }
   }, []);
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      if (demoAudioRef.current) {
+        demoAudioRef.current.pause();
+        demoAudioRef.current = null;
+      }
+    };
+  }, []);
+
+  const handlePlayDemo = async () => {
+    if (demoAudioUrl) {
+      if (demoPlaying) {
+        demoAudioRef.current?.pause();
+        setDemoPlaying(false);
+      } else {
+        demoAudioRef.current?.play().catch(console.error);
+        setDemoPlaying(true);
+      }
+      return;
+    }
+
+    setLoadingDemo(true);
+    const teaserText = "Power is not given. It is taken — quietly, patiently, and with the grace of someone who never reveals their intention. Robert Greene studied history's most dangerous men and found a disturbing truth: the rules of power have never changed — only the players.";
+    const res = await getOrGenerateAudio({
+      text: teaserText,
+      category: 'stories',
+      voice: 'onyx'
+    });
+
+    setLoadingDemo(false);
+    if (res.success && res.audioUrl) {
+      setDemoAudioUrl(res.audioUrl);
+      const audio = new Audio(res.audioUrl);
+      audio.addEventListener('ended', () => {
+        setDemoPlaying(false);
+      });
+      demoAudioRef.current = audio;
+      audio.play().catch(console.error);
+      setDemoPlaying(true);
+    }
+  };
 
   return (
     <div className="bg-primary min-h-screen">
@@ -97,19 +144,26 @@ export default function HomePage() {
               <Button variant="gold" size="lg" onClick={() => setActiveStoryId('1')}>
                 <Flame size={18} /> Bắt đầu miễn phí — Không cần thẻ
               </Button>
-              <Button variant="ghost" size="lg" onClick={() => setDemoPlaying(!demoPlaying)}>
-                <Volume2 size={18} /> {demoPlaying ? "Dừng nghe" : "Nghe thử câu chuyện"}
+              <Button variant="ghost" size="lg" onClick={handlePlayDemo} disabled={loadingDemo}>
+                <Volume2 size={18} /> {loadingDemo ? "Đang tải..." : demoPlaying ? "Dừng nghe" : "Nghe thử câu chuyện"}
               </Button>
             </div>
 
             {/* Demo waveform card */}
             <div className="glass-card max-w-xl mx-auto p-5" style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '576px' }}>
               <button
-                onClick={() => setDemoPlaying(!demoPlaying)}
-                className="w-12 h-12 rounded-full flex-center pulse-ring"
+                onClick={handlePlayDemo}
+                disabled={loadingDemo}
+                className="w-12 h-12 rounded-full flex-center pulse-ring transition-transform hover:scale-105 active:scale-95"
                 style={{ background: "var(--gradient-violet)", flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                {demoPlaying ? <span className="text-white font-bold text-lg">‖</span> : <Play size={18} className="text-white ml-0.5" />}
+                {loadingDemo ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : demoPlaying ? (
+                  <span className="text-white font-bold text-lg">‖</span>
+                ) : (
+                  <Play size={18} className="text-white ml-0.5" />
+                )}
               </button>
               <div style={{ flex: 1, textAlign: 'left' }}>
                 <div className="text-sm font-semibold mb-2">Tâm Lý Học Của Quyền Lực — Bản nghe thử</div>

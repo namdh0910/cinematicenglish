@@ -11,6 +11,7 @@ import SocialShareEngine from "../social/SocialShareEngine";
 import ReflectionEngine from "../journal/ReflectionEngine";
 import { Share2 } from "lucide-react";
 import Badge from "../ui/Badge";
+import { getOrGenerateAudio } from "@/app/actions/audio";
 
 interface StoryPlayerProps {
   storyId: string;
@@ -28,16 +29,24 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
   const [showShareOverlay, setShowShareOverlay] = useState(false);
   const [showReflection, setShowReflection] = useState(false);
   const [savedQuotes, setSavedQuotes] = useState<string[]>([]);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const focusTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [loadingAudio, setLoadingAudio] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   // Load story data
   useEffect(() => {
     const story = STORIES.find(s => s.id === storyId);
     if (story) {
       setCurrentStory(story);
-      // In a real app, duration would come from audio metadata
-      setDuration(120); 
+      setAudioUrl(null);
+      setCurrentTime(0);
+      setDuration(120); // Default placeholder, updated on metadata load
+      setIsPlaying(false);
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
     }
   }, [storyId]);
 
@@ -61,41 +70,72 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
     onClose();
   };
 
-  // Handle auto-focus mode
+  // Clean up audio on unmount
   useEffect(() => {
-    const handleActivity = () => {
-      setIsFocusMode(false);
-      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
-      focusTimerRef.current = setTimeout(() => {
-        if (isPlaying) setIsFocusMode(true);
-      }, 5000);
-    };
-
-    window.addEventListener('mousemove', handleActivity);
-    window.addEventListener('touchstart', handleActivity);
     return () => {
-      window.removeEventListener('mousemove', handleActivity);
-      window.removeEventListener('touchstart', handleActivity);
+      if (activeAudioRef.current) {
+        activeAudioRef.current.pause();
+        activeAudioRef.current = null;
+      }
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
     };
-  }, [isPlaying]);
+  }, []);
 
-  // Mock audio progress for the demo
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying && currentTime < duration) {
-      interval = setInterval(() => {
-        setCurrentTime(prev => {
-          if (prev >= duration) {
-            setIsPlaying(false);
-            setShowMomentum(true);
-            return duration;
-          }
-          return prev + 0.1;
-        });
-      }, 100);
+  const handleTogglePlay = async () => {
+    if (activeAudioRef.current) {
+      if (isPlaying) {
+        activeAudioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        activeAudioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
+      return;
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, currentTime, duration]);
+
+    if (!currentStory) return;
+
+    setLoadingAudio(true);
+    const fullText = currentStory.transcript.length > 0
+      ? currentStory.transcript.map(l => l.text).join(" ")
+      : currentStory.description;
+
+    const res = await getOrGenerateAudio({
+      text: fullText,
+      category: 'stories',
+      voice: 'onyx'
+    });
+
+    setLoadingAudio(false);
+    if (res.success && res.audioUrl) {
+      setAudioUrl(res.audioUrl);
+      const audio = new Audio(res.audioUrl);
+
+      audio.addEventListener('loadedmetadata', () => {
+        setDuration(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        setShowMomentum(true);
+      });
+
+      activeAudioRef.current = audio;
+      audio.play().catch(console.error);
+      setIsPlaying(true);
+    }
+  };
+
+  const handleSeek = (time: number) => {
+    if (activeAudioRef.current) {
+      activeAudioRef.current.currentTime = time;
+    }
+    setCurrentTime(time);
+  };
 
   if (!currentStory) return null;
 
@@ -216,12 +256,12 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
         <AudioControls 
           isPlaying={isPlaying}
           currentTime={currentTime}
-          duration={duration}
-          onTogglePlay={() => setIsPlaying(!isPlaying)}
-          onSeek={(time) => setCurrentTime(time)}
+          duration={duration || 120}
+          onTogglePlay={handleTogglePlay}
+          onSeek={handleSeek}
           onReplaySentence={() => {
-            const currentLine = currentStory.transcript.find(l => currentTime >= l.startTime && currentTime <= l.endTime);
-            if (currentLine) setCurrentTime(currentLine.startTime);
+            const currentLine = currentStory?.transcript.find(l => currentTime >= l.startTime && currentTime <= l.endTime);
+            if (currentLine) handleSeek(currentLine.startTime);
           }}
           isShadowing={isShadowing}
           onToggleShadowing={() => setIsShadowing(!isShadowing)}
