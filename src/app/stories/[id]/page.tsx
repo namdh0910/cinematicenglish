@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Bookmark, Play, Pause, RotateCcw, Settings2, ChevronDown, Volume2, Zap } from "lucide-react";
 import { STORIES } from "@/lib/data";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import InteractiveOverlay from "@/components/stories/interactive/InteractiveOverlay";
+import { getOrGenerateAudio } from "@/app/actions/audio";
 
 const STORY_PARAGRAPHS = [
   {
@@ -40,10 +41,16 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [savedWords, setSavedWords] = useState<string[]>([]);
   const [highlightMode, setHighlightMode] = useState(false);
   const [activeVocab, setActiveVocab] = useState<typeof VOCAB[0] | null>(null);
-  const [progress, setProgress] = useState(42);
+  const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [activeCheckpoint, setActiveCheckpoint] = useState<any>(null);
   const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
+
+  // Real Audio Pipeline states
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [playingParagraphId, setPlayingParagraphId] = useState<number | null>(null);
+  const [loadingAudio, setLoadingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Mock Checkpoints
   const checkpoints = [
@@ -65,33 +72,147 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
     }
   ];
 
-  // Simulated Timer for demo
+  // Synchronize playback speed
   useEffect(() => {
-    let interval: any;
-    if (playing && !activeCheckpoint) {
-      interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          const next = prev + 1;
-          // Check for checkpoint
-          const cp = checkpoints.find(c => c.timestamp_seconds === next && !completedCheckpoints.includes(c.id));
-          if (cp) {
-            setPlaying(false);
-            setActiveCheckpoint(cp);
-          }
-          return next;
-        });
-      }, 1000);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed;
     }
-    return () => clearInterval(interval);
-  }, [playing, activeCheckpoint, completedCheckpoints]);
+  }, [speed]);
+
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const handleCheckpointComplete = (isCorrect: boolean, responseTime: number) => {
     if (activeCheckpoint) {
       setCompletedCheckpoints([...completedCheckpoints, activeCheckpoint.id]);
     }
     setActiveCheckpoint(null);
-    setPlaying(true);
-    // In real app, we would send stats to Supabase here
+    if (audioRef.current) {
+      audioRef.current.play().catch(console.error);
+      setPlaying(true);
+    }
+  };
+
+  const handlePlayPause = async () => {
+    // If playing a paragraph, pause it first
+    if (playingParagraphId !== null) {
+      if (audioRef.current) audioRef.current.pause();
+      setPlayingParagraphId(null);
+    }
+
+    if (audioUrl) {
+      if (playing) {
+        audioRef.current?.pause();
+        setPlaying(false);
+      } else {
+        audioRef.current?.play().catch(console.error);
+        setPlaying(true);
+      }
+      return;
+    }
+
+    // Load full story audio
+    setLoadingAudio(true);
+    const fullText = STORY_PARAGRAPHS.map(p => p.text).join(" ");
+    const res = await getOrGenerateAudio({
+      text: fullText,
+      category: 'stories',
+      voice: 'nova'
+    });
+
+    setLoadingAudio(false);
+    if (res.success && res.audioUrl) {
+      setAudioUrl(res.audioUrl);
+      const audio = new Audio(res.audioUrl);
+      audio.playbackRate = speed;
+
+      audio.addEventListener('timeupdate', () => {
+        const cur = audio.currentTime;
+        const dur = audio.duration || 1;
+        setCurrentTime(Math.round(cur));
+        setProgress(Math.round((cur / dur) * 100));
+
+        // Check for checkpoints
+        const next = Math.round(cur);
+        const cp = checkpoints.find(c => c.timestamp_seconds === next && !completedCheckpoints.includes(c.id));
+        if (cp) {
+          audio.pause();
+          setPlaying(false);
+          setActiveCheckpoint(cp);
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        setPlaying(false);
+        setProgress(0);
+        setCurrentTime(0);
+      });
+
+      audioRef.current = audio;
+      audio.play().catch(console.error);
+      setPlaying(true);
+    }
+  };
+
+  const handlePlayParagraph = async (paraId: number, text: string) => {
+    // If full audio is playing, pause it
+    if (playingParagraphId === null && playing) {
+      audioRef.current?.pause();
+      setPlaying(false);
+    }
+
+    if (playingParagraphId === paraId) {
+      if (playing) {
+        audioRef.current?.pause();
+        setPlaying(false);
+      } else {
+        audioRef.current?.play().catch(console.error);
+        setPlaying(true);
+      }
+      return;
+    }
+
+    // Stop current audio if any
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+
+    setLoadingAudio(true);
+    setPlayingParagraphId(paraId);
+
+    const res = await getOrGenerateAudio({
+      text,
+      category: 'stories',
+      voice: 'nova'
+    });
+
+    setLoadingAudio(false);
+    if (res.success && res.audioUrl) {
+      const audio = new Audio(res.audioUrl);
+      audio.playbackRate = speed;
+
+      audio.addEventListener('timeupdate', () => {
+        setCurrentTime(Math.round(audio.currentTime));
+      });
+
+      audio.addEventListener('ended', () => {
+        setPlaying(false);
+        setPlayingParagraphId(null);
+      });
+
+      audioRef.current = audio;
+      audio.play().catch(console.error);
+      setPlaying(true);
+    } else {
+      setPlayingParagraphId(null);
+    }
   };
 
   const toggleSave = (word: string) => {
@@ -146,38 +267,60 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
         >
           <div className="flex items-center gap-4 mb-4">
             <button
-              onClick={() => setPlaying(!playing)}
-              className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+              onClick={handlePlayPause}
+              disabled={loadingAudio}
+              className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-transform hover:scale-105 active:scale-95 ${
+                loadingAudio ? "opacity-50 cursor-wait" : ""
+              }`}
               style={{ background: "linear-gradient(135deg, #8b5cf6, #6366f1)" }}
             >
-              {playing ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white ml-0.5" />}
+              {loadingAudio ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : playing && playingParagraphId === null ? (
+                <Pause size={18} className="text-white" />
+              ) : (
+                <Play size={18} className="text-white ml-0.5" />
+              )}
             </button>
 
-            {/* Waveform */}
-            <div className="flex-1 flex items-center gap-[2px] h-8">
-              {Array.from({ length: 40 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="waveform-bar flex-1"
-                  style={{
-                    height: `${Math.sin(i * 0.5) * 12 + 14}px`,
-                    animationDelay: `${i * 0.04}s`,
-                    animationPlayState: playing ? "running" : "paused",
-                    opacity: i / 40 < progress / 100 ? 1 : 0.25,
-                  }}
-                />
-              ))}
+            {/* Real dynamic waveform */}
+            <div className="flex-1 flex items-center gap-[2px] h-8 overflow-hidden">
+              {Array.from({ length: 40 }).map((_, i) => {
+                const isActive = playing && playingParagraphId === null;
+                const progressRatio = progress / 100;
+                const barRatio = i / 40;
+                
+                return (
+                  <div
+                    key={i}
+                    className="waveform-bar flex-1 rounded-full transition-all duration-300"
+                    style={{
+                      height: `${isActive ? Math.abs(Math.sin(currentTime + i * 0.15)) * 14 + 6 : 6}px`,
+                      background: barRatio < progressRatio ? "linear-gradient(to top, #8b5cf6, #a78bfa)" : "rgba(255,255,255,0.08)",
+                    }}
+                  />
+                );
+              })}
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setSpeed(speed === 1.0 ? 0.75 : speed === 0.75 ? 0.5 : 1.0)}
-                className="px-2 py-1 rounded-lg text-xs font-mono font-bold"
+                onClick={() => setSpeed(speed === 1.0 ? 0.75 : speed === 0.75 ? 0.5 : speed === 0.5 ? 1.25 : speed === 1.25 ? 1.5 : 1.0)}
+                className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all hover:bg-violet-500/20"
                 style={{ background: "rgba(139,92,246,0.15)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.25)" }}
               >
                 {speed}×
               </button>
-              <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+              <button 
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = 0;
+                    setProgress(0);
+                    setCurrentTime(0);
+                  }
+                }}
+                className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+              >
                 <RotateCcw size={16} style={{ color: "var(--text-secondary)" }} />
               </button>
             </div>
@@ -212,47 +355,58 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
           <h2 className="font-display font-bold text-lg flex items-center gap-2">
             <Volume2 size={18} style={{ color: "#a78bfa" }} /> Lời thoại
           </h2>
-          {STORY_PARAGRAPHS.map((para, pi) => (
-            <div key={para.id} className="glass-card p-5">
-              <p className="text-base leading-relaxed" style={{ lineHeight: "2" }}>
-                {para.words.map((word, wi) => {
-                  const clean = word.replace(/[.,!?—:]/g, "").toLowerCase();
-                  const isSaved = savedWords.includes(clean);
-                  const isActive = activeWord === clean;
-                  return (
-                    <span key={wi}>
-                      <motion.span
-                        whileHover={{ scale: 1.05 }}
-                        onClick={() => {
-                          setActiveWord(clean);
-                          const v = VOCAB.find((v) => v.word === clean);
-                          setActiveVocab(v || null);
-                          if (highlightMode) toggleSave(clean);
-                        }}
-                        className="cursor-pointer rounded px-0.5 transition-all"
-                        style={{
-                          background: isSaved ? "rgba(245,200,66,0.18)" : isActive ? "rgba(139,92,246,0.2)" : "transparent",
-                          color: isSaved ? "#f5c842" : isActive ? "#a78bfa" : "inherit",
-                          textDecoration: VOCAB.find((v) => v.word === clean) ? "underline dotted" : "none",
-                          textDecorationColor: "#6366f1",
-                        }}
-                      >
-                        {word}
-                      </motion.span>
-                      {" "}
-                    </span>
-                  );
-                })}
-              </p>
-              <button
-                className="mt-2 text-xs flex items-center gap-1"
-                style={{ color: "var(--text-secondary)" }}
-                onClick={() => setPlaying(!playing)}
+          {STORY_PARAGRAPHS.map((para, pi) => {
+            const isParagraphPlaying = playing && playingParagraphId === para.id;
+            
+            return (
+              <div 
+                key={para.id} 
+                className={`glass-card p-5 transition-all duration-300 ${
+                  isParagraphPlaying ? "border-violet-500/30 bg-violet-500/[0.02] shadow-glow-violet" : ""
+                }`}
               >
-                <Play size={10} /> Nghe lại câu này
-              </button>
-            </div>
-          ))}
+                <p className="text-base leading-relaxed" style={{ lineHeight: "2" }}>
+                  {para.words.map((word, wi) => {
+                    const clean = word.replace(/[.,!?—:]/g, "").toLowerCase();
+                    const isSaved = savedWords.includes(clean);
+                    const isActive = activeWord === clean;
+                    return (
+                      <span key={wi}>
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          onClick={() => {
+                            setActiveWord(clean);
+                            const v = VOCAB.find((v) => v.word === clean);
+                            setActiveVocab(v || null);
+                            if (highlightMode) toggleSave(clean);
+                          }}
+                          className="cursor-pointer rounded px-0.5 transition-all"
+                          style={{
+                            background: isSaved ? "rgba(245,200,66,0.18)" : isActive ? "rgba(139,92,246,0.2)" : "transparent",
+                            color: isSaved ? "#f5c842" : isActive ? "#a78bfa" : "inherit",
+                            textDecoration: VOCAB.find((v) => v.word === clean) ? "underline dotted" : "none",
+                            textDecorationColor: "#6366f1",
+                          }}
+                        >
+                          {word}
+                        </motion.span>
+                        {" "}
+                      </span>
+                    );
+                  })}
+                </p>
+                <button
+                  className={`mt-2 text-xs flex items-center gap-1.5 transition-colors font-bold ${
+                    isParagraphPlaying ? "text-violet-400" : "text-[#8b5cf6]"
+                  }`}
+                  onClick={() => handlePlayParagraph(para.id, para.text)}
+                >
+                  {isParagraphPlaying ? <Pause size={10} /> : <Play size={10} />} 
+                  {isParagraphPlaying ? "Đang phát..." : "Nghe lại câu này"}
+                </button>
+              </div>
+            );
+          })}
         </motion.div>
 
         {/* Vocab popup */}
