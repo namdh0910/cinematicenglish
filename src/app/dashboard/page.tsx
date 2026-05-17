@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Settings, Bell, Search, LayoutGrid, Compass, Mic, Sparkles, Trophy } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MissionHub from "@/components/dashboard/MissionHub";
+import LeaguesHub from "@/components/dashboard/LeaguesHub";
 import Section from "@/components/ui/Section";
 import { INITIAL_USER_PROGRESS } from "@/lib/data";
 
@@ -61,6 +62,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/5 w-fit mb-10 overflow-x-auto no-scrollbar">
             {[
               { id: 'missions', label: 'Nhiệm vụ', icon: Sparkles },
+              { id: 'leagues', label: 'Bảng đấu', icon: Trophy },
               { id: 'library', label: 'Thư viện', icon: LayoutGrid },
               { id: 'explore', label: 'Khám phá', icon: Compass },
               { id: 'profile', label: 'Hồ sơ', icon: User },
@@ -88,6 +90,15 @@ export default function DashboardPage() {
                     exit={{ opacity: 0, x: 20 }}
                   >
                     <MissionHub progress={INITIAL_USER_PROGRESS} />
+                  </motion.div>
+                ) : activeTab === 'leagues' ? (
+                  <motion.div
+                    key="leagues-content"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                  >
+                    <LeaguesHub />
                   </motion.div>
                 ) : (
                   <motion.div
