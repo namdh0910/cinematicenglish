@@ -35,61 +35,66 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const url = req.nextUrl.clone()
 
-  // ─── STUDENT/TEACHER ROUTES ───────────────────────────────────────────────
-  // Protect /dashboard, /learn, /practice, /teacher, /classroom
-  const protectedStudentRoutes = ['/dashboard', '/practice', '/classroom']
-  const isProtectedStudent = protectedStudentRoutes.some(r => url.pathname.startsWith(r))
+  // Define protected routes
+  const protectedStudentRoutes = ['/dashboard', '/practice', '/classroom', '/learn', '/chat', '/community', '/exam', '/feed', '/journal']
+  const isProtectedStudent = protectedStudentRoutes.some(r => url.pathname.startsWith(r) || url.pathname === r)
+  
+  const isTeacherRoute = url.pathname.startsWith('/teacher') || url.pathname === '/teacher'
+  const isAdminRoute = url.pathname.startsWith('/admin') && url.pathname !== '/admin/login'
 
-  if (!session && isProtectedStudent) {
-    url.pathname = '/login'
-    url.searchParams.set('from', req.nextUrl.pathname)
-    return NextResponse.redirect(url)
-  }
-
-  // Protect /teacher — requires teacher or admin role
-  if (session && url.pathname.startsWith('/teacher')) {
+  // Fetch role if logged in
+  let role = 'guest'
+  if (session?.user?.id) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', session.user.id)
       .single()
+    role = profile?.role || 'student'
+  }
 
-    if (!profile || (profile.role !== 'teacher' && profile.role !== 'admin')) {
-      url.pathname = '/dashboard'
+  // 1. GUEST ENFORCEMENT
+  if (role === 'guest') {
+    if (isProtectedStudent || isTeacherRoute || isAdminRoute) {
+      url.pathname = '/login'
+      url.searchParams.set('from', req.nextUrl.pathname)
       return NextResponse.redirect(url)
     }
-  }
-
-  // Redirect logged-in users away from login/signup
-  if (session && (url.pathname === '/login' || url.pathname === '/signup')) {
-    url.pathname = '/dashboard'
-    return NextResponse.redirect(url)
-  }
-
-  // ─── ADMIN ROUTES ─────────────────────────────────────────────────────────
-  if (!session && url.pathname.startsWith('/admin')) {
-    if (url.pathname !== '/admin/login') {
-      return NextResponse.redirect(new URL('/admin/login', req.url))
-    }
+    // Guest accessing /login or /signup is allowed
     return res
   }
 
-
-  if (session?.user?.id && url.pathname.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url))
-    }
+  // 2. LOGGED IN REDIRECTS (from auth pages)
+  if (role !== 'guest' && (url.pathname === '/login' || url.pathname === '/signup' || url.pathname === '/admin/login')) {
+    if (role === 'admin') url.pathname = '/admin'
+    else if (role === 'teacher') url.pathname = '/teacher'
+    else url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
   }
 
-  // Already logged in → redirect away from admin login
-  if (session && url.pathname === '/admin/login') {
-    return NextResponse.redirect(new URL('/admin', req.url))
+  // 3. ADMIN ENFORCEMENT
+  if (role === 'admin') {
+    // Admins can access everything, but let's say they stay in admin.
+    // If we want to strictly route admins:
+    return res
+  }
+
+  // 4. TEACHER ENFORCEMENT
+  if (role === 'teacher') {
+    if (isAdminRoute) {
+      url.pathname = '/teacher'
+      return NextResponse.redirect(url)
+    }
+    return res // Teachers can access student routes and teacher routes
+  }
+
+  // 5. STUDENT ENFORCEMENT
+  if (role === 'student') {
+    if (isTeacherRoute || isAdminRoute) {
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+    return res
   }
 
   return res
@@ -97,14 +102,6 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/dashboard/:path*',
-    '/dashboard',
-    '/teacher/:path*',
-    '/teacher',
-    '/classroom/:path*',
-    '/practice/:path*',
-    '/login',
-    '/signup',
+    '/((?!_next/static|_next/image|favicon.ico|public|images|audio|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ]
 }

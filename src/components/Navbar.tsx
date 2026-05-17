@@ -3,15 +3,29 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-const navLinks = [
+const studentNavLinks = [
   { label: "Luyện nhanh", href: "/practice" },
   { label: "Thư viện", href: "/stories" },
   { label: "Học tập", href: "/learn" },
   { label: "Lớp học", href: "/classroom/eng10a1" },
   { label: "HLV Phát Âm", href: "/coach" },
-  { label: "Trò chuyện", href: "/chat" },
-  { label: "Giáo viên", href: "/teacher" },
+];
+
+const teacherNavLinks = [
+  { label: "Quản lý Lớp", href: "/teacher" },
+  { label: "Giao bài", href: "/teacher/assignments" },
+];
+
+const adminNavLinks = [
+  { label: "Bảng điều khiển", href: "/admin" },
+  { label: "Thống kê & Đo lường", href: "/admin/telemetry" },
+];
+
+const guestNavLinks = [
+  { label: "Trang chủ", href: "/" },
+  { label: "Thư viện", href: "/stories" },
 ];
 
 // Actual navbar height in px (keep in sync with py-4/py-5 + logo 40px)
@@ -20,6 +34,25 @@ const NAV_HEIGHT = 72;
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<'guest' | 'student' | 'teacher' | 'admin'>('guest');
+
+  useEffect(() => {
+    const supabase = createClientComponentClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        supabase.from('profiles').select('role').eq('id', session.user.id).single().then(({ data }) => {
+          if (data?.role) setRole(data.role as any);
+          else setRole('student');
+        });
+      }
+    });
+  }, []);
+
+  const navLinks = 
+    role === 'admin' ? adminNavLinks : 
+    role === 'teacher' ? teacherNavLinks : 
+    role === 'student' ? studentNavLinks : 
+    guestNavLinks;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -83,26 +116,47 @@ export default function Navbar() {
 
           {/* Desktop CTAs — hidden on mobile */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border"
-              style={{
-                color: "var(--text-primary)",
-                borderColor: "var(--border-medium)",
-                background: "transparent",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-glass-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-            >
-              Bảng điều khiển
-            </Link>
-            <Link
-              href="/#pricing"
-              className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all duration-200"
-              style={{ background: "var(--gradient-violet)" }}
-            >
-              Gói Pro
-            </Link>
+            {role === 'guest' ? (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border"
+                  style={{ color: "var(--text-primary)", borderColor: "var(--border-medium)", background: "transparent" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-glass-hover)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  Đăng nhập
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all duration-200"
+                  style={{ background: "var(--gradient-violet)" }}
+                >
+                  Bắt đầu ngay
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href={role === 'admin' ? '/admin' : role === 'teacher' ? '/teacher' : '/dashboard'}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border"
+                  style={{ color: "var(--text-primary)", borderColor: "var(--border-medium)", background: "transparent" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-glass-hover)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  Bảng điều khiển
+                </Link>
+                {role === 'student' && (
+                  <Link
+                    href="/#pricing"
+                    className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all duration-200"
+                    style={{ background: "var(--gradient-violet)" }}
+                  >
+                    Gói Pro
+                  </Link>
+                )}
+              </>
+            )}
           </div>
 
           {/* Mobile hamburger — only visible on mobile */}
@@ -212,26 +266,47 @@ export default function Navbar() {
                 className="px-4 py-6 space-y-3 shrink-0"
                 style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
               >
-                <Link
-                  href="/dashboard"
-                  onClick={closeMenu}
-                  className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold border transition-all active:scale-95"
-                  style={{
-                    color: "var(--text-primary)",
-                    borderColor: "var(--border-medium)",
-                    background: "var(--bg-glass)",
-                  }}
-                >
-                  Bảng điều khiển
-                </Link>
-                <Link
-                  href="/#pricing"
-                  onClick={closeMenu}
-                  className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
-                  style={{ background: "var(--gradient-violet)" }}
-                >
-                  Gói Pro ✦
-                </Link>
+                {role === 'guest' ? (
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={closeMenu}
+                      className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold border transition-all active:scale-95"
+                      style={{ color: "var(--text-primary)", borderColor: "var(--border-medium)", background: "var(--bg-glass)" }}
+                    >
+                      Đăng nhập
+                    </Link>
+                    <Link
+                      href="/signup"
+                      onClick={closeMenu}
+                      className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
+                      style={{ background: "var(--gradient-violet)" }}
+                    >
+                      Bắt đầu ngay ✦
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={role === 'admin' ? '/admin' : role === 'teacher' ? '/teacher' : '/dashboard'}
+                      onClick={closeMenu}
+                      className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold border transition-all active:scale-95"
+                      style={{ color: "var(--text-primary)", borderColor: "var(--border-medium)", background: "var(--bg-glass)" }}
+                    >
+                      Bảng điều khiển
+                    </Link>
+                    {role === 'student' && (
+                      <Link
+                        href="/#pricing"
+                        onClick={closeMenu}
+                        className="flex items-center justify-center w-full py-4 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
+                        style={{ background: "var(--gradient-violet)" }}
+                      >
+                        Gói Pro ✦
+                      </Link>
+                    )}
+                  </>
+                )}
               </div>
             </motion.div>
           </>
