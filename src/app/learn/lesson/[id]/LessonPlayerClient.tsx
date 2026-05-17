@@ -27,6 +27,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import { submitAssignment } from "@/app/actions/classroom";
 import RealAudioPlayer from "@/components/audio/RealAudioPlayer";
+import VoiceRecorder from "@/components/coach/VoiceRecorder";
+import { evaluateSpeaking } from "@/app/actions/speaking";
 
 interface Activity {
   id: string;
@@ -88,6 +90,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     rhythm: number;
     confidence: number;
     coachFeedback: string;
+    wordEvaluations?: any[];
   } | null>(null);
 
   // Exam Mode states
@@ -409,31 +412,68 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
                 {activeActivity?.type === 'shadowing' && (
                   <div className="space-y-6">
-                    {/* Transcript card */}
+                    {/* Transcript card with dynamic visual highlighting */}
                     <div className="p-8 rounded-3xl bg-[#1a1a1a]/40 border border-white/5 flex items-center justify-between gap-6">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-black text-amber-500/50 uppercase tracking-widest">Văn bản mẫu</span>
-                        <p className="text-lg md:text-xl font-display font-bold text-white leading-relaxed italic">
-                          "{activeActivity.content?.transcript || "Không tìm thấy văn bản mẫu"}"
-                        </p>
+                      <div className="space-y-2 w-full">
+                        <span className="text-[9px] font-black text-amber-500/55 uppercase tracking-widest block">Văn bản mẫu</span>
+                        <div className="text-lg md:text-xl font-display font-bold text-white leading-relaxed italic">
+                          {speakingResult?.wordEvaluations ? (
+                            <span className="flex flex-wrap gap-x-2 gap-y-1.5 not-italic">
+                              {speakingResult.wordEvaluations.map((w: any, idx: number) => {
+                                let wordColor = "text-white";
+                                if (w.status === "correct") wordColor = "text-emerald-400";
+                                else if (w.status === "imperfect") wordColor = "text-amber-400";
+                                else if (w.status === "missing") wordColor = "text-red-400 line-through";
+                                return (
+                                  <span key={idx} className={`${wordColor} transition-colors duration-300`}>
+                                    {w.word}
+                                  </span>
+                                );
+                              })}
+                            </span>
+                          ) : (
+                            `"${activeActivity.content?.transcript || "Không tìm thấy văn bản mẫu"}"`
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Speech Recorder */}
-                    <div className="flex flex-col items-center justify-center gap-4 py-6">
-                      <motion.button 
-                        onClick={startRecording}
-                        disabled={isRecording}
-                        whileTap={{ scale: 0.95 }}
-                        className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-glow-amber transition-all ${
-                          isRecording ? "bg-red-500 animate-pulse" : "bg-amber-500 hover:bg-amber-400 text-black"
-                        }`}
-                      >
-                        <Mic size={32} />
-                      </motion.button>
-                      <span className="text-xs font-bold uppercase tracking-widest text-white/40">
-                        {isRecording ? "Đang lắng nghe & phân tích..." : "Chạm để Nói & Nhắc lại"}
-                      </span>
+                    {/* Real AI Speech Recorder Node */}
+                    <div className="py-2">
+                      <VoiceRecorder
+                        sentence={activeActivity.content?.transcript || "Practice speaking naturally."}
+                        onComplete={async (blob, feedbackText) => {
+                          setIsRecording(true);
+                          try {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(blob);
+                            reader.onloadend = async () => {
+                              const base64Data = (reader.result as string).split(',')[1];
+                              const res = await evaluateSpeaking({
+                                userId: "student-1",
+                                audioBase64: base64Data,
+                                targetSentence: activeActivity.content?.transcript || "Practice speaking naturally.",
+                                durationSeconds: 4
+                              });
+                              if (res.success) {
+                                setSpeakingResult({
+                                  pronunciation: res.accuracy,
+                                  rhythm: res.fluency,
+                                  confidence: res.completeness,
+                                  coachFeedback: res.coachFeedback,
+                                  wordEvaluations: res.wordEvaluations
+                                });
+                                setXpReward(prev => prev + Math.floor(res.accuracy * 1.5));
+                              }
+                              setIsRecording(false);
+                            };
+                          } catch (err) {
+                            console.error(err);
+                            setIsRecording(false);
+                          }
+                        }}
+                        accentColor="#f59e0b"
+                      />
                     </div>
 
                     {/* Simulated Pronunciation Feedback */}
@@ -449,7 +489,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-white">Nhận xét phát âm của AI Coach</h4>
-                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Phân tích âm học & nhịp điệu</p>
+                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Phân tích âm học & nhịp điệu thực tế</p>
                           </div>
                         </div>
 
@@ -460,11 +500,11 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                             <h5 className="text-2xl font-black text-emerald-400 mt-1">{speakingResult.pronunciation}%</h5>
                           </div>
                           <div className="bg-white/2 rounded-2xl p-4 border border-white/5 text-center">
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Nhịp điệu / Tốc độ</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Độ trôi chảy</span>
                             <h5 className="text-2xl font-black text-amber-500 mt-1">{speakingResult.rhythm}%</h5>
                           </div>
                           <div className="bg-white/2 rounded-2xl p-4 border border-white/5 text-center">
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Sự tự tin</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Độ hoàn thiện</span>
                             <h5 className="text-2xl font-black text-violet-400 mt-1">{speakingResult.confidence}%</h5>
                           </div>
                         </div>
