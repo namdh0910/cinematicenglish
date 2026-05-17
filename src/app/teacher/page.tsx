@@ -91,7 +91,7 @@ export default function TeacherDashboard() {
     <div className="bg-primary min-h-screen text-white">
       <Navbar />
 
-      <main className="pt-28 pb-20">
+      <main className="pt-[120px] md:pt-[140px] pb-20">
         <Section container={true} className="space-y-10">
 
           {/* Header */}

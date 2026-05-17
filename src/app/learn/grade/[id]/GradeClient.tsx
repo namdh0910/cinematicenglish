@@ -89,7 +89,7 @@ export default function GradeClient({ grade }: GradeClientProps) {
     <div className="bg-primary min-h-screen pb-20">
       <Navbar />
 
-      <main className="pt-28 container-custom space-y-8">
+      <main className="pt-[120px] md:pt-[140px] container-custom space-y-8">
         {/* Header Breadcrumbs */}
         <div className="flex flex-col gap-3">
           <Link 
