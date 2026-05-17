@@ -11,12 +11,8 @@ export async function middleware(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // If env vars missing, only block admin routes (skip student routes gracefully)
+  // Enforce DB Environment keys presence
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (req.nextUrl.pathname.startsWith('/admin') &&
-        req.nextUrl.pathname !== '/admin/login') {
-      return NextResponse.redirect(new URL('/admin/login', req.url))
-    }
     return res
   }
 
@@ -78,10 +74,6 @@ export async function middleware(req: NextRequest) {
     return res
   }
 
-  // Master Admin Bypass
-  if (session?.user?.email === 'admin@cinematicenglish.com') {
-    return res
-  }
 
   if (session?.user?.id && url.pathname.startsWith('/admin')) {
     const { data: profile } = await supabase

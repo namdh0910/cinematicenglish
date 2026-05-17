@@ -1,0 +1,280 @@
+-- STORIES TABLE
+create table stories (
+  id uuid default gen_random_uuid() primary key,
+  title text not null,
+  synopsis text,
+  transcript text,
+  category text check (category in ('Psychology','Business','Philosophy','Cinema','Power & Influence','Creative')),
+  difficulty text check (difficulty in ('Beginner','Intermediate','Advanced')),
+  duration text, -- '12:45'
+  thumbnail_url text,
+  audio_url text,
+  xp_value int default 250,
+  is_premium boolean default false,
+  is_featured boolean default false,
+  status text check (status in ('Draft','Published','Archived')) default 'Draft',
+  plays int default 0,
+  tags text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- QUIZZES TABLE
+create table quizzes (
+  id uuid default gen_random_uuid() primary key,
+  story_id uuid references stories(id) on delete cascade,
+  questions jsonb not null default '[]',
+  created_at timestamptz default now()
+);
+
+-- USER PROGRESS TABLE
+create table user_progress (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id),
+  story_id uuid references stories(id),
+  completed boolean default false,
+  quiz_score int,
+  xp_earned int default 0,
+  listened_at timestamptz default now()
+);
+
+-- USER PROFILES (EXTENDS AUTH.USERS)
+create table profiles (
+  id uuid references auth.users(id) primary key,
+  full_name text,
+  email text,
+  avatar_url text,
+  plan text check (plan in ('Free','Pro','Group')) default 'Free',
+  total_xp int default 0,
+  current_streak int default 0,
+  role text check (role in ('user','admin')) default 'user',
+  last_active timestamptz default now(),
+  created_at timestamptz default now()
+);
+
+-- ENABLE RLS (Row Level Security)
+alter table stories enable row level security;
+alter table quizzes enable row level security;
+alter table user_progress enable row level security;
+alter table profiles enable row level security;
+
+-- ADMIN POLICIES
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid()
+      and role = 'admin'
+    )
+  );
+end;
+$$ language plpgsql security definer;
+
+create policy "Admins can do anything" on stories for all to authenticated using (
+  is_admin()
+);
+-- ... add more policies as needed
+-- 1. Trigger: auto-create profile on signup
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.profiles (id, full_name, avatar_url, role)
+  values (
+    new.id,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'avatar_url',
+    'user'  -- default role
+  );
+  return new;
+end;
+$$ language plpgsql security definer;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- 2. Security Definer function to check admin role without recursion
+create or replace function public.is_admin()
+returns boolean as $$
+begin
+  return (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid()
+      and role = 'admin'
+    )
+  );
+end;
+$$ language plpgsql security definer;
+
+-- 3. RLS Policies
+-- Enable RLS
+alter table stories enable row level security;
+alter table quizzes enable row level security;
+alter table user_progress enable row level security;
+alter table profiles enable row level security;
+
+-- Stories: public read published, admin full access
+create policy "Public can read published stories"
+  on stories for select
+  using (status = 'published');
+
+create policy "Admin full access to stories"
+  on stories for all
+  using (is_admin());
+
+-- Profiles: users read own, admin read all
+create policy "Users can read own profile"
+  on profiles for select
+  using (auth.uid() = id);
+
+create policy "Admin can read all profiles"
+  on profiles for select
+  using (is_admin());
+
+-- User progress: users manage own
+create policy "Users manage own progress"
+  on user_progress for all
+  using (auth.uid() = user_id);
+
+create policy "Admin read all progress"
+  on user_progress for select
+  using (is_admin());
+
+-- Note: To set an admin manually:
+-- update profiles set role = 'admin' where id = '<your-user-uuid>';
+-- Cinematic English Phase 2: Classroom System Database Schema
+
+-- 1. Classrooms Table
+CREATE TABLE IF NOT EXISTS classrooms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(10) UNIQUE NOT NULL,
+    teacher_id UUID NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Classroom Members
+CREATE TABLE IF NOT EXISTS classroom_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    classroom_id UUID REFERENCES classrooms(id) ON DELETE CASCADE,
+    student_id UUID NOT NULL,
+    joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(classroom_id, student_id)
+);
+
+-- 3. Assignments Table
+CREATE TABLE IF NOT EXISTS assignments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    classroom_id UUID REFERENCES classrooms(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    activity_type VARCHAR(50) NOT NULL, -- 'lesson' or 'exam'
+    activity_id UUID NOT NULL,
+    due_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Assignment Submissions
+CREATE TABLE IF NOT EXISTS assignment_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    assignment_id UUID REFERENCES assignments(id) ON DELETE CASCADE,
+    student_id UUID NOT NULL,
+    score INT DEFAULT 0,
+    accuracy_speaking INT DEFAULT 0,
+    accuracy_listening INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'submitted', -- 'submitted', 'graded'
+    completed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Classroom Streaks & Momentum
+CREATE TABLE IF NOT EXISTS classroom_streaks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    classroom_id UUID UNIQUE REFERENCES classrooms(id) ON DELETE CASCADE,
+    streak_days INT DEFAULT 0,
+    last_active_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    aura_xp INT DEFAULT 0
+);
+-- Cinematic English Phase 2.2: Premium Exam Ecosystem Database Schema
+
+-- 1. Exams Configuration Table
+CREATE TABLE IF NOT EXISTS exams (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    exam_type VARCHAR(50) NOT NULL, -- 'quick', 'sprint', 'midterm', 'final', 'ielts'
+    time_limit_minutes INT DEFAULT 45,
+    max_score INT DEFAULT 100,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Exam Sections Table (Modular sections: listening, speaking, reading)
+CREATE TABLE IF NOT EXISTS exam_sections (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+    title VARCHAR(100) NOT NULL,
+    skill_type VARCHAR(50) NOT NULL, -- 'listening', 'speaking', 'reading', 'vocabulary', 'dictation'
+    order_index INT DEFAULT 0
+);
+
+-- 3. Exam Questions Table
+CREATE TABLE IF NOT EXISTS exam_questions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID REFERENCES exam_sections(id) ON DELETE CASCADE,
+    question_text TEXT NOT NULL,
+    audio_url VARCHAR(512), -- for listening section
+    max_replays INT DEFAULT 2, -- listening play limit
+    options JSONB, -- multiple choice choices e.g. ["A", "B", "C"]
+    correct_answer TEXT,
+    speaking_prompt TEXT, -- prompt for AI speaking engine
+    order_index INT DEFAULT 0
+);
+
+-- 4. Exam Attempts Table (Tracks student status and progress)
+CREATE TABLE IF NOT EXISTS exam_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
+    student_id UUID NOT NULL,
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    time_spent_seconds INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'in_progress', -- 'in_progress', 'submitted', 'paused'
+    score INT DEFAULT 0
+);
+
+-- 5. Exam Answers Table
+CREATE TABLE IF NOT EXISTS exam_answers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    attempt_id UUID REFERENCES exam_attempts(id) ON DELETE CASCADE,
+    question_id UUID REFERENCES exam_questions(id) ON DELETE CASCADE,
+    student_answer TEXT,
+    is_correct BOOLEAN,
+    speaking_audio_url VARCHAR(512), -- speech submission link
+    speaking_accuracy INT DEFAULT 0,
+    speaking_rhythm INT DEFAULT 0,
+    speaking_confidence INT DEFAULT 0
+);
+
+-- 6. Exam Results & Analytics Table
+CREATE TABLE IF NOT EXISTS exam_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    attempt_id UUID UNIQUE REFERENCES exam_attempts(id) ON DELETE CASCADE,
+    student_id UUID NOT NULL,
+    final_score INT DEFAULT 0,
+    correct_count INT DEFAULT 0,
+    incorrect_count INT DEFAULT 0,
+    accuracy_percentage INT DEFAULT 0
+);
+
+-- 7. Skill Breakdowns (For longitudinal adaptive engine profiling)
+CREATE TABLE IF NOT EXISTS skill_breakdowns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_id UUID NOT NULL,
+    listening_mastery INT DEFAULT 50, -- 0-100 scale
+    speaking_mastery INT DEFAULT 50,
+    reading_mastery INT DEFAULT 50,
+    vocabulary_mastery INT DEFAULT 50,
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

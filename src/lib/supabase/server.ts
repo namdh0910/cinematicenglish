@@ -6,29 +6,7 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export async function createSupabaseServerClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
-    // Return a robust proxy that handles any chained calls
-    const createProxy = (): any => {
-      const fn = () => {};
-      return new Proxy(fn, {
-        get: (target: any, prop: any) => {
-          if (prop === 'then') {
-            return (resolve: any) => resolve({ data: [], error: null, count: 0 });
-          }
-          return createProxy();
-        },
-        apply: (target: any, thisArg: any, args: any) => {
-          return createProxy();
-        }
-      });
-    };
-
-    return {
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        getUser: async () => ({ data: { user: null }, error: null }),
-      },
-      from: () => createProxy(),
-    } as any;
+    throw new Error('Supabase Environment Variables are missing. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your environment.');
   }
 
   const cookieStore = await cookies()
