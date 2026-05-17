@@ -17,6 +17,10 @@ import Navbar from "@/components/Navbar";
 import Section from "@/components/ui/Section";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import ClassroomHeatmap from "@/components/classroom/ClassroomHeatmap";
+import AIInterventionPanel from "@/components/classroom/AIInterventionPanel";
+import AssignmentTimeline from "@/components/classroom/AssignmentTimeline";
+import StudentEvolutionProfile from "@/components/classroom/StudentEvolutionProfile";
 
 interface Student {
   id: string;
@@ -121,6 +125,14 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
                 </div>
               </Card>
             ))}
+          </div>
+
+          {/* AI DIAGNOSTICS & COHORT HEATMAPS */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <AIInterventionPanel />
+            <ClassroomHeatmap />
+            <StudentEvolutionProfile />
+            <AssignmentTimeline />
           </div>
 
           {/* Student Roster & Active Assignments Grid */}
