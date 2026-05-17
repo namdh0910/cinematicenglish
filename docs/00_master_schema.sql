@@ -47,7 +47,7 @@ create table profiles (
   plan text check (plan in ('Free','Pro','Group')) default 'Free',
   total_xp int default 0,
   current_streak int default 0,
-  role text check (role in ('user','admin')) default 'user',
+  role text check (role in ('user', 'teacher', 'admin')) default 'user',
   last_active timestamptz default now(),
   created_at timestamptz default now()
 );
@@ -85,7 +85,7 @@ begin
     new.id,
     new.raw_user_meta_data->>'full_name',
     new.raw_user_meta_data->>'avatar_url',
-    'user'  -- default role
+    coalesce(new.raw_user_meta_data->>'role', 'user')  -- Tự động gán role từ metadata đăng ký (user/teacher)
   );
   return new;
 end;
