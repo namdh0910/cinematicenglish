@@ -90,7 +90,7 @@ export async function checkSpeakingQuota(userId: string): Promise<{ allowed: boo
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayFiles = data.filter(f => new Date(f.created_at) >= today);
+  const todayFiles = data.filter(f => f.created_at ? new Date(f.created_at) >= today : false);
   
   if (todayFiles.length >= limits.maxDailySpeakingAttempts) {
     return { 

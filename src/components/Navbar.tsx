@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const studentNavLinks = [
   { label: "Luyện nhanh", href: "/practice" },
@@ -37,11 +37,12 @@ export default function Navbar() {
   const [role, setRole] = useState<'guest' | 'student' | 'teacher' | 'admin'>('guest');
 
   useEffect(() => {
-    const supabase = createClientComponentClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getSession().then((result: any) => {
+      const session = result?.data?.session;
       if (session) {
-        supabase.from('profiles').select('role').eq('id', session.user.id).single().then(({ data }) => {
-          if (data?.role) setRole(data.role as any);
+        supabase.from('profiles').select('role').eq('id', session.user.id).single().then((profileResult: any) => {
+          if (profileResult?.data?.role) setRole(profileResult.data.role);
           else setRole('student');
         });
       }
