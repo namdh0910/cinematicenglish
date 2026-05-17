@@ -7,6 +7,7 @@ import Button from "./ui/Button";
 
 const navLinks = [
   { label: "Thư viện", href: "/stories" },
+  { label: "Học tập", href: "/learn" },
   { label: "HLV Phát Âm", href: "/coach" },
   { label: "Trò chuyện", href: "/chat" },
   { label: "Khám phá", href: "/feed" },
