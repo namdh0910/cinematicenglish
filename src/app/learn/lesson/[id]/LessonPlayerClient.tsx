@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import { submitAssignment } from "@/app/actions/classroom";
+import RealAudioPlayer from "@/components/audio/RealAudioPlayer";
 
 interface Activity {
   id: string;
@@ -354,59 +355,13 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                 <p className="text-secondary text-sm italic">{activeActivity?.instructions}</p>
               </div>
 
-              {/* Waveform / Audio Control Hub (For Dictation, Listening, Speaking) */}
-              {(activeActivity?.content?.audioUrl || activeActivity?.type === 'dictation' || activeActivity?.type === 'shadowing') && (
-                <div className="rounded-3xl border border-white/5 bg-[#1a1a1a]/50 p-6 md:p-8 space-y-6">
-                  {/* Waveform graphic */}
-                  <div className="h-16 flex items-center justify-center gap-1.5 overflow-hidden relative">
-                    {waveBars.map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={isPlaying ? {
-                          height: [10, Math.floor(Math.random() * 45) + 15, 10]
-                        } : { height: 12 }}
-                        transition={{
-                          repeat: Infinity,
-                          duration: 1.2,
-                          delay: i * 0.05
-                        }}
-                        className={`w-1 rounded-full ${isPlaying ? "bg-amber-500 shadow-glow-amber" : "bg-white/10"}`}
-                        style={{ height: '12px' }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Audio Controls */}
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/5 pt-6">
-                    <div className="flex items-center gap-3">
-                      <button 
-                        onClick={togglePlay}
-                        className="w-14 h-14 rounded-full bg-amber-500 text-black flex items-center justify-center hover:scale-105 transition-transform"
-                      >
-                        {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
-                      </button>
-
-                      <div className="flex items-center gap-1 text-xs text-white/40">
-                        <span>Tốc độ:</span>
-                        {[0.75, 1.0, 1.25, 1.5].map((speed) => (
-                          <button
-                            key={speed}
-                            onClick={() => handleSpeedChange(speed)}
-                            className={`px-2 py-1 rounded font-mono font-bold ${
-                              playbackSpeed === speed ? "bg-white/10 text-amber-500" : "hover:text-white"
-                            }`}
-                          >
-                            {speed}x
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/40">
-                      <Sliders size={16} /> Phân tích Sóng âm chuẩn
-                    </div>
-                  </div>
-                </div>
+              {/* Real Audio Player Node (Web Audio API Frequency Analyser) */}
+              {(activeActivity?.content?.audioUrl !== undefined || activeActivity?.type === 'dictation' || activeActivity?.type === 'shadowing') && (
+                <RealAudioPlayer
+                  text={activeActivity.content?.transcript || activeActivity.title || "Practice speaking naturally."}
+                  category="pronunciation"
+                  voice="nova"
+                />
               )}
 
               {/* Dynamic Interactive Node content based on activity type */}

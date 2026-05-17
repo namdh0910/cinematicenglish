@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Square, Play, RefreshCw, CheckCircle2, MessageSquareHeart, Sparkles } from "lucide-react";
@@ -14,7 +15,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [waveform, setWaveform] = useState<number[]>(Array(40).fill(10));
+  const [waveform, setWaveform] = useState<number[]>(Array(30).fill(10));
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
@@ -23,22 +24,28 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   const audioChunks = useRef<Blob[]>([]);
   const animationFrame = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (isRecording) {
-      const updateWaveform = () => {
-        setWaveform(prev => prev.map(() => Math.random() * 60 + 20));
-        animationFrame.current = requestAnimationFrame(updateWaveform);
-      };
-      updateWaveform();
-    } else {
-      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
-      setWaveform(Array(40).fill(10));
-    }
-  }, [isRecording]);
+  // Web Audio refs for real microphone visualization
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+
+      // Initialize Web Audio context for real-time visualization
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 64; // Small fftSize for 32 frequency bins
+
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      audioContextRef.current = ctx;
+      analyserRef.current = analyser;
+
       mediaRecorder.current = new MediaRecorder(stream);
       audioChunks.current = [];
 
@@ -69,9 +76,56 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
     if (mediaRecorder.current && isRecording) {
       mediaRecorder.current.stop();
       setIsRecording(false);
-      mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+      
+      // Stop stream tracks
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      
+      // Close audio context
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => {});
+      }
     }
   };
+
+  // Real-time animation loop pulling actual voice frequency from microphone
+  const drawMicWaveform = () => {
+    if (!analyserRef.current || !isRecording) {
+      setWaveform(Array(30).fill(10));
+      return;
+    }
+
+    const bufferLength = analyserRef.current.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyserRef.current.getByteFrequencyData(dataArray);
+
+    // Map first 30 frequency bins directly to waveform heights (0% to 100%)
+    const newWaveform: number[] = [];
+    for (let i = 0; i < 30; i++) {
+      const raw = dataArray[i] || 0;
+      // Convert 0-255 frequency amplitude to 10% - 90% scale
+      const height = Math.max(10, Math.round((raw / 255) * 80) + 10);
+      newWaveform.push(height);
+    }
+
+    setWaveform(newWaveform);
+    animationFrame.current = requestAnimationFrame(drawMicWaveform);
+  };
+
+  useEffect(() => {
+    if (isRecording) {
+      animationFrame.current = requestAnimationFrame(drawMicWaveform);
+    } else {
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
+      setWaveform(Array(30).fill(10));
+    }
+    return () => {
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+    };
+  }, [isRecording]);
 
   const analyzeSpeech = () => {
     setIsAnalyzing(true);
@@ -82,22 +136,34 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
     }, 2000);
   };
 
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(() => {});
+      }
+    };
+  }, []);
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-10">
-      {/* Waveform Visualization */}
-      <div className="h-40 flex items-center justify-center gap-1 sm:gap-1.5 px-4 sm:px-6 bg-white/5 rounded-[32px] sm:rounded-[40px] backdrop-blur-2xl border border-white/10 relative overflow-hidden group w-full">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
+      {/* Waveform Visualization - REAL MICROPHONE FREQUENCIES */}
+      <div className="h-40 flex items-end justify-center gap-1.5 px-6 pb-6 bg-[#16161a] rounded-[32px] sm:rounded-[40px] border border-white/5 relative overflow-hidden group w-full">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
         
         {waveform.map((h, i) => (
           <motion.div
             key={i}
             animate={{ height: h + "%" }}
-            className={`w-1 sm:w-1.5 rounded-full transition-colors duration-500 ${
-              i >= 20 ? "hidden sm:block" : ""
-            }`}
+            className="w-1.5 rounded-full transition-all duration-75"
             style={{ 
-              background: isRecording ? `linear-gradient(to top, ${accentColor}, #fff)` : 'rgba(255,255,255,0.1)',
-              boxShadow: isRecording ? `0 0 20px ${accentColor}44` : 'none'
+              background: isRecording 
+                ? `linear-gradient(to top, ${accentColor}, #fff)` 
+                : 'rgba(255,255,255,0.06)',
+              boxShadow: isRecording ? `0 0 16px ${accentColor}88` : 'none',
+              minHeight: '8px'
             }}
           />
         ))}
@@ -106,14 +172,14 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center gap-4 z-20"
+            className="absolute inset-0 bg-black/85 backdrop-blur-xl flex flex-col items-center justify-center gap-4 z-20"
           >
             <motion.div 
               animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
               className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full shadow-glow-gold"
             />
-            <span className="text-sm font-bold tracking-[0.2em] uppercase text-amber-400">Cô đang nghe phân tích...</span>
+            <span className="text-xs font-black tracking-[0.2em] uppercase text-amber-400">Cô đang nghe phân tích phát âm...</span>
           </motion.div>
         )}
       </div>
@@ -128,7 +194,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
               onClick={isRecording ? stopRecording : startRecording}
               className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 ${isRecording ? 'bg-red-500 scale-110 shadow-glow-red' : 'bg-white text-black shadow-glow-gold'}`}
             >
-              {isRecording ? <Square size={36} fill="white" /> : <Mic size={40} fill="black" />}
+              {isRecording ? <Square size={36} fill="white" className="text-white" /> : <Mic size={40} className="text-black" />}
             </motion.button>
             <AnimatePresence>
               {isRecording && (
@@ -136,7 +202,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-1 bg-red-500 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-glow-red"
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-red-500 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-glow-red"
                 >
                   Đang ghi âm
                 </motion.div>
@@ -151,7 +217,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
                 setFeedback(null); 
                 trackTelemetry('retry_recording');
               }}
-              className="w-16 h-16 rounded-full glass border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
+              className="w-16 h-16 rounded-full bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
             >
               <RefreshCw size={24} />
             </button>
@@ -176,7 +242,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
           </div>
         )}
 
-        <p className="text-sm font-bold tracking-widest uppercase opacity-20 text-center">
+        <p className="text-xs font-black tracking-widest uppercase opacity-30 text-center">
           {isRecording ? "Chạm để dừng & phân tích" : audioUrl ? "Lắng nghe hoặc thử lại" : "Chạm để bắt đầu luyện nói"}
         </p>
       </div>
