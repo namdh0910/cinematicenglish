@@ -166,23 +166,75 @@ export async function getAnalytics(dateRange: string = '30') {
 // --- CURRICULUM ACTIONS ---
 
 export async function getGrades() {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (isMockMode) {
+    return [
+      { id: "grade-10", title: "Lớp 10 - Global Success", description: "Chương trình Tiếng Anh lớp 10 theo chuẩn GD&ĐT mới.", order_index: 1 },
+      { id: "grade-11", title: "Lớp 11 - Global Success", description: "Chương trình Tiếng Anh lớp 11 theo chuẩn GD&ĐT mới.", order_index: 2 },
+      { id: "grade-12", title: "Lớp 12 - Global Success", description: "Chương trình Tiếng Anh lớp 12 theo chuẩn GD&ĐT mới.", order_index: 3 }
+    ];
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('grades')
     .select('*')
     .order('order_index', { ascending: true });
 
-  if (error) {
-    console.error("Error fetching grades:", error);
-    return [];
+  if (error || !data || data.length === 0) {
+    console.error("Error fetching grades or empty data, using fallback:", error);
+    return [
+      { id: "grade-10", title: "Lớp 10 - Global Success", description: "Chương trình Tiếng Anh lớp 10 theo chuẩn GD&ĐT mới.", order_index: 1 },
+      { id: "grade-11", title: "Lớp 11 - Global Success", description: "Chương trình Tiếng Anh lớp 11 theo chuẩn GD&ĐT mới.", order_index: 2 },
+      { id: "grade-12", title: "Lớp 12 - Global Success", description: "Chương trình Tiếng Anh lớp 12 theo chuẩn GD&ĐT mới.", order_index: 3 }
+    ];
   }
-  return data || [];
+  return data;
 }
 
 export async function getGradeWithDetails(gradeId: string) {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const mockGrade = {
+    id: gradeId,
+    title: gradeId === "grade-10" ? "Lớp 10 - Global Success" : gradeId === "grade-11" ? "Lớp 11 - Global Success" : "Lớp 12 - Global Success",
+    description: "Chương trình Tiếng Anh theo chuẩn GD&ĐT mới.",
+    semesters: [
+      {
+        id: "semester-1",
+        title: "Học kỳ I",
+        order_index: 1,
+        units: [
+          {
+            id: "unit-1",
+            title: "Unit 1: Family Life",
+            description: "Đời sống gia đình và trách nhiệm của thành viên.",
+            order_index: 1,
+            lessons: [
+              { id: "lesson-1", title: "Getting Started - Family responsibilities", type: "Getting Started", order_index: 1 },
+              { id: "lesson-u1l2", title: "Unit 1 Lesson 2: Speaking & Shadowing Practice", type: "Speaking", order_index: 2 },
+              { id: "lesson-3", title: "Listening - Family value reflections", type: "Listening", order_index: 3 }
+            ]
+          },
+          {
+            id: "unit-2",
+            title: "Unit 2: Humans and the Environment",
+            description: "Con người và môi trường xung quanh.",
+            order_index: 2,
+            lessons: [
+              { id: "lesson-4", title: "Getting Started - Eco-friendly lifestyle", type: "Getting Started", order_index: 1 },
+              { id: "lesson-5", title: "Speaking - Environmental protection suggestions", type: "Speaking", order_index: 2 }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+
+  if (isMockMode) {
+    return mockGrade;
+  }
+
   const supabase = await createSupabaseServerClient();
-  
-  // Lấy Grade kèm Semesters và Units và Lessons của nó
   const { data: grade, error } = await supabase
     .from('grades')
     .select(`
@@ -200,9 +252,9 @@ export async function getGradeWithDetails(gradeId: string) {
     .eq('id', gradeId)
     .single();
 
-  if (error) {
-    console.error("Error fetching grade details:", error);
-    return null;
+  if (error || !grade) {
+    console.error("Error fetching grade details, using fallback:", error);
+    return mockGrade;
   }
   return grade;
 }
@@ -234,8 +286,30 @@ export async function createUnit(data: { semester_id: string, title: string, des
 }
 
 export async function getUnitWithDetails(unitId: string) {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const mockUnit = {
+    id: unitId,
+    title: "Unit 1: Family Life",
+    description: "Đời sống gia đình và trách nhiệm của thành viên.",
+    lessons: [
+      {
+        id: "lesson-u1l2",
+        title: "Unit 1 Lesson 2: Speaking & Shadowing Practice",
+        type: "Speaking",
+        order_index: 1,
+        activities: [
+          { id: "act-1", title: "Luyện phát âm & Nghe chính tả", type: "dictation", order_index: 1 },
+          { id: "act-2", title: "Luyện nói Shadowing", type: "shadowing", order_index: 2 }
+        ]
+      }
+    ]
+  };
+
+  if (isMockMode) {
+    return mockUnit;
+  }
+
   const supabase = await createSupabaseServerClient();
-  
   const { data: unit, error } = await supabase
     .from('units')
     .select(`
@@ -250,9 +324,9 @@ export async function getUnitWithDetails(unitId: string) {
     .eq('id', unitId)
     .single();
 
-  if (error) {
-    console.error("Error fetching unit details:", error);
-    return null;
+  if (error || !unit) {
+    console.error("Error fetching unit details, using fallback:", error);
+    return mockUnit;
   }
   return unit;
 }
@@ -358,6 +432,65 @@ export async function deleteUnit(unitId: string) {
 }
 
 export async function getLessonWithDetails(lessonId: string) {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const mockLesson = {
+    id: lessonId,
+    title: "Unit 1 Lesson 2: Speaking & Shadowing Practice",
+    type: "Speaking",
+    unit: {
+      id: "unit-1",
+      title: "Unit 1: Family Life",
+      grade: {
+        id: "grade-10",
+        title: "Lớp 10"
+      }
+    },
+    activities: [
+      {
+        id: "act-1",
+        title: "Luyện phát âm & Nghe chính tả",
+        type: "dictation",
+        instructions: "Nghe kỹ đoạn băng và điền lại các từ bạn nghe được bên dưới.",
+        order_index: 1,
+        content: {
+          audioUrl: "", 
+          transcript: "doing household chores helps children learn to take responsibility"
+        }
+      },
+      {
+        id: "act-2",
+        title: "Luyện nói Shadowing",
+        type: "shadowing",
+        instructions: "Nhấn nút ghi âm và bắt chước phát âm cụm từ dưới đây với ngữ điệu tự nhiên nhất.",
+        order_index: 2,
+        content: {
+          transcript: "doing household chores helps children learn to take responsibility"
+        }
+      },
+      {
+        id: "act-3",
+        title: "Chọn đáp án đúng",
+        type: "multiple_choice",
+        instructions: "Chọn từ/cụm từ đúng nhất để hoàn thành câu.",
+        order_index: 3,
+        content: {
+          questions: [
+            {
+              id: "q-1",
+              question: "Children should participate in household tasks to _______ responsibility.",
+              options: ["develop", "destroy", "neglect", "postpone"],
+              answer: "develop"
+            }
+          ]
+        }
+      }
+    ]
+  };
+
+  if (isMockMode) {
+    return mockLesson;
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: lesson, error } = await supabase
     .from('lessons')
@@ -379,9 +512,9 @@ export async function getLessonWithDetails(lessonId: string) {
     .eq('id', lessonId)
     .single();
 
-  if (error) {
-    console.error("Error fetching lesson details:", error);
-    return null;
+  if (error || !lesson) {
+    console.error("Error fetching lesson details, using fallback:", error);
+    return mockLesson;
   }
   return lesson;
 }

@@ -34,27 +34,27 @@ interface Competitor {
 }
 
 const GLOBAL_LEAGUE_DATA: Competitor[] = [
-  { rank: 1, name: "Hoàng Minh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hoang", identity: "Linguistic Director", xp: 1850, streak: 24, accuracy: 96, tag: { text: "consistent", type: "consistent" } },
+  { rank: 1, name: "Hoàng Minh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hoang", identity: "Linguistic Director", xp: 1850, streak: 24, accuracy: 96, tag: { text: "Bền bỉ", type: "consistent" } },
   { rank: 2, name: "Minh Thư", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Thu", identity: "Storywalker Elite", xp: 1620, streak: 18, accuracy: 94 },
-  { rank: 3, name: "You (Protagonist)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Rising Protagonist", type: "rising" } },
-  { rank: 4, name: "Anh Tuấn", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tuan", identity: "Clarity Architect", xp: 1350, streak: 5, accuracy: 89, tag: { text: "Comeback: 5d Streak", type: "comeback" } },
+  { rank: 3, name: "Bạn (Nhân vật chính)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Ngôi sao đang lên", type: "rising" } },
+  { rank: 4, name: "Anh Tuấn", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tuan", identity: "Clarity Architect", xp: 1350, streak: 5, accuracy: 89, tag: { text: "Trở lại: Chuỗi 5 ngày", type: "comeback" } },
   { rank: 5, name: "Lan Phương", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Phuong", identity: "Cadence Weaver", xp: 1280, streak: 14, accuracy: 91 },
   { rank: 6, name: "Bảo Nam", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nam", identity: "Tone Designer", xp: 1100, streak: 3, accuracy: 85 },
 ];
 
 const CLASSROOM_LEAGUE_DATA: Competitor[] = [
-  { rank: 1, name: "You (Protagonist)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Class Leader", type: "rising" } },
+  { rank: 1, name: "Bạn (Nhân vật chính)", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix", identity: "Voice Architect", xp: 1480, streak: 12, accuracy: 92, tag: { text: "Dẫn đầu lớp", type: "rising" } },
   { rank: 2, name: "Bảo Nam", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nam", identity: "Tone Designer", xp: 1100, streak: 3, accuracy: 85 },
-  { rank: 3, name: "Khánh Linh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Linh", identity: "Speaker Novice", xp: 950, streak: 8, accuracy: 88, tag: { text: "Consistent 8d", type: "consistent" } },
+  { rank: 3, name: "Khánh Linh", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Linh", identity: "Speaker Novice", xp: 950, streak: 8, accuracy: 88, tag: { text: "Chuỗi 8 ngày", type: "consistent" } },
   { rank: 4, name: "Gia Huy", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Huy", identity: "Dialogue Crafter", xp: 820, streak: 2, accuracy: 81 },
 ];
 
 const LEAGUE_TIERS = [
-  { id: "bronze", name: "Bronze Voices", color: "#b45309", bg: "rgba(180, 83, 9, 0.05)", border: "rgba(180, 83, 9, 0.2)" },
-  { id: "silver", name: "Silver Speakers", color: "#64748b", bg: "rgba(100, 116, 139, 0.05)", border: "rgba(100, 116, 139, 0.2)" },
-  { id: "gold", name: "Gold Storywalkers", color: "#eab308", bg: "rgba(234, 179, 8, 0.05)", border: "rgba(234, 179, 8, 0.2)", active: true },
-  { id: "platinum", name: "Platinum Directors", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.05)", border: "rgba(6, 182, 212, 0.2)" },
-  { id: "aura", name: "Aura Masters", color: "#a855f7", bg: "rgba(168, 85, 247, 0.05)", border: "rgba(168, 85, 247, 0.2)" },
+  { id: "bronze", name: "Giọng Đồng Bền Bỉ", color: "#b45309", bg: "rgba(180, 83, 9, 0.05)", border: "rgba(180, 83, 9, 0.2)" },
+  { id: "silver", name: "Giọng Bạc Tự Tin", color: "#64748b", bg: "rgba(100, 116, 139, 0.05)", border: "rgba(100, 116, 139, 0.2)" },
+  { id: "gold", name: "Hành Giả Vàng", color: "#eab308", bg: "rgba(234, 179, 8, 0.05)", border: "rgba(234, 179, 8, 0.2)", active: true },
+  { id: "platinum", name: "Nhà Sản Xuất Bạch Kim", color: "#06b6d4", bg: "rgba(6, 182, 212, 0.05)", border: "rgba(6, 182, 212, 0.2)" },
+  { id: "aura", name: "Bậc Thầy Hào Quang", color: "#a855f7", bg: "rgba(168, 85, 247, 0.05)", border: "rgba(168, 85, 247, 0.2)" },
 ];
 
 export default function LeaguesHub() {
@@ -74,7 +74,7 @@ export default function LeaguesHub() {
               const isActive = tier.id === selectedTier;
               return (
                 <button
-                  key={tier.id}
+                   key={tier.id}
                   onClick={() => setSelectedTier(tier.id)}
                   style={{ 
                     color: tier.color,
@@ -93,9 +93,9 @@ export default function LeaguesHub() {
         </div>
 
         <div className="text-right">
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Cycle Reset</span>
+          <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Đặt lại Đấu trường</span>
           <span className="text-xs font-mono font-bold text-amber-500 flex items-center justify-end gap-1.5 mt-1">
-            <Calendar size={14} /> Sunday, 23:59
+            <Calendar size={14} /> Chủ Nhật, 23:59
           </span>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function LeaguesHub() {
                   activeLeagueTab === "global" ? "text-white" : "text-white/30 hover:text-white/60"
                 }`}
               >
-                Global Competitors
+                Bảng xếp hạng Toàn quốc
               </button>
               <button
                 onClick={() => setActiveLeagueTab("classroom")}
@@ -119,12 +119,12 @@ export default function LeaguesHub() {
                   activeLeagueTab === "classroom" ? "text-white" : "text-white/30 hover:text-white/60"
                 }`}
               >
-                Classroom Arena <GraduationCap size={16} className="text-violet-400" />
+                Đấu trường Lớp học <GraduationCap size={16} className="text-violet-400" />
               </button>
             </div>
 
             <div className="flex items-center gap-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
-              <Info size={12} /> Top 3 Promoted
+              <Info size={12} /> Top 3 Thăng hạng
             </div>
           </div>
 
@@ -132,7 +132,7 @@ export default function LeaguesHub() {
           <div className="space-y-3">
             <AnimatePresence mode="wait">
               {activeCompetitors.map((competitor, idx) => {
-                const isUser = competitor.name.includes("You");
+                const isUser = competitor.name.includes("Bạn");
                 return (
                   <motion.div
                     key={competitor.name}
@@ -185,21 +185,21 @@ export default function LeaguesHub() {
                     <div className="flex items-center gap-8 text-right">
                       {/* Consistency score */}
                       <div className="hidden sm:block">
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Accuracy</span>
+                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Độ chính xác</span>
                         <span className="text-xs font-mono font-bold text-white/70">{competitor.accuracy}%</span>
                       </div>
                       
                       {/* Streak */}
                       <div className="hidden sm:block">
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Streak</span>
+                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Chuỗi ngày</span>
                         <span className="text-xs font-mono font-bold text-amber-500 flex items-center justify-end gap-1">
-                          <Flame size={12} /> {competitor.streak}d
+                          <Flame size={12} /> {competitor.streak} ngày
                         </span>
                       </div>
 
                       {/* XP */}
                       <div>
-                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Weekly Aura</span>
+                        <span className="text-[9px] text-white/20 uppercase font-bold tracking-widest block">Hào quang tuần</span>
                         <span className="text-sm font-mono font-black text-white flex items-center justify-end gap-1">
                           <Zap size={12} className="text-amber-500" fill="currentColor" /> {competitor.xp} XP
                         </span>
@@ -216,14 +216,14 @@ export default function LeaguesHub() {
         <div className="space-y-6">
           <div className="border-b border-white/5 pb-4">
             <h3 className="text-lg font-display font-black text-white flex items-center gap-2">
-              Class Ritual Target <Users size={18} className="text-amber-500" />
+              Mục tiêu chung Lớp học <Users size={18} className="text-amber-500" />
             </h3>
           </div>
 
           <Card className="p-6 bg-gradient-to-br from-violet-950/10 to-black border-white/5 space-y-6">
             <div className="space-y-2">
-              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest">Active Group</span>
-              <h4 className="text-md font-bold text-white">Lớp 11A1 — Global Success Group</h4>
+              <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest">Nhóm đang hoạt động</span>
+              <h4 className="text-md font-bold text-white">Lớp 11A1 — Giáo trình mới Group</h4>
               <p className="text-xs text-secondary leading-relaxed">
                 Hợp tác cùng cả lớp tích luỹ XP hàng tuần để mở khoá **Lá Chắn Hào Quang** bảo vệ chuỗi Streak cho tất cả thành viên.
               </p>
@@ -232,8 +232,8 @@ export default function LeaguesHub() {
             {/* Target Progress Milestone */}
             <div className="space-y-3 pt-2">
               <div className="flex justify-between items-end text-xs">
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Shared Milestone</span>
-                <span className="font-mono font-bold text-white">8,450 / 10,000 XP</span>
+                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Cột mốc chung</span>
+                <span className="font-mono font-bold text-white">8.450 / 10.000 XP</span>
               </div>
               
               <div className="h-2 bg-white/5 rounded-full overflow-hidden">
@@ -241,18 +241,18 @@ export default function LeaguesHub() {
               </div>
               
               <span className="text-[9px] text-white/30 uppercase font-bold tracking-wider block text-center">
-                Còn thiếu 1,550 XP để mở khoá Lá Chắn tuần này
+                Còn thiếu 1.550 XP để mở khoá Lá Chắn tuần này
               </span>
             </div>
 
             {/* Class Ritual Missions */}
             <div className="space-y-3 pt-4 border-t border-white/5">
-              <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest block">Group Missions</span>
+              <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest block">Nhiệm vụ Nhóm</span>
               
               <div className="space-y-2.5">
                 {[
-                  { text: "15 thành viên hoàn thành Daily Ritual", progress: "12/15" },
-                  { text: "Đạt trung bình Speaking accuracy > 88%", progress: "86.5%" }
+                  { text: "15 thành viên hoàn thành Nghi thức học tập", progress: "12/15" },
+                  { text: "Đạt trung bình Độ chuẩn phát âm > 88%", progress: "86.5%" }
                 ].map((mission, idx) => (
                   <div key={idx} className="flex justify-between items-center text-xs p-3 rounded-xl bg-white/[0.02] border border-white/5">
                     <span className="text-white/60 font-medium">{mission.text}</span>
@@ -266,7 +266,7 @@ export default function LeaguesHub() {
           {/* Mature social quote */}
           <div className="p-6 rounded-[28px] border border-white/5 bg-white/[0.01] text-center">
             <p className="text-xs text-white/40 leading-relaxed italic">
-              "Luyện tập tiếng Anh không đơn độc. Bạn đang cùng 11A1 xây dựng nền tảng ngôn ngữ vững chắc hướng ra toàn cầu."
+              "Luyện tập tiếng Anh không đơn độc. Bạn đang cùng tập thể 11A1 xây dựng nền tảng ngôn ngữ vững chắc hướng ra toàn cầu."
             </p>
           </div>
         </div>

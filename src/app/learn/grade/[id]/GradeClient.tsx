@@ -70,6 +70,19 @@ export default function GradeClient({ grade }: GradeClientProps) {
     }
   };
 
+  const getLessonTypeLabel = (type: Lesson['type']) => {
+    switch (type) {
+      case 'Listening': return 'Luyện nghe';
+      case 'Speaking': return 'Luyện nói';
+      case 'Reading': return 'Luyện đọc';
+      case 'Writing': return 'Luyện viết';
+      case 'Language': return 'Ngữ pháp & Từ vựng';
+      case 'Getting Started': return 'Khởi động';
+      case 'Exam': return 'Bài kiểm tra';
+      default: return type;
+    }
+  };
+
   const selectedSemester = grade.semesters.find(s => s.id === activeSemester);
 
   return (
@@ -83,7 +96,7 @@ export default function GradeClient({ grade }: GradeClientProps) {
             href="/learn" 
             className="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest"
           >
-            <ChevronLeft size={14} /> Back to Hub
+            <ChevronLeft size={14} /> Quay lại Học tập
           </Link>
           <div className="space-y-1">
             <h1 className="text-4xl font-display font-black text-white">{grade.title}</h1>
@@ -159,7 +172,7 @@ export default function GradeClient({ grade }: GradeClientProps) {
                                 {getLessonIcon(lesson.type)}
                               </div>
                               <div className="min-w-0">
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-white/30 block leading-none mb-1">{lesson.type}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-white/30 block leading-none mb-1">{getLessonTypeLabel(lesson.type)}</span>
                                 <h4 className="text-xs font-bold text-white group-hover:text-amber-500 transition-colors truncate">{lesson.title}</h4>
                               </div>
                             </div>

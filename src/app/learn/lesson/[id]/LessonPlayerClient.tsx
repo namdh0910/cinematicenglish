@@ -222,7 +222,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             pronunciation: Math.floor(Math.random() * 15) + 82, // 82 - 97
             rhythm: Math.floor(Math.random() * 20) + 78,       // 78 - 98
             confidence: Math.floor(Math.random() * 10) + 88,   // 88 - 98
-            coachFeedback: "Excellent pacing! Bạn đã bắt nhịp ngữ điệu tiếng Anh rất tốt, các âm gió đuôi (-s, -ed) phát âm rất rõ nét. Hãy tiếp tục duy trì nhịp thở tự nhiên này."
+            coachFeedback: "Nhịp điệu tuyệt vời! Em đã bắt nhịp ngữ điệu tiếng Anh rất tốt, các âm gió đuôi (-s, -ed) phát âm rất rõ nét. Hãy tiếp tục duy trì nhịp thở tự nhiên này."
           });
           setXpReward(prev => prev + 100);
           return 100;
@@ -268,13 +268,13 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             href={lesson.unit ? `/learn/grade/${lesson.unit.id}` : "/learn"}
             className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest"
           >
-            <ChevronLeft size={16} /> Quit Session
+            <ChevronLeft size={16} /> Thoát phòng học
           </Link>
 
           {/* Center lesson stats */}
           <div className="text-center">
             <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em]">
-              {lesson.unit?.title || "Global Success Learning"}
+              {lesson.unit?.title || "Giáo trình Global Success"}
             </span>
             <h2 className="text-sm font-bold text-white max-w-xs md:max-w-md truncate">{lesson.title}</h2>
           </div>
@@ -320,10 +320,10 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
               {/* Instructions and instructions card */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="badge badge-gold uppercase tracking-widest px-3 py-1">{activeActivity?.type} Node</span>
-                  <span className="text-white/30 text-xs font-bold">Activity {currentIdx + 1} of {activities.length}</span>
+                  <span className="badge badge-gold uppercase tracking-widest px-3 py-1">Phần {activeActivity?.type === "dictation" ? "Nghe chép" : (activeActivity?.type === "shadowing" ? "Nói đuổi" : "Trắc nghiệm")}</span>
+                  <span className="text-white/30 text-xs font-bold">Hoạt động {currentIdx + 1} / {activities.length}</span>
                 </div>
-                <h3 className="text-2xl md:text-3xl font-display font-black text-white">{activeActivity?.title || "Immersive Exercise"}</h3>
+                <h3 className="text-2xl md:text-3xl font-display font-black text-white">{activeActivity?.title || "Bài tập Thực hành"}</h3>
                 <p className="text-secondary text-sm italic">{activeActivity?.instructions}</p>
               </div>
 
@@ -360,7 +360,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                       </button>
 
                       <div className="flex items-center gap-1 text-xs text-white/40">
-                        <span>Speed:</span>
+                        <span>Tốc độ:</span>
                         {[0.75, 1.0, 1.25, 1.5].map((speed) => (
                           <button
                             key={speed}
@@ -376,7 +376,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                     </div>
 
                     <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-white/40">
-                      <Sliders size={16} /> Standard Waveform Analysis
+                      <Sliders size={16} /> Phân tích Sóng âm chuẩn
                     </div>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                     <textarea
                       value={dictationInput}
                       onChange={(e) => setDictationInput(e.target.value)}
-                      placeholder="Listen carefully and type what you hear..."
+                      placeholder="Lắng nghe cẩn thận và điền những gì em nghe được..."
                       className="w-full bg-[#161616] border border-white/5 focus:border-amber-500/40 rounded-3xl p-6 text-base font-sans focus:outline-none h-32 resize-none text-white leading-relaxed"
                     />
 
@@ -398,14 +398,14 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                         onClick={checkDictation}
                         className="px-6 py-3 rounded-2xl bg-amber-500 text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
                       >
-                        Verify Dictation <CheckCircle size={14} />
+                        Kiểm tra Chính tả <CheckCircle size={14} />
                       </button>
                     </div>
 
                     {/* Dictation Feedback word rendering */}
                     {dictationFeedback && (
                       <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-3">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Fuzzy spelling audit</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">Đánh giá chính tả tự động</span>
                         <div className="flex flex-wrap gap-2 text-sm leading-relaxed">
                           {dictationFeedback.map((fb, idx) => (
                             <span 
@@ -430,9 +430,9 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                     {/* Transcript card */}
                     <div className="p-8 rounded-3xl bg-[#1a1a1a]/40 border border-white/5 flex items-center justify-between gap-6">
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black text-amber-500/50 uppercase tracking-widest">Transcript</span>
+                        <span className="text-[9px] font-black text-amber-500/50 uppercase tracking-widest">Văn bản mẫu</span>
                         <p className="text-lg md:text-xl font-display font-bold text-white leading-relaxed italic">
-                          "{activeActivity.content?.transcript || "No transcript available"}"
+                          "{activeActivity.content?.transcript || "Không tìm thấy văn bản mẫu"}"
                         </p>
                       </div>
                     </div>
@@ -450,7 +450,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                         <Mic size={32} />
                       </motion.button>
                       <span className="text-xs font-bold uppercase tracking-widest text-white/40">
-                        {isRecording ? "Listening & analyzing..." : "Tap to Speak & Shadow Repeat"}
+                        {isRecording ? "Đang lắng nghe & phân tích..." : "Chạm để Nói & Nhắc lại"}
                       </span>
                     </div>
 
@@ -466,23 +466,23 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                             <Sparkles size={16} className="text-black" />
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-white">AI Coach Pronunciation Feedback</h4>
-                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Acoustic & rhythm analysis</p>
+                            <h4 className="text-sm font-bold text-white">Nhận xét phát âm của AI Coach</h4>
+                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-wider">Phân tích âm học & nhịp điệu</p>
                           </div>
                         </div>
 
                         {/* Stats scores */}
                         <div className="grid grid-cols-3 gap-4">
                           <div className="bg-white/2 rounded-2xl p-4 border border-white/5 text-center">
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Pronunciation</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Phát âm</span>
                             <h5 className="text-2xl font-black text-emerald-400 mt-1">{speakingResult.pronunciation}%</h5>
                           </div>
                           <div className="bg-white/2 rounded-2xl p-4 border border-white/5 text-center">
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Rhythm / Tempo</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Nhịp điệu / Tốc độ</span>
                             <h5 className="text-2xl font-black text-amber-500 mt-1">{speakingResult.rhythm}%</h5>
                           </div>
                           <div className="bg-white/2 rounded-2xl p-4 border border-white/5 text-center">
-                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Confidence</span>
+                            <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">Sự tự tin</span>
                             <h5 className="text-2xl font-black text-violet-400 mt-1">{speakingResult.confidence}%</h5>
                           </div>
                         </div>
@@ -543,7 +543,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
               <div className="flex items-center justify-between border-t border-white/5 pt-6 mt-8">
                 {combo > 1 && (
                   <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-amber-500 animate-bounce">
-                    <Zap size={14} fill="currentColor" /> Combo Streak x{combo}
+                    <Zap size={14} fill="currentColor" /> Combo Chuỗi liên tục x{combo}
                   </div>
                 )}
                 
@@ -552,7 +552,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                     onClick={handleNext}
                     className="px-6 py-3 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
                   >
-                    {currentIdx < activities.length - 1 ? "Next Node" : "Complete Lesson"} <ArrowRight size={14} />
+                    {currentIdx < activities.length - 1 ? "Tiếp theo" : "Hoàn thành bài học"} <ArrowRight size={14} />
                   </button>
                 </div>
               </div>
@@ -570,21 +570,21 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
               </div>
 
               <div className="space-y-3">
-                <Badge variant="violet" className="py-1 px-3 uppercase tracking-widest">Ritual Completed</Badge>
-                <h3 className="text-4xl font-display font-black text-white">Lesson Mastery Achieved</h3>
+                <Badge variant="violet" className="py-1 px-3 uppercase tracking-widest">Nghi thức Đã Hoàn Thành</Badge>
+                <h3 className="text-4xl font-display font-black text-white">Làm chủ Tiết học Thành công</h3>
                 <p className="text-secondary text-sm max-w-md mx-auto italic">
-                  Outstanding effort! You successfully completed all activities inside "{lesson.title}". Your skills are progressing rapidly.
+                  Nỗ lực xuất sắc! Em đã hoàn thành tất cả hoạt động của bài học "{lesson.title}". Các kỹ năng của em đang phát triển vượt bậc.
                 </p>
               </div>
 
               {/* XP and accuracy counters */}
               <div className="grid grid-cols-2 gap-8 max-w-sm w-full py-6 border-y border-white/5">
                 <div>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">XP Gained</span>
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">XP Nhận được</span>
                   <h4 className="text-3xl font-display font-black text-amber-500 mt-1">+{xpReward} XP</h4>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Session Score</span>
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Điểm buổi học</span>
                   <h4 className="text-3xl font-display font-black text-emerald-400 mt-1">
                     {activities.length > 0 ? Math.round((xpReward / (activities.length * 150)) * 100) : 100}%
                   </h4>
@@ -597,7 +597,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                   onClick={handleRestart}
                   className="px-6 py-3.5 rounded-2xl bg-white/5 border border-white/5 text-white/60 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2"
                 >
-                  <RefreshCw size={14} /> Retry Session
+                  <RefreshCw size={14} /> Luyện tập lại
                 </button>
                 <button 
                   onClick={() => {
@@ -609,7 +609,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                   }}
                   className="px-6 py-3.5 rounded-2xl bg-amber-500 text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform flex items-center gap-2"
                 >
-                  Continue Path <ArrowRight size={14} />
+                  Tiếp tục lộ trình <ArrowRight size={14} />
                 </button>
               </div>
             </motion.div>

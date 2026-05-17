@@ -2,17 +2,13 @@
 import Link from "next/link";
 import { 
   BookOpen, 
-  Tv, 
   Clock, 
   Mic, 
   Volume2, 
-  FileText,
   ChevronRight,
-  Play,
-  Award
+  Play
 } from "lucide-react";
 import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
 
 export default function LearnZone() {
   return (
@@ -22,9 +18,9 @@ export default function LearnZone() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2 p-4 rounded-xl border border-white/5 bg-gradient-to-r from-violet-950/10 via-black to-black flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-[8px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Continue learning</span>
+            <span className="text-[8px] font-mono font-bold tracking-widest text-violet-400 uppercase block">Tiếp tục học tập</span>
             <h4 className="text-xs font-bold text-white">Unit 1 Lesson 2: Household Chores</h4>
-            <span className="text-[9px] text-white/40 block">Vietnamese Ministry GD&ĐT National Standard Grade 10</span>
+            <span className="text-[9px] text-white/40 block">Lớp 10 - Giáo trình chuẩn quốc gia GD&ĐT Việt Nam</span>
           </div>
 
           <Link href="/learn/lesson/lesson-u1l2">
@@ -36,12 +32,12 @@ export default function LearnZone() {
 
         <Card className="p-4 border-white/5 bg-white/[0.01] flex items-center justify-between">
           <div className="space-y-0.5">
-            <span className="text-[8px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Active Coursework</span>
-            <h4 className="text-xs font-bold text-white">ENG10A1 Assigned task</h4>
+            <span className="text-[8px] font-mono font-bold tracking-widest text-amber-500 uppercase block">Nhiệm vụ đang giao</span>
+            <h4 className="text-xs font-bold text-white">Bài tập Lớp ENG10A1</h4>
           </div>
           <Link href="/classroom/eng10a1">
             <span className="text-[9px] font-mono font-bold text-white/40 hover:text-white cursor-pointer flex items-center gap-0.5">
-              Open <ChevronRight size={10} />
+              Mở <ChevronRight size={10} />
             </span>
           </Link>
         </Card>
@@ -49,13 +45,13 @@ export default function LearnZone() {
 
       {/* ─── GLOBAL SUCCESS CURRICULUM PATHS ─── */}
       <div className="space-y-3">
-        <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Global Success Curriculum</h3>
+        <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Lộ trình học theo SGK mới</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { grade: "Grade 10 Path", desc: "10 Units • National Standard", status: "Active Path", color: "text-violet-400", href: "/learn/grade/10" },
-            { grade: "Grade 11 Path", desc: "10 Units • High-School Prep", status: "Unlocked", color: "text-amber-500", href: "/learn/grade/11" },
-            { grade: "Grade 12 Path", desc: "8 Units • National Graduation", status: "Unlocked", color: "text-cyan-400", href: "/learn/grade/12" },
+            { grade: "Lộ trình Tiếng Anh Lớp 10", desc: "10 Unit học • Giáo trình chuẩn quốc gia", status: "Đang học tập", color: "text-violet-400", href: "/learn/grade/grade-10" },
+            { grade: "Lộ trình Tiếng Anh Lớp 11", desc: "10 Unit học • Bám sát cấu trúc ôn tập", status: "Đã mở khóa", color: "text-amber-500", href: "/learn/grade/grade-11" },
+            { grade: "Lộ trình Tiếng Anh Lớp 12", desc: "8 Unit học • Chinh phục kỳ thi Quốc gia", status: "Đã mở khóa", color: "text-cyan-400", href: "/learn/grade/grade-12" },
           ].map((path, idx) => (
             <Link key={idx} href={path.href}>
               <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors flex items-center justify-between gap-3 cursor-pointer group">
@@ -76,12 +72,12 @@ export default function LearnZone() {
         
         {/* Story Universes & Exams */}
         <div className="lg:col-span-2 space-y-3">
-          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Story Universes</h3>
+          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Vũ trụ câu chuyện điện ảnh</h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { title: "The Negotiation Chamber", tag: "Business English", img: "https://api.dicebear.com/7.x/identicon/svg?seed=negotiation" },
-              { title: "Midnight Telemetry", tag: "Tech & Science", img: "https://api.dicebear.com/7.x/identicon/svg?seed=telemetry" },
+              { title: "The Negotiation Chamber", tag: "Tiếng Anh Thương mại", img: "https://api.dicebear.com/7.x/identicon/svg?seed=negotiation" },
+              { title: "Midnight Telemetry", tag: "Công nghệ & Khoa học", img: "https://api.dicebear.com/7.x/identicon/svg?seed=telemetry" },
             ].map((story, idx) => (
               <Link key={idx} href="/stories">
                 <div className="rounded-xl overflow-hidden border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors cursor-pointer group flex">
@@ -91,7 +87,7 @@ export default function LearnZone() {
                   <div className="p-3 flex-1 flex flex-col justify-center">
                     <span className="text-[7px] font-mono font-bold text-violet-400 uppercase tracking-wider block">{story.tag}</span>
                     <h4 className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors mt-0.5 truncate max-w-[150px]">{story.title}</h4>
-                    <span className="text-[9px] text-white/30 mt-0.5 block">2 Chapters • 12 Active Nodes</span>
+                    <span className="text-[9px] text-white/30 mt-0.5 block">2 Chương • 12 Tiết học</span>
                   </div>
                 </div>
               </Link>
@@ -101,13 +97,13 @@ export default function LearnZone() {
 
         {/* Immersion Labs */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Immersion Labs</h3>
+          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest">Phòng thực hành chuyên sâu</h3>
 
           <div className="space-y-2">
             {[
-              { name: "Listening Lab", sub: "Dictation & Speed control", icon: Volume2, color: "text-violet-400", href: "/learn" },
-              { name: "AI Speaking Lab", sub: "Phoneme analysis", icon: Mic, color: "text-amber-500", href: "/coach" },
-              { name: "Exam Preparation", sub: "IELTS mocks & Timed tests", icon: Clock, color: "text-cyan-400", href: "/exam/ielts-foundation-test" },
+              { name: "Phòng Luyện Nghe", sub: "Nghe chép chính tả & Điều tốc", icon: Volume2, color: "text-violet-400", href: "/learn" },
+              { name: "Phòng Nói AI Coach", sub: "Phân tích âm vị và ngữ điệu nói", icon: Mic, color: "text-amber-500", href: "/coach" },
+              { name: "Phòng Luyện Thi IELTS", sub: "Thi thử IELTS & Khảo thí tính giờ", icon: Clock, color: "text-cyan-400", href: "/exam/ielts-foundation-test" },
             ].map((lab, idx) => (
               <Link key={idx} href={lab.href}>
                 <div className="p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:border-white/10 transition-colors flex items-center justify-between gap-3 cursor-pointer group">
