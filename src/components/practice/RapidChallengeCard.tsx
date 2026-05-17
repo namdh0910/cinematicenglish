@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Play, Volume2, Mic, Check } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import { getOrGenerateAudio } from "@/app/actions/audio";
 
 export interface ChallengeData {
   id: string;
@@ -28,6 +29,68 @@ export default function RapidChallengeCard({
   const [inputValue, setInputValue] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [loadingAudio, setLoadingAudio] = useState(false);
+
+  const playClientSpeech = (text: string, onEnd?: () => void) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.85; // slightly slower for clear dictation/reflex loop
+
+      const voices = window.speechSynthesis.getVoices();
+      const premiumVoice = voices.find(v => 
+        v.lang.startsWith('en') && 
+        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))
+      );
+      if (premiumVoice) utterance.voice = premiumVoice;
+      if (onEnd) utterance.onend = onEnd;
+      
+      window.speechSynthesis.speak(utterance);
+      return true;
+    }
+    return false;
+  };
+
+  const handlePlayAudio = async () => {
+    if (isPlaying) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlaying(false);
+      return;
+    }
+
+    const textToSpeak = challenge.correctAnswer;
+    setIsPlaying(true);
+    setLoadingAudio(true);
+
+    const res = await getOrGenerateAudio({
+      text: textToSpeak,
+      category: 'pronunciation',
+      voice: 'nova'
+    });
+
+    setLoadingAudio(false);
+    if (res.success && res.audioUrl) {
+      const audio = new Audio(res.audioUrl);
+      
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+
+      audio.addEventListener('error', () => {
+        playClientSpeech(textToSpeak, () => setIsPlaying(false));
+      });
+
+      audio.play().catch(() => {
+        playClientSpeech(textToSpeak, () => setIsPlaying(false));
+      });
+    } else {
+      playClientSpeech(textToSpeak, () => setIsPlaying(false));
+    }
+  };
 
   const handleSubmitText = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,9 +127,21 @@ export default function RapidChallengeCard({
           </h3>
         </div>
 
-        {challenge.audioUrl && (
-          <button className="p-3 rounded-xl bg-violet-600/10 border border-violet-500/20 text-violet-400 hover:bg-violet-600/20 transition-all shrink-0">
-            <Volume2 size={16} />
+        {(challenge.audioUrl || challenge.type === "dictation" || challenge.type === "shadow_repeat") && (
+          <button 
+            onClick={handlePlayAudio}
+            disabled={loadingAudio}
+            className={`p-3 rounded-xl border transition-all shrink-0 cursor-pointer ${
+              isPlaying 
+                ? "bg-amber-500/20 border-amber-500/30 text-amber-400 font-bold" 
+                : "bg-violet-600/10 border-violet-500/20 text-violet-400 hover:bg-violet-600/20"
+            }`}
+          >
+            {loadingAudio ? (
+              <div className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Volume2 size={16} className={isPlaying ? "animate-pulse" : ""} />
+            )}
           </button>
         )}
       </div>
