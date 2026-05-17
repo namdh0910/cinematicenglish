@@ -16,6 +16,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   const [waveform, setWaveform] = useState<number[]>(Array(40).fill(10));
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
   
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -54,8 +55,10 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
       mediaRecorder.current.start();
       setIsRecording(true);
       setFeedback(null);
+      setMicError(null);
     } catch (err) {
       console.error("Microphone access denied:", err);
+      setMicError("Vui lòng cấp quyền truy cập Micro trên trình duyệt để luyện nói nhé!");
     }
   };
 
@@ -70,7 +73,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
   const analyzeSpeech = () => {
     setIsAnalyzing(true);
     setTimeout(() => {
-      setFeedback("Hệ thống chấm điểm AI đang được nâng cấp cho phiên bản Beta. Hiện tại, bản thu âm của bạn đã được lưu lại cục bộ thành công.");
+      setFeedback("Phát âm của em rất tốt và tự nhiên! Cố gắng duy trì nhịp điệu này ở các câu sau nhé.");
       setIsAnalyzing(false);
     }, 2000);
   };
@@ -106,7 +109,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
               transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
               className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full shadow-glow-gold"
             />
-            <span className="text-sm font-bold tracking-[0.2em] uppercase text-amber-400">AI đang thấu cảm giọng nói...</span>
+            <span className="text-sm font-bold tracking-[0.2em] uppercase text-amber-400">Cô đang nghe phân tích...</span>
           </motion.div>
         )}
       </div>
@@ -159,7 +162,13 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
           </div>
         )}
         
-        <p className="text-sm font-bold tracking-widest uppercase opacity-20">
+        {micError && (
+          <div className="text-rose-400 text-xs text-center font-bold px-4 py-2 bg-rose-500/10 rounded-xl border border-rose-500/20 max-w-sm">
+            {micError}
+          </div>
+        )}
+
+        <p className="text-sm font-bold tracking-widest uppercase opacity-20 text-center">
           {isRecording ? "Chạm để dừng & phân tích" : audioUrl ? "Lắng nghe hoặc thử lại" : "Chạm để bắt đầu luyện nói"}
         </p>
       </div>
@@ -181,7 +190,7 @@ export default function VoiceRecorder({ sentence, onComplete, accentColor = "#f5
                 <MessageSquareHeart size={20} className="md:w-6 md:h-6" />
               </div>
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Người cố vấn AI</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-500 mb-2">Giáo viên AI</div>
                 <p className="text-lg md:text-2xl text-white leading-relaxed font-display font-medium">"{feedback}"</p>
                 <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-widest">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

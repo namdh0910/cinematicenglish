@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Loader2, GraduationCap } from 'lucide-react';
+import { Eye, EyeOff, Loader2, GraduationCap, Play } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 function LoginForm() {
@@ -56,7 +56,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-primary flex items-center justify-center p-4">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-[120px]" />
@@ -149,6 +149,13 @@ function LoginForm() {
             </button>
           </form>
 
+          {/* Guest Mode */}
+          <Link href="/demo">
+            <button className="w-full py-3 rounded-xl border border-white/10 bg-white/5 text-white font-bold text-sm hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
+              <Play size={16} className="text-amber-500" fill="currentColor" /> Học thử miễn phí
+            </button>
+          </Link>
+
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-white/10" />
@@ -180,7 +187,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-primary flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-primary flex items-center justify-center">
         <Loader2 className="animate-spin text-white/40" size={24} />
       </div>
     }>
