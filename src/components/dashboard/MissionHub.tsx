@@ -18,7 +18,12 @@ import {
   TrendingUp,
   RefreshCw,
   Sliders,
-  X
+  X,
+  Lock,
+  Eye,
+  SlidersHorizontal,
+  VolumeX,
+  Compass
 } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -56,8 +61,69 @@ export default function MissionHub({ progress }: MissionHubProps) {
   const [earnedXP, setEarnedXP] = useState(0);
   const [streakCombo, setStreakCombo] = useState(1);
 
-  // Fatigue & Recovery State
-  const [fatigueLevel, setFatigueLevel] = useState("Calm & Focused");
+  // Fatigue & Tomorrow Engine States
+  const [holdReveal, setHoldReveal] = useState(false);
+  const [countdownText, setCountdownText] = useState("13:58:24");
+  const [tomorrowMode, setTomorrowMode] = useState<{
+    chamber: string;
+    difficulty: number;
+    tone: string;
+    glow: string;
+    description: string;
+    reminder: string;
+  }>({
+    chamber: "The Negotiation Chamber",
+    difficulty: 4,
+    tone: "High Intensity Debate",
+    glow: "rgba(139, 92, 246, 0.4)", // Violet
+    description: "Prepare to engage in timed persuasion scripts with direct AI assessment.",
+    reminder: "The silence is waiting for your voice again."
+  });
+
+  // Calculate live countdown timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const tomorrow = new Date();
+      tomorrow.setHours(24, 0, 0, 0); // Next midnight
+      const diff = tomorrow.getTime() - now.getTime();
+      
+      const hrs = Math.floor(diff / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      setCountdownText(
+        `${hrs < 10 ? '0' : ''}${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`
+      );
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Tomorrow Engine: Recovery Intelligence calculation
+  // Determines tomorrow's parameters based on today's ritual score
+  const runTomorrowEngineForecast = (score: number) => {
+    if (score < 80) {
+      // High fatigue / burnout risk -> Restorative calm session tomorrow
+      setTomorrowMode({
+        chamber: "The Ambient Whispers",
+        difficulty: 2,
+        tone: "Restorative Cadence",
+        glow: "rgba(16, 185, 129, 0.4)", // Emerald
+        description: "A calming low-pressure dialogue to absorb natural accent rhythms and rebuild trust.",
+        reminder: "Soft footsteps lead to quiet confidence tomorrow."
+      });
+    } else {
+      // High energy competence -> High stakes Quest tomorrow
+      setTomorrowMode({
+        chamber: "The Negotiation Chamber",
+        difficulty: 4,
+        tone: "High Intensity Persuasion",
+        glow: "rgba(245, 200, 66, 0.4)", // Gold
+        description: "A timed rapid debate challenge targeting speaking pressure and cadence control.",
+        reminder: "The silence is waiting for your voice again."
+      });
+    }
+  };
 
   // Timer loop for Node 3 (Exam Sprint)
   useEffect(() => {
@@ -99,10 +165,9 @@ export default function MissionHub({ progress }: MissionHubProps) {
     setTimeout(() => {
       setIsRecording(false);
       setRecordingSuccess(true);
-      setSpeechScores({
-        accuracy: Math.floor(Math.random() * 10) + 88,
-        rhythm: Math.floor(Math.random() * 15) + 80
-      });
+      const acc = Math.floor(Math.random() * 10) + 88;
+      const rhy = Math.floor(Math.random() * 15) + 80;
+      setSpeechScores({ accuracy: acc, rhythm: rhy });
       setEarnedXP(prev => prev + 150);
       setStreakCombo(prev => prev + 1);
     }, 2500);
@@ -125,6 +190,9 @@ export default function MissionHub({ progress }: MissionHubProps) {
     if (activeNode < 2) {
       setActiveNode(prev => prev + 1);
     } else {
+      // Calculate overall ritual score (accuracy math)
+      const mockScore = speechScores ? Math.floor((speechScores.accuracy + 92) / 2) : 92;
+      runTomorrowEngineForecast(mockScore);
       setRitualCompleted(true);
     }
   };
@@ -455,43 +523,114 @@ export default function MissionHub({ progress }: MissionHubProps) {
                     </div>
                   </motion.div>
                 ) : (
-                  /* RITUAL COMPLETED CEREMONY */
+                  /* RITUAL COMPLETED CEREMONY (INTEGRATING TOMORROW ENGINE V1) */
                   <motion.div
                     key="ceremony"
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-8 p-8"
+                    className="text-center space-y-8 p-6 md:p-8"
                   >
-                    <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto shadow-glow-gold animate-pulse">
-                      <Award size={40} />
+                    {/* Subtle Celebration Badge & Reflection */}
+                    <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center mx-auto shadow-glow-gold">
+                      <Award size={32} />
                     </div>
 
                     <div className="space-y-2">
                       <Badge variant="violet" className="py-1 px-3">Identity Recharged</Badge>
-                      <h2 className="text-3xl md:text-4xl font-display font-black text-white">Daily Ritual Complete</h2>
-                      <p className="text-secondary text-sm max-w-sm mx-auto italic">
-                        "Luyện tập không phải là nghĩa vụ, đó là nghi thức kết nối bạn với sự tự tin sâu thẳm."
+                      <h2 className="text-3xl font-display font-black text-white">Ritual Completed</h2>
+                      <p className="text-secondary text-sm max-w-md mx-auto italic">
+                        "{tomorrowMode.reminder}"
                       </p>
                     </div>
 
-                    {/* Stats results block */}
-                    <div className="rounded-3xl border border-white/5 bg-[#141414]/60 p-6 max-w-sm mx-auto grid grid-cols-2 gap-4">
+                    {/* Today's Results block */}
+                    <div className="rounded-3xl border border-white/5 bg-[#141414]/60 p-5 max-w-sm mx-auto grid grid-cols-2 gap-4">
                       <div>
                         <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest block">XP Gained</span>
-                        <h4 className="text-2xl font-black text-amber-500">+{earnedXP} XP</h4>
+                        <h4 className="text-xl font-black text-amber-400">+{earnedXP} XP</h4>
                       </div>
                       <div>
-                        <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest block">Ritual Score</span>
-                        <h4 className="text-2xl font-black text-emerald-400">92%</h4>
+                        <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest block">Accuracy Score</span>
+                        <h4 className="text-xl font-black text-emerald-400">
+                          {speechScores ? speechScores.accuracy : 92}%
+                        </h4>
                       </div>
                     </div>
 
-                    {/* Next unlocked preview message */}
-                    <div className="max-w-xs mx-auto p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] font-bold text-white/30 uppercase tracking-wider flex items-center justify-center gap-2">
-                      <Clock size={12} /> Next Daily Ritual unlocks in 14 hours
+                    {/* ─── TOMORROW ENGINE VAULT CHAMBER ─── */}
+                    <div className="max-w-md mx-auto rounded-[32px] border border-white/5 bg-gradient-to-b from-[#11111e] to-black p-6 relative overflow-hidden space-y-4">
+                      {/* Aura Color Indicator leak */}
+                      <div 
+                        className="absolute inset-0 rounded-full blur-[80px] pointer-events-none opacity-20 transition-all duration-700" 
+                        style={{ backgroundColor: tomorrowMode.glow }}
+                      />
+
+                      <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                        <span className="text-[9px] font-black text-white/30 uppercase tracking-wider flex items-center gap-1.5">
+                          <Lock size={10} /> Tomorrow's locked Chamber
+                        </span>
+                        
+                        <span className="font-mono text-xs font-bold text-amber-500 flex items-center gap-1">
+                          <Clock size={12} className="animate-spin" style={{ animationDuration: "10s" }} /> {countdownText}
+                        </span>
+                      </div>
+
+                      {/* Locked Content View */}
+                      <AnimatePresence mode="wait">
+                        {!holdReveal ? (
+                          <motion.div 
+                            key="locked"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="py-6 flex flex-col items-center justify-center gap-3 cursor-pointer group"
+                            onClick={() => setHoldReveal(true)}
+                          >
+                            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                              <Lock size={20} className="text-white/40 group-hover:text-amber-500 transition-colors" />
+                            </div>
+                            <h4 className="text-xs font-bold text-white/40 tracking-widest uppercase">Click to Foreshadow tomorrow</h4>
+                            <p className="text-[10px] text-white/20 italic">Zeigarnik anticipation hook ready</p>
+                          </motion.div>
+                        ) : (
+                          <motion.div 
+                            key="revealed"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-left space-y-4 py-2 relative z-10"
+                          >
+                            <div className="flex justify-between items-start gap-4">
+                              <div className="space-y-1">
+                                <span className="text-[9px] font-black text-violet-400 uppercase tracking-widest">{tomorrowMode.tone}</span>
+                                <h4 className="text-lg font-display font-black text-white">{tomorrowMode.chamber}</h4>
+                              </div>
+                              <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <div 
+                                    key={star} 
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      star <= tomorrowMode.difficulty ? "bg-amber-400" : "bg-white/10"
+                                    }`} 
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <p className="text-xs text-white/60 leading-relaxed italic border-l-2 border-white/10 pl-3">
+                              "{tomorrowMode.description}"
+                            </p>
+
+                            <div className="flex justify-between items-center text-[9px] font-bold text-white/30 uppercase tracking-widest pt-2 border-t border-white/5">
+                              <span>Mood: Calming Ocean Ambient</span>
+                              <span>Target: 150 XP</span>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
-                    <div className="pt-4">
+                    {/* Returning Controls */}
+                    <div className="pt-2">
                       <button
                         onClick={() => {
                           setActiveRitual(false);
