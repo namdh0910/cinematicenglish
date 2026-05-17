@@ -8,11 +8,10 @@ import Button from "./ui/Button";
 const navLinks = [
   { label: "Thư viện", href: "/stories" },
   { label: "Học tập", href: "/learn" },
+  { label: "Lớp học", href: "/classroom/eng10a1" },
   { label: "HLV Phát Âm", href: "/coach" },
   { label: "Trò chuyện", href: "/chat" },
-  { label: "Khám phá", href: "/feed" },
-  { label: "Cộng đồng", href: "/community" },
-  { label: "Bảng giá", href: "/#pricing" },
+  { label: "Giáo viên", href: "/teacher" },
 ];
 
 export default function Navbar() {
