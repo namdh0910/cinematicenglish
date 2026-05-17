@@ -7,6 +7,17 @@ interface AtmosphereLayerProps {
   isFocusMode: boolean;
 }
 
+// Pre-compute particle data at module level — deterministic, no Math.random() in render.
+// This prevents SSR/CSR hydration mismatch.
+const PARTICLE_DATA = Array.from({ length: 12 }, (_, i) => ({
+  x: (i * 83 + 17) % 100,
+  y: (i * 61 + 29) % 100,
+  opacity: 0.05 + ((i * 7) % 25) / 100,
+  yMove: -((i * 53 + 40) % 80) - 30,
+  duration: 10 + ((i * 31) % 10),
+  delay: ((i * 19) % 50) / 10,
+}));
+
 export default function AtmosphereLayer({ mood, isFocusMode }: AtmosphereLayerProps) {
   const { atmosphere } = useAdaptive();
 
@@ -35,8 +46,12 @@ export default function AtmosphereLayer({ mood, isFocusMode }: AtmosphereLayerPr
       {/* Dynamic Glow */}
       <motion.div
         animate={{
-          scale: [1, 1.1 + (atmosphere.glowIntensity * 0.2), 1],
-          opacity: [0.3 * atmosphere.glowIntensity, 0.6 * atmosphere.glowIntensity, 0.3 * atmosphere.glowIntensity],
+          scale: [1, 1.1 + atmosphere.glowIntensity * 0.2, 1],
+          opacity: [
+            0.3 * atmosphere.glowIntensity,
+            0.6 * atmosphere.glowIntensity,
+            0.3 * atmosphere.glowIntensity,
+          ],
         }}
         transition={{
           duration: 8 / atmosphere.motionPacing,
@@ -58,25 +73,25 @@ export default function AtmosphereLayer({ mood, isFocusMode }: AtmosphereLayerPr
         )}
       </AnimatePresence>
 
-      {/* Subtle Particles */}
-      <div className="absolute inset-0 z-0">
-        {Array.from({ length: 20 }).map((_, i) => (
+      {/* Subtle Particles — hidden on mobile for GPU performance */}
+      <div className="absolute inset-0 z-0 hidden sm:block">
+        {PARTICLE_DATA.map((p, i) => (
           <motion.div
             key={i}
-            initial={{ 
-              x: Math.random() * 100 + "%", 
-              y: Math.random() * 100 + "%",
-              opacity: Math.random() * 0.3
+            initial={{
+              x: `${p.x}%`,
+              y: `${p.y}%`,
+              opacity: p.opacity,
             }}
             animate={{
-              y: [null, (Math.random() * -100 - 50) + "px"],
-              opacity: [null, 0],
+              y: [`${p.y}%`, `${p.yMove}px`],
+              opacity: [p.opacity, 0],
             }}
             transition={{
-              duration: (Math.random() * 10 + 10) / atmosphere.motionPacing,
+              duration: p.duration / atmosphere.motionPacing,
               repeat: Infinity,
               ease: "linear",
-              delay: Math.random() * 5,
+              delay: p.delay,
             }}
             className={`absolute w-1 h-1 rounded-full ${current.particles} transition-all duration-[2000ms]`}
           />
@@ -84,8 +99,8 @@ export default function AtmosphereLayer({ mood, isFocusMode }: AtmosphereLayerPr
       </div>
 
       {/* Cinematic Film Grain */}
-      <div 
-        className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] transition-opacity duration-[2000ms]" 
+      <div
+        className="absolute inset-0 pointer-events-none mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')] transition-opacity duration-[2000ms]"
         style={{ opacity: atmosphere.grainOpacity }}
       />
     </div>

@@ -5,80 +5,98 @@ import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   let res = NextResponse.next({
-    request: {
-      headers: req.headers,
-    },
+    request: { headers: req.headers },
   })
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  // If environment variables are missing (e.g. during build or before config), 
-  // bypass middleware to prevent 500 errors.
+  // If env vars missing, only block admin routes (skip student routes gracefully)
   if (!supabaseUrl || !supabaseAnonKey) {
-    return res
-  }
-
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          req.cookies.set({ name, value, ...options })
-          res = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          res.cookies.set({ name, value, ...options })
-        },
-        remove(name: string, options: any) {
-          req.cookies.set({ name, value: '', ...options })
-          res = NextResponse.next({
-            request: {
-              headers: req.headers,
-            },
-          })
-          res.cookies.set({ name, value: '', ...options })
-        },
-      },
-    }
-  )
-
-  const { data: { session } } = await supabase.auth.getSession()
-
-  // 1. Not logged in → redirect to admin login
-  if (!session && req.nextUrl.pathname.startsWith('/admin')) {
-    if (req.nextUrl.pathname !== '/admin/login') {
+    if (req.nextUrl.pathname.startsWith('/admin') &&
+        req.nextUrl.pathname !== '/admin/login') {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
     return res
   }
 
-  // 2. Logged in but accessing admin routes → check role
-    // Master Admin Bypass
-    if (session?.user?.email === 'admin@cinematicenglish.com') {
-      return res
+  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) { return req.cookies.get(name)?.value },
+      set(name: string, value: string, options: any) {
+        req.cookies.set({ name, value, ...options })
+        res = NextResponse.next({ request: { headers: req.headers } })
+        res.cookies.set({ name, value, ...options })
+      },
+      remove(name: string, options: any) {
+        req.cookies.set({ name, value: '', ...options })
+        res = NextResponse.next({ request: { headers: req.headers } })
+        res.cookies.set({ name, value: '', ...options })
+      },
+    },
+  })
+
+  const { data: { session } } = await supabase.auth.getSession()
+  const url = req.nextUrl.clone()
+
+  // ─── STUDENT/TEACHER ROUTES ───────────────────────────────────────────────
+  // Protect /dashboard, /learn, /practice, /teacher, /classroom
+  const protectedStudentRoutes = ['/dashboard', '/practice', '/classroom']
+  const isProtectedStudent = protectedStudentRoutes.some(r => url.pathname.startsWith(r))
+
+  if (!session && isProtectedStudent) {
+    url.pathname = '/login'
+    url.searchParams.set('from', req.nextUrl.pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Protect /teacher — requires teacher or admin role
+  if (session && url.pathname.startsWith('/teacher')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile || (profile.role !== 'teacher' && profile.role !== 'admin')) {
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
     }
+  }
 
-    if (session?.user?.id) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single()
+  // Redirect logged-in users away from login/signup
+  if (session && (url.pathname === '/login' || url.pathname === '/signup')) {
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
 
-      if (!profile || profile.role !== 'admin') {
-        return NextResponse.redirect(new URL('/', req.url))
-      }
+  // ─── ADMIN ROUTES ─────────────────────────────────────────────────────────
+  if (!session && url.pathname.startsWith('/admin')) {
+    if (url.pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', req.url))
     }
+    return res
+  }
 
-  // 3. Already logged in + going to /admin/login → redirect to dashboard
-  if (session && req.nextUrl.pathname === '/admin/login') {
+  // Master Admin Bypass
+  if (session?.user?.email === 'admin@cinematicenglish.com') {
+    return res
+  }
+
+  if (session?.user?.id && url.pathname.startsWith('/admin')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile || profile.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', req.url))
+    }
+  }
+
+  // Already logged in → redirect away from admin login
+  if (session && url.pathname === '/admin/login') {
     return NextResponse.redirect(new URL('/admin', req.url))
   }
 
@@ -86,5 +104,15 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*']
+  matcher: [
+    '/admin/:path*',
+    '/dashboard/:path*',
+    '/dashboard',
+    '/teacher/:path*',
+    '/teacher',
+    '/classroom/:path*',
+    '/practice/:path*',
+    '/login',
+    '/signup',
+  ]
 }

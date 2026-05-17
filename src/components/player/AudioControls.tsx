@@ -46,25 +46,24 @@ export default function AudioControls({
           onSeek(pct * duration);
         }}>
           <div className="absolute inset-0 flex items-center gap-1 opacity-20">
-            {Array.from({ length: 60 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="flex-1 bg-white rounded-full" 
-                style={{ height: `${Math.random() * 60 + 20}%` }} 
-              />
-            ))}
+            {Array.from({ length: 60 }).map((_, i) => {
+              // Deterministic heights seeded from index — no hydration mismatch
+              const h = 20 + ((i * 37 + 13) % 60);
+              return (
+                <div key={i} className="flex-1 bg-white rounded-full" style={{ height: `${h}%` }} />
+              );
+            })}
           </div>
           <motion.div 
             className="absolute inset-0 flex items-center gap-1 overflow-hidden"
             style={{ width: `${progress}%` }}
           >
-            {Array.from({ length: 60 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="flex-1 bg-amber-400 rounded-full" 
-                style={{ height: `${Math.random() * 60 + 20}%` }} 
-              />
-            ))}
+            {Array.from({ length: 60 }).map((_, i) => {
+              const h = 20 + ((i * 37 + 13) % 60);
+              return (
+                <div key={i} className="flex-1 bg-amber-400 rounded-full" style={{ height: `${h}%` }} />
+              );
+            })}
           </motion.div>
           
           {/* Progress Handle */}
