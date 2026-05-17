@@ -9,7 +9,7 @@ import Card from "@/components/ui/Card";
 
 export default function PracticePage() {
   return (
-    <div className="bg-[#050508] min-h-screen text-white">
+    <div className="bg-primary min-h-screen text-white">
       <Navbar />
       
       <main className="pt-28 pb-20">
@@ -19,7 +19,7 @@ export default function PracticePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <Link href="/dashboard">
               <span className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
-                <ChevronLeft size={14} /> Back to Dashboard
+                <ChevronLeft size={14} /> Về Bảng điều khiển
               </span>
             </Link>
 
@@ -32,7 +32,7 @@ export default function PracticePage() {
 
           {/* Title Header */}
           <div className="border-b border-white/5 pb-6 space-y-2">
-            <h1 className="text-3xl font-display font-black text-white">Rapid Practice Engine</h1>
+            <h1 className="text-3xl font-display font-black text-white">Hệ thống Luyện phản xạ</h1>
             <p className="text-xs text-white/40 max-w-xl leading-relaxed">
               Trình luyện tập thần tốc 500ms. Phục hồi phát âm yếu, củng cố vốn từ vựng và cải thiện nhịp điệu giao tiếp liên tục không gián đoạn.
             </p>
@@ -50,7 +50,7 @@ export default function PracticePage() {
             <aside className="space-y-4">
               <Card className="p-5 border-white/5 bg-white/[0.01] space-y-3">
                 <h4 className="text-[10px] font-mono font-bold tracking-widest text-amber-500 uppercase flex items-center gap-1.5">
-                  <Info size={12} /> Practice Regulations
+                  <Info size={12} /> Quy định luyện tập
                 </h4>
 
                 <div className="space-y-2.5 text-xs text-white/60 leading-relaxed">

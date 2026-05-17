@@ -329,7 +329,7 @@ export default function HomePage() {
           <div className="relative z-10">
             <h2 className="text-display mb-4">
               Hành Trình Tiếng Anh Của Bạn<br />
-              Bắt Đầu <span className="gradient-text-gold">Ngay Đêm Ngay</span>
+              Bắt Đầu <span className="gradient-text-gold">Ngay Hôm Nay</span>
             </h2>
             <p className="text-lg mb-10 max-w-xl mx-auto text-secondary">
               Gia nhập cùng hơn 380,000 học viên đã chọn những câu chuyện thay vì sách giáo khoa. Không cần thẻ tín dụng.
@@ -373,10 +373,10 @@ export default function HomePage() {
             <span className="font-display font-bold text-lg">Cinematic<span className="gradient-text-gold">English</span></span>
           </div>
           <div className="flex gap-6 text-sm text-secondary">
-            <Link href="#" className="hover:text-white transition-colors">Bảo mật</Link>
-            <Link href="#" className="hover:text-white transition-colors">Điều khoản</Link>
-            <Link href="#" className="hover:text-white transition-colors">Blog</Link>
-            <Link href="#" className="hover:text-white transition-colors">Liên hệ</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">Bảo mật</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Điều khoản</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+            <Link href="/contact" className="hover:text-white transition-colors">Liên hệ</Link>
           </div>
           <div className="text-sm text-muted">
             © 2025 Cinematic English. All rights reserved.

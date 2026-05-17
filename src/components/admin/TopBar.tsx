@@ -10,7 +10,7 @@ export default function TopBar() {
   const pathParts = pathname.split('/').filter(Boolean);
   const pageTitle = pathParts.length > 1 
     ? pathParts[pathParts.length - 1].charAt(0).toUpperCase() + pathParts[pathParts.length - 1].slice(1)
-    : "Dashboard Overview";
+    : "Tổng quan hệ thống";
 
   return (
     <header className="sticky top-0 z-50 w-full h-[72px] bg-[#0f0f0f]/80 backdrop-blur-xl border-b border-white/5 px-8 flex items-center justify-between">

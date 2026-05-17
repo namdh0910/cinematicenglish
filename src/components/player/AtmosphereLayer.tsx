@@ -23,7 +23,7 @@ export default function AtmosphereLayer({ mood, isFocusMode }: AtmosphereLayerPr
 
   const moodStyles = {
     'the-void': {
-      bg: "bg-[#050508]",
+      bg: "bg-primary",
       glow: "from-violet-500/20 to-transparent",
       particles: "bg-violet-400/10",
     },

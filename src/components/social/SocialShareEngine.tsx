@@ -61,7 +61,7 @@ export default function SocialShareEngine({ storyTitle, hookText, identity, onCl
 
         {/* Preview Area */}
         <div className="p-6">
-          <div className="aspect-[9/16] max-h-[400px] w-full mx-auto relative rounded-2xl overflow-hidden bg-[#050508] border border-white/10 flex items-center justify-center p-8 group">
+          <div className="aspect-[9/16] max-h-[400px] w-full mx-auto relative rounded-2xl overflow-hidden bg-primary border border-white/10 flex items-center justify-center p-8 group">
             {/* Background Effect */}
             <div className={`absolute inset-0 opacity-30 transition-all duration-700 ${
               activeTab === 'quote' ? 'bg-gradient-to-br from-violet-900/50 via-transparent to-transparent' :

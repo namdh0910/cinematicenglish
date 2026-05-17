@@ -46,7 +46,7 @@ export default function SpeakingAnalytics() {
   const [history, setHistory] = useState<VoiceHistoryPoint[]>(MOCK_HISTORY);
 
   return (
-    <div className="bg-[#050508] min-h-screen text-white">
+    <div className="bg-primary min-h-screen text-white">
       <Navbar />
       
       <main className="pt-28 pb-20">
@@ -56,7 +56,7 @@ export default function SpeakingAnalytics() {
           <div>
             <Link href="/dashboard">
               <span className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
-                <ChevronLeft size={14} /> Back to Protagonist Dashboard
+                <ChevronLeft size={14} /> Về Bảng điều khiển
               </span>
             </Link>
           </div>

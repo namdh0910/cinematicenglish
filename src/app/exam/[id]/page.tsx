@@ -169,7 +169,7 @@ export default function ExamPlayer({ params }: { params: Promise<{ id: string }>
   };
 
   return (
-    <div className="bg-[#050508] min-h-screen text-white flex flex-col font-sans antialiased">
+    <div className="bg-primary min-h-screen text-white flex flex-col font-sans antialiased">
       
       {/* ─── FULL SCREEN FOCUS HEADER ─── */}
       <header className="border-b border-white/5 bg-[#08080c] px-6 py-4 flex items-center justify-between">
@@ -259,7 +259,7 @@ export default function ExamPlayer({ params }: { params: Promise<{ id: string }>
               <div className="pt-4">
                 <Link href="/dashboard">
                   <span className="px-6 py-3 rounded-xl bg-white text-black font-black uppercase tracking-widest text-[10px] hover:bg-amber-400 transition-colors cursor-pointer">
-                    Return to Dashboard
+                    Về Bảng điều khiển
                   </span>
                 </Link>
               </div>

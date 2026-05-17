@@ -37,7 +37,7 @@ const navGroups = [
       { icon: BookOpen, label: "Câu chuyện", href: "/admin/stories" },
       { icon: GraduationCap, label: "Bài học", href: "/admin/curriculum" },
       { icon: HelpCircle, label: "Bài luyện", href: "/admin/quizzes" },
-      { icon: BookOpen, label: "Từ vựng", href: "#" },
+      { icon: BookOpen, label: "Từ vựng", href: "/admin/vocabulary" },
       { icon: Bot, label: "Nhân vật", href: "/admin/characters" },
     ]
   },
@@ -45,9 +45,9 @@ const navGroups = [
     title: "LỚP HỌC",
     items: [
       { icon: Users, label: "Lớp học", href: "/teacher/classroom" },
-      { icon: Users, label: "Giáo viên", href: "#" },
+      { icon: Users, label: "Giáo viên", href: "/admin/teachers" },
       { icon: Users, label: "Học sinh", href: "/admin/users" },
-      { icon: BookOpen, label: "Bài giao", href: "#" },
+      { icon: BookOpen, label: "Bài giao", href: "/admin/assignments" },
     ]
   },
   {

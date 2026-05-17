@@ -71,7 +71,7 @@ function SignupForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-primary flex items-center justify-center p-4">
         <div className="w-full max-w-sm text-center space-y-6">
           <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto">
             <CheckCircle2 size={32} className="text-emerald-400" />
@@ -92,7 +92,7 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050508] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-primary flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/8 rounded-full blur-[120px]" />
       </div>
@@ -246,7 +246,7 @@ function SignupForm() {
 export default function SignupPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <Loader2 className="animate-spin text-white/40" size={24} />
       </div>
     }>

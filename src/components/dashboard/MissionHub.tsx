@@ -312,7 +312,7 @@ export default function MissionHub({ progress }: MissionHubProps) {
             initial={{ opacity: 0, scale: 0.98 }} 
             animate={{ opacity: 1, scale: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[#050508] p-6 md:p-12 overflow-y-auto flex flex-col justify-between"
+            className="fixed inset-0 z-50 bg-primary p-6 md:p-12 overflow-y-auto flex flex-col justify-between"
           >
             {/* Header ritual top bar */}
             <div className="flex items-center justify-between border-b border-white/5 pb-4">

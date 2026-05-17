@@ -72,7 +72,7 @@ export default function TeacherClassroomDetails({ params }: { params: Promise<{ 
   );
 
   return (
-    <div className="bg-[#050508] min-h-screen text-white">
+    <div className="bg-primary min-h-screen text-white">
       <Navbar />
       
       <main className="pt-28 pb-20">

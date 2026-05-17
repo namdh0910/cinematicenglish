@@ -32,20 +32,20 @@ export default function SessionSummary({
           <Award size={32} />
         </div>
         <span className="text-[10px] font-mono font-bold tracking-widest text-violet-400 uppercase">
-          Practice Loop Completed
+          Hoàn thành lượt luyện tập
         </span>
         <h2 className="text-2xl font-display font-black text-white">
-          Session Mastery Acquired
+          Hoàn thành Xuất sắc
         </h2>
       </div>
 
       {/* ─── METRIC SCOREBOARD ─── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
         {[
-          { label: "XP Gained", value: `+${xpGained}`, color: "text-amber-500" },
-          { label: "Overall Accuracy", value: `${accuracy}%`, color: "text-emerald-400" },
-          { label: "Speech Pacing", value: `${wpm} WPM`, color: "text-cyan-400" },
-          { label: "Missions Resolved", value: `${score}/${total}`, color: "text-violet-400" },
+          { label: "XP Nhận được", value: `+${xpGained}`, color: "text-amber-500" },
+          { label: "Độ chính xác", value: `${accuracy}%`, color: "text-emerald-400" },
+          { label: "Tốc độ nói", value: `${wpm} WPM`, color: "text-cyan-400" },
+          { label: "Nhiệm vụ xong", value: `${score}/${total}`, color: "text-violet-400" },
         ].map((stat, i) => (
           <div key={i} className="p-4 rounded-xl border border-white/5 bg-white/[0.01]">
             <span className="text-[8px] font-mono font-bold tracking-widest text-white/30 uppercase block">
@@ -62,7 +62,7 @@ export default function SessionSummary({
       {weakTags.length > 0 && (
         <div className="p-4 rounded-xl border border-white/5 bg-white/[0.01] text-left space-y-2">
           <span className="text-[8px] font-mono font-bold tracking-widest text-amber-500 uppercase block">
-            AI Weakness Recovery Tagged
+            AI ghi nhận Điểm cần khắc phục
           </span>
           <div className="flex flex-wrap gap-2">
             {weakTags.map((tag, i) => (
@@ -83,12 +83,12 @@ export default function SessionSummary({
           onClick={onReset}
           className="px-6 py-3.5 rounded-xl bg-white hover:bg-amber-400 text-black text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <RefreshCw size={12} /> Practice Another Loop
+          <RefreshCw size={12} /> Luyện thêm lượt nữa
         </button>
 
         <Link href="/dashboard">
           <span className="px-6 py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-white text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
-            <Home size={12} /> Dashboard Home
+            <Home size={12} /> Trang chủ
           </span>
         </Link>
       </div>

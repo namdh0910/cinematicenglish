@@ -107,29 +107,29 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
   return (
     <div className="space-y-8">
       {/* Quiz Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h3 className="text-xl font-bold flex items-center gap-3">
-          <HelpCircle size={24} className="text-blue-400" /> Attached Quiz ({questions.length})
+          <HelpCircle size={24} className="text-blue-400" /> Bài tập đính kèm ({questions.length})
         </h3>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <button 
             type="button"
             onClick={generateWithAI}
             disabled={isGenerating}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-bold uppercase tracking-widest hover:bg-violet-500/20 transition-all disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-bold uppercase tracking-widest hover:bg-violet-500/20 transition-all disabled:opacity-50"
           >
             {isGenerating ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-            Generate with AI
+            Tạo bằng AI
           </button>
           
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <button 
               type="button"
               onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-glow-blue"
+              className="flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500 text-white text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-glow-blue"
             >
-              <Plus size={14} strokeWidth={3} /> Add Question
+              <Plus size={14} strokeWidth={3} /> Thêm câu hỏi
             </button>
             
             <AnimatePresence>
@@ -193,7 +193,7 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
 
               {/* Question Input */}
               <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Question Text</label>
+                <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Nội dung câu hỏi</label>
                 <input 
                   type="text"
                   value={q.question}
@@ -206,7 +206,7 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
               {/* Conditional Options Input */}
               {['multiple_choice', 'true_false', 'listen_choose'].includes(q.type) && (
                 <div className="space-y-4">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Answer Options</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Các đáp án</label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {q.options.map((opt, optIdx) => (
                       <div key={optIdx} className="flex items-center gap-3 group/opt">
@@ -240,7 +240,7 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
               {/* Fill in the Blank Input */}
               {q.type === 'fill_blank' && (
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Correct Answer (Word)</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Đáp án đúng (Từ)</label>
                   <input 
                     type="text"
                     value={q.correctAnswer as string}
@@ -255,7 +255,7 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-6 border-t border-white/5">
                 <div className="md:col-span-3 space-y-2">
                   <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4 flex items-center gap-2">
-                    <Info size={12} /> Explanation
+                    <Info size={12} /> Giải thích
                   </label>
                   <textarea 
                     value={q.explanation}
@@ -266,7 +266,7 @@ export default function QuizBuilder({ transcript, onUpdate }: QuizBuilderProps) 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Points</label>
+                  <label className="text-[10px] uppercase font-bold tracking-widest text-white/30 ml-4">Điểm số</label>
                   <div className="relative">
                     <Zap className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500/50" size={14} />
                     <input 

@@ -67,7 +67,7 @@ export default function Navbar() {
           {/* CTAs */}
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard'}>
-              Dashboard
+              Bảng điều khiển
             </Button>
             <Button variant="primary" size="sm" onClick={() => window.location.href = '/#pricing'}>
               Gói Pro
@@ -107,7 +107,7 @@ export default function Navbar() {
               ))}
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <Button variant="ghost" fullWidth onClick={() => { setOpen(false); window.location.href='/dashboard'; }}>
-                  Dashboard
+                  Bảng điều khiển
                 </Button>
                 <Button variant="primary" fullWidth onClick={() => { setOpen(false); window.location.href='/#pricing'; }}>
                   Gói Pro

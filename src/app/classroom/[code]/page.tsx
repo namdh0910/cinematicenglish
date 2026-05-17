@@ -39,7 +39,7 @@ function JoinClassroomContent() {
   }, [code, router]);
 
   return (
-    <div className="min-h-screen bg-[#050508] flex items-center justify-center p-6">
+    <div className="min-h-screen bg-primary flex items-center justify-center p-6">
       <div className="w-full max-w-sm text-center space-y-6">
         {/* Logo */}
         <div className="w-16 h-16 rounded-2xl bg-violet-600/10 border border-violet-500/20 flex items-center justify-center mx-auto">
@@ -127,7 +127,7 @@ function JoinClassroomContent() {
 export default function JoinClassroomPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#050508] flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <Loader2 className="animate-spin text-white/40" size={24} />
       </div>
     }>

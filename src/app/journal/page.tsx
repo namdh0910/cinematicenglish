@@ -13,7 +13,7 @@ export default function CinematicJournal() {
   const memories: Memory[] = [];
 
   return (
-    <div className="min-h-screen bg-[#050508] text-white selection:bg-violet-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-primary text-white selection:bg-violet-500/30 overflow-x-hidden">
       {/* Immersive Background */}
       <AtmosphereLayer mood={activeMemory?.mood || 'the-void'} isFocusMode={false} />
 
