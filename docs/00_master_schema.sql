@@ -1,5 +1,11 @@
+-- =========================================================================
+-- CINEMATIC ENGLISH — SYSTEM DATABASE MASTER SCHEMA (PRODUCTION READY)
+-- =========================================================================
+
+-- ─── 1. CORE SYSTEM TABLES ────────────────────────────────────────────────
+
 -- STORIES TABLE
-create table stories (
+CREATE TABLE IF NOT EXISTS stories (
   id uuid default gen_random_uuid() primary key,
   title text not null,
   synopsis text,
@@ -20,7 +26,7 @@ create table stories (
 );
 
 -- QUIZZES TABLE
-create table quizzes (
+CREATE TABLE IF NOT EXISTS quizzes (
   id uuid default gen_random_uuid() primary key,
   story_id uuid references stories(id) on delete cascade,
   questions jsonb not null default '[]',
@@ -28,7 +34,7 @@ create table quizzes (
 );
 
 -- USER PROGRESS TABLE
-create table user_progress (
+CREATE TABLE IF NOT EXISTS user_progress (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id),
   story_id uuid references stories(id),
@@ -39,7 +45,7 @@ create table user_progress (
 );
 
 -- USER PROFILES (EXTENDS AUTH.USERS)
-create table profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id uuid references auth.users(id) primary key,
   full_name text,
   email text,
@@ -52,102 +58,92 @@ create table profiles (
   created_at timestamptz default now()
 );
 
--- ENABLE RLS (Row Level Security)
-alter table stories enable row level security;
-alter table quizzes enable row level security;
-alter table user_progress enable row level security;
-alter table profiles enable row level security;
+-- ─── 2. AUTHENTICATION & SECURITY DEFINERS ────────────────────────────────
 
--- ADMIN POLICIES
-create or replace function public.is_admin()
-returns boolean as $$
-begin
-  return (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid()
-      and role = 'admin'
+-- Security Definer function to check admin role safely
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+BEGIN
+  RETURN (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid()
+      AND role = 'admin'
     )
   );
-end;
-$$ language plpgsql security definer;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-create policy "Admins can do anything" on stories for all to authenticated using (
-  is_admin()
-);
--- ... add more policies as needed
--- 1. Trigger: auto-create profile on signup
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, full_name, avatar_url, role)
-  values (
+-- Trigger Function: Auto-create profile on signup with selected role
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, email, avatar_url, role)
+  VALUES (
     new.id,
     new.raw_user_meta_data->>'full_name',
+    new.email,
     new.raw_user_meta_data->>'avatar_url',
-    coalesce(new.raw_user_meta_data->>'role', 'user')  -- Tự động gán role từ metadata đăng ký (user/teacher)
+    coalesce(new.raw_user_meta_data->>'role', 'user')
   );
-  return new;
-end;
-$$ language plpgsql security definer;
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- Safe Trigger Creation
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- 2. Security Definer function to check admin role without recursion
-create or replace function public.is_admin()
-returns boolean as $$
-begin
-  return (
-    exists (
-      select 1 from public.profiles
-      where id = auth.uid()
-      and role = 'admin'
-    )
-  );
-end;
-$$ language plpgsql security definer;
+-- ─── 3. ROW LEVEL SECURITY (RLS) & POLICIES ────────────────────────────────
 
--- 3. RLS Policies
--- Enable RLS
-alter table stories enable row level security;
-alter table quizzes enable row level security;
-alter table user_progress enable row level security;
-alter table profiles enable row level security;
+ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quizzes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Stories: public read published, admin full access
-create policy "Public can read published stories"
-  on stories for select
-  using (status = 'published');
+-- Stories Policies
+DROP POLICY IF EXISTS "Public can read published stories" ON stories;
+CREATE POLICY "Public can read published stories"
+  ON stories FOR SELECT
+  USING (status = 'Published');
 
-create policy "Admin full access to stories"
-  on stories for all
-  using (is_admin());
+DROP POLICY IF EXISTS "Admin full access to stories" ON stories;
+CREATE POLICY "Admin full access to stories"
+  ON stories FOR ALL
+  USING (is_admin());
 
--- Profiles: users read own, admin read all
-create policy "Users can read own profile"
-  on profiles for select
-  using (auth.uid() = id);
+DROP POLICY IF EXISTS "Admins can do anything" ON stories;
+CREATE POLICY "Admins can do anything" 
+  ON stories FOR ALL 
+  USING (is_admin());
 
-create policy "Admin can read all profiles"
-  on profiles for select
-  using (is_admin());
+-- Profiles Policies
+DROP POLICY IF EXISTS "Users can read own profile" ON profiles;
+CREATE POLICY "Users can read own profile"
+  ON profiles FOR SELECT
+  USING (auth.uid() = id);
 
--- User progress: users manage own
-create policy "Users manage own progress"
-  on user_progress for all
-  using (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Admin can read all profiles" ON profiles;
+CREATE POLICY "Admin can read all profiles"
+  ON profiles FOR SELECT
+  USING (is_admin());
 
-create policy "Admin read all progress"
-  on user_progress for select
-  using (is_admin());
+-- User Progress Policies
+DROP POLICY IF EXISTS "Users manage own progress" ON user_progress;
+CREATE POLICY "Users manage own progress"
+  ON user_progress FOR ALL
+  USING (auth.uid() = user_id);
 
--- Note: To set an admin manually:
--- update profiles set role = 'admin' where id = '<your-user-uuid>';
--- Cinematic English Phase 2: Classroom System Database Schema
+DROP POLICY IF EXISTS "Admin read all progress" ON user_progress;
+CREATE POLICY "Admin read all progress"
+  ON user_progress FOR SELECT
+  USING (is_admin());
 
--- 1. Classrooms Table
+-- ─── 4. CLASSROOM SYSTEM SCHEMAS ───────────────────────────────────────────
+
+-- Classrooms Table
 CREATE TABLE IF NOT EXISTS classrooms (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
@@ -156,7 +152,7 @@ CREATE TABLE IF NOT EXISTS classrooms (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Classroom Members
+-- Classroom Members
 CREATE TABLE IF NOT EXISTS classroom_members (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     classroom_id UUID REFERENCES classrooms(id) ON DELETE CASCADE,
@@ -165,7 +161,7 @@ CREATE TABLE IF NOT EXISTS classroom_members (
     UNIQUE(classroom_id, student_id)
 );
 
--- 3. Assignments Table
+-- Assignments Table
 CREATE TABLE IF NOT EXISTS assignments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     classroom_id UUID REFERENCES classrooms(id) ON DELETE CASCADE,
@@ -177,7 +173,7 @@ CREATE TABLE IF NOT EXISTS assignments (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 4. Assignment Submissions
+-- Assignment Submissions
 CREATE TABLE IF NOT EXISTS assignment_submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     assignment_id UUID REFERENCES assignments(id) ON DELETE CASCADE,
@@ -189,7 +185,7 @@ CREATE TABLE IF NOT EXISTS assignment_submissions (
     completed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. Classroom Streaks & Momentum
+-- Classroom Streaks & Momentum
 CREATE TABLE IF NOT EXISTS classroom_streaks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     classroom_id UUID UNIQUE REFERENCES classrooms(id) ON DELETE CASCADE,
@@ -197,9 +193,10 @@ CREATE TABLE IF NOT EXISTS classroom_streaks (
     last_active_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     aura_xp INT DEFAULT 0
 );
--- Cinematic English Phase 2.2: Premium Exam Ecosystem Database Schema
 
--- 1. Exams Configuration Table
+-- ─── 5. PREMIUM EXAM SYSTEM SCHEMAS ────────────────────────────────────────
+
+-- Exams Configuration Table
 CREATE TABLE IF NOT EXISTS exams (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
@@ -210,7 +207,7 @@ CREATE TABLE IF NOT EXISTS exams (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Exam Sections Table (Modular sections: listening, speaking, reading)
+-- Exam Sections Table (Modular sections)
 CREATE TABLE IF NOT EXISTS exam_sections (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
@@ -219,7 +216,7 @@ CREATE TABLE IF NOT EXISTS exam_sections (
     order_index INT DEFAULT 0
 );
 
--- 3. Exam Questions Table
+-- Exam Questions Table
 CREATE TABLE IF NOT EXISTS exam_questions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     section_id UUID REFERENCES exam_sections(id) ON DELETE CASCADE,
@@ -232,7 +229,7 @@ CREATE TABLE IF NOT EXISTS exam_questions (
     order_index INT DEFAULT 0
 );
 
--- 4. Exam Attempts Table (Tracks student status and progress)
+-- Exam Attempts Table
 CREATE TABLE IF NOT EXISTS exam_attempts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     exam_id UUID REFERENCES exams(id) ON DELETE CASCADE,
@@ -244,7 +241,7 @@ CREATE TABLE IF NOT EXISTS exam_attempts (
     score INT DEFAULT 0
 );
 
--- 5. Exam Answers Table
+-- Exam Answers Table
 CREATE TABLE IF NOT EXISTS exam_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     attempt_id UUID REFERENCES exam_attempts(id) ON DELETE CASCADE,
@@ -257,7 +254,7 @@ CREATE TABLE IF NOT EXISTS exam_answers (
     speaking_confidence INT DEFAULT 0
 );
 
--- 6. Exam Results & Analytics Table
+-- Exam Results & Analytics Table
 CREATE TABLE IF NOT EXISTS exam_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     attempt_id UUID UNIQUE REFERENCES exam_attempts(id) ON DELETE CASCADE,
@@ -268,7 +265,7 @@ CREATE TABLE IF NOT EXISTS exam_results (
     accuracy_percentage INT DEFAULT 0
 );
 
--- 7. Skill Breakdowns (For longitudinal adaptive engine profiling)
+-- Skill Breakdowns
 CREATE TABLE IF NOT EXISTS skill_breakdowns (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL,
