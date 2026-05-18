@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { evaluateSpeaking } from "@/app/actions/speaking";
 import { trackTelemetry } from "@/lib/observability/observability";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Activity, SpeakingResult } from "../types";
 
 export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
+  const router = useRouter();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [xpReward, setXpReward] = useState(0);
@@ -34,7 +37,6 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
     hasLoggedCompletion.current = false;
 
     return () => {
-      // If the component unmounts and the lesson has NOT been marked finished, log drop-off
       if (!hasLoggedCompletion.current && !isFinished && activities.length > 0) {
         const sessionDuration = Math.round((Date.now() - startTime.current) / 1000);
         trackTelemetry('session_abandoned', {
@@ -86,9 +88,26 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
     }
   };
 
-  // Start Mic Audio capture
+  // Start Mic Audio capture with Guest checks
   const startRecording = async () => {
     setAiResponse(null);
+
+    // ─── GUEST ATTEMPT LIMITATIONS ─────────────────────────────────────────
+    const supabase = createSupabaseBrowserClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const isGuest = !session?.user;
+
+    if (isGuest) {
+      const attemptsStr = localStorage.getItem("guest_speaking_attempts") || "0";
+      const attempts = parseInt(attemptsStr, 10);
+      
+      if (attempts >= 3) {
+        alert("🎬 LƯỢT HỌC THỬ CỦA KHÁCH\n\nBạn đã sử dụng hết 3 lượt phát âm thử miễn phí.\nHãy đăng ký tài khoản miễn phí để nhận 15 lượt học luyện nói AI mỗi ngày!");
+        router.push("/signup?from=" + encodeURIComponent(window.location.pathname));
+        return;
+      }
+    }
+
     setIsRecording(true);
     audioChunks.current = [];
 
@@ -152,16 +171,28 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
       const base64Audio = await blobToBase64(audioBlob);
       const sentenceText = activeActivity.content?.transcript || activeActivity.title || "Silence is not empty.";
       
+      const supabase = createSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const isGuest = !session?.user;
+
       const res = await evaluateSpeaking({
-        userId: "student-1",
+        userId: session?.user?.id || "guest",
         audioBase64: base64Audio,
         targetSentence: sentenceText,
-        durationSeconds: 4
+        durationSeconds: 4,
+        sentenceId: activeActivity.id // Direct DB sentence UUID reference
       });
 
       setIsAnalyzing(false);
 
       if (res.success) {
+        // Increment guest attempts if not logged in
+        if (isGuest) {
+          const attemptsStr = localStorage.getItem("guest_speaking_attempts") || "0";
+          const newAttempts = parseInt(attemptsStr, 10) + 1;
+          localStorage.setItem("guest_speaking_attempts", newAttempts.toString());
+        }
+
         const score = res.accuracy || 75;
         
         let remark = "Rất tốt! 👌";
@@ -177,15 +208,22 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
           wordEvaluations: res.wordEvaluations
         });
 
+        // Earn XP reward
         setXpReward(prev => prev + Math.floor(score * 1.2));
 
-        // Auto-advance loop: wait 1.6 seconds then proceed to next sentence
+        // Auto-advance loop: wait 2.2 seconds then proceed to next sentence
         setTimeout(() => {
           handleAutoNext();
-        }, 1600);
+        }, 2200);
       } else {
-        trackTelemetry('speaking_failed', { lessonId, error: res.error || "Evaluation failed" });
-        alert(res.error || "Có lỗi xảy ra khi chấm điểm.");
+        if (res.gated) {
+          // Trigger paywall/upgrade prompt gracefully
+          alert(`💎 GÓI PRO YÊU CẦU\n\n${res.error || "Bạn đã dùng hết hạn ngạch ngày hôm nay. Hãy nâng cấp lên PRO để có trải nghiệm nói tiếng Anh không giới hạn!"}`);
+          router.push("/#pricing");
+        } else {
+          trackTelemetry('speaking_failed', { lessonId, error: res.error || "Evaluation failed" });
+          alert(res.error || "Có lỗi xảy ra khi chấm điểm.");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -212,7 +250,6 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
   };
 
   const handleRestart = () => {
-    // Track repeat usage psychology
     trackTelemetry('retry_recording', { lessonId });
     
     setCurrentIdx(0);

@@ -11,6 +11,7 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultRole = searchParams.get('role') === 'teacher' ? 'teacher' : 'user';
+  const redirectTo = searchParams.get('from') || '/dashboard';
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -45,7 +46,6 @@ function SignupForm() {
             full_name: fullName.trim(),
             role,
           },
-          // emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -63,7 +63,7 @@ function SignupForm() {
       // If email confirmation is disabled in Supabase, session is immediate
       if (data.session) {
         trackTelemetry('signup_completed', { role });
-        router.push('/dashboard');
+        router.push(redirectTo);
         router.refresh();
       } else {
         // Require email confirmation
@@ -76,6 +76,7 @@ function SignupForm() {
       setLoading(false);
     }
   };
+
 
   if (success) {
     return (
@@ -91,7 +92,10 @@ function SignupForm() {
               Nhấp vào link để hoàn tất đăng ký.
             </p>
           </div>
-          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-white text-black font-black text-sm hover:bg-amber-400 transition-colors">
+          <Link 
+            href={redirectTo !== '/dashboard' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
+            className="inline-block px-6 py-3 rounded-xl bg-white text-black font-black text-sm hover:bg-amber-400 transition-colors"
+          >
             Về trang đăng nhập
           </Link>
         </div>
@@ -234,7 +238,10 @@ function SignupForm() {
 
           <p className="text-center text-xs text-white/40">
             Đã có tài khoản?{' '}
-            <Link href="/login" className="text-violet-400 hover:text-violet-300 font-bold transition-colors">
+            <Link 
+              href={redirectTo !== '/dashboard' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
+              className="text-violet-400 hover:text-violet-300 font-bold transition-colors"
+            >
               Đăng nhập
             </Link>
           </p>

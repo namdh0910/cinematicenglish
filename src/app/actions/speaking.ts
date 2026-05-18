@@ -2,7 +2,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import crypto from 'crypto';
-import { enforceSpeakingQuota, PaywallError, paywallResult } from '@/lib/monetization/guards';
+import { enforceSpeakingQuota, PaywallError } from '@/lib/monetization/guards';
 import { trackServerMonetizationEvent } from '@/lib/monetization/analytics';
 
 interface WordEvaluation {
@@ -21,7 +21,10 @@ interface SpeakingEvaluationResult {
   wordEvaluations: WordEvaluation[];
   coachFeedback: string;
   audioUrl?: string;
+  xpEarned?: number;
   error?: string;
+  gated?: boolean;
+  upgradePrompt?: any;
 }
 
 /**
@@ -80,46 +83,54 @@ export async function evaluateSpeaking({
   audioBase64,
   targetSentence,
   durationSeconds,
+  sentenceId,
 }: {
   userId: string;
   audioBase64: string;
   targetSentence: string;
   durationSeconds: number;
+  sentenceId?: string;
 }): Promise<SpeakingEvaluationResult> {
   try {
-    // ─── REAL SERVER PAYWALL (cannot be bypassed from client) ────────────────
-    try {
-      await enforceSpeakingQuota();
-    } catch (err) {
-      if (err instanceof PaywallError) {
-        return {
-          success: false,
-          gated: true,
-          transcription: '',
-          accuracy: 0,
-          fluency: 0,
-          completeness: 0,
-          pacingWpm: 0,
-          wordEvaluations: [],
-          coachFeedback: err.upgradePrompt.message,
-          error: err.upgradePrompt.message,
-          upgradePrompt: err.upgradePrompt,
-        } as any;
-      }
-      throw err;
-    }
+    const supabase = await createSupabaseServerClient();
+    const { data: { session } } = await supabase.auth.getSession();
 
-    await trackServerMonetizationEvent({ event_type: 'feature_usage', feature: 'speaking_evaluation', user_id: userId });
+    const isGuest = !session?.user;
+    const activeUserId = session?.user?.id || 'guest';
+
+    // ─── REAL SERVER PAYWALL (Only if user is logged in) ────────────────
+    if (!isGuest) {
+      try {
+        await enforceSpeakingQuota();
+      } catch (err) {
+        if (err instanceof PaywallError) {
+          return {
+            success: false,
+            gated: true,
+            transcription: '',
+            accuracy: 0,
+            fluency: 0,
+            completeness: 0,
+            pacingWpm: 0,
+            wordEvaluations: [],
+            coachFeedback: err.upgradePrompt.message,
+            error: err.upgradePrompt.message,
+            upgradePrompt: err.upgradePrompt,
+          };
+        }
+        throw err;
+      }
+      await trackServerMonetizationEvent({ event_type: 'feature_usage', feature: 'speaking_evaluation', user_id: activeUserId });
+    }
 
     if (!audioBase64) {
       return { success: false, transcription: '', accuracy: 0, fluency: 0, completeness: 0, pacingWpm: 0, wordEvaluations: [], coachFeedback: 'Không nhận được dữ liệu âm thanh.' };
     }
 
     const audioBuffer = Buffer.from(audioBase64, 'base64');
-    const supabase = await createSupabaseServerClient();
     const timestamp = Date.now();
-    const hash = crypto.createHash('md5').update(`${userId}_${timestamp}`).digest('hex');
-    const storagePath = `submissions/${userId}/${hash}.wav`;
+    const hash = crypto.createHash('md5').update(`${activeUserId}_${timestamp}`).digest('hex');
+    const storagePath = `submissions/${activeUserId}/${hash}.wav`;
     const bucketName = 'speaking-submissions';
 
     // 1. Upload audio recording to Supabase Storage
@@ -166,7 +177,6 @@ export async function evaluateSpeaking({
       transcription = whisperData.text || '';
     } else {
       // High-fidelity fallback simulated matching (fuzzying around target)
-      // If no key is set, we use this to ensure zero downtime and true dynamic results based on voice length
       const fillerChance = Math.random() > 0.6 ? ' um ' : ' ';
       const stutterChance = Math.random() > 0.7;
       let mockTranscript = targetSentence;
@@ -187,7 +197,6 @@ export async function evaluateSpeaking({
     let fillersCount = 0;
 
     targetWords.forEach((targetWord, index) => {
-      // Find the closest matching actual word in the neighborhood to allow skipped/extra words
       let bestMatchIdx = -1;
       let highestScore = 0;
 
@@ -228,7 +237,7 @@ export async function evaluateSpeaking({
       }
     });
 
-    // Detect filler words (e.g., um, ah, like, er)
+    // Detect filler words
     const fillerWords = ['um', 'ah', 'like', 'er', 'uh'];
     actualWords.forEach((actualWord) => {
       if (fillerWords.includes(cleanWord(actualWord))) {
@@ -236,7 +245,7 @@ export async function evaluateSpeaking({
       }
     });
 
-    // 4. Calculate Pronunciation Metrics (No hardcoding)
+    // 4. Calculate Pronunciation Metrics
     const accuracy = targetWords.length > 0 ? Math.round(totalScore / targetWords.length) : 100;
     const completeness = targetWords.length > 0 ? Math.round((matchedCount / targetWords.length) * 100) : 100;
     
@@ -272,6 +281,38 @@ export async function evaluateSpeaking({
       }
     }
 
+    const xpEarned = Math.floor(accuracy * 1.2);
+
+    // ─── DATABASE SAVING FOR AUTHENTICATED USERS ─────────────────────────
+    if (!isGuest) {
+      // A. Save speaking attempt history
+      const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      if (sentenceId && isValidUuid(sentenceId)) {
+        await supabase.from('speaking_attempts').insert({
+          user_id: activeUserId,
+          sentence_id: sentenceId,
+          accuracy_score: accuracy,
+          word_evaluations: wordEvaluations,
+          audio_url: audioUrl || null,
+          coach_feedback: coachFeedback
+        });
+      }
+
+      // B. Update XP score in student profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('xp_score')
+        .eq('id', activeUserId)
+        .single();
+      
+      const currentXp = profile?.xp_score || 0;
+      await supabase
+        .from('profiles')
+        .update({ xp_score: currentXp + xpEarned })
+        .eq('id', activeUserId);
+    }
+
     return {
       success: true,
       transcription,
@@ -282,6 +323,7 @@ export async function evaluateSpeaking({
       wordEvaluations,
       coachFeedback,
       audioUrl,
+      xpEarned,
     };
   } catch (err: any) {
     console.error('evaluateSpeaking error:', err);
