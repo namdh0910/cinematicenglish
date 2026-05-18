@@ -100,7 +100,7 @@ export default function StoriesPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
               <Badge variant="violet" className="mb-2">Thư viện</Badge>
-              <h1 className="text-display mb-2">Kho Câu Chuyện Điện Ảnh</h1>
+              <h1 className="text-display mb-2 gradient-text-silver">Kho Câu Chuyện Điện Ảnh</h1>
               <p className="text-secondary">Học tiếng Anh qua những câu chuyện sâu sắc và lôi cuốn nhất.</p>
             </div>
             

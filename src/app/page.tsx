@@ -176,7 +176,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.03),transparent)] pointer-events-none" />
         
         <div className="text-center mb-16 space-y-3 relative z-10">
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight">Mục tiêu học tập thực chiến</h2>
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight gradient-text-silver">Mục tiêu học tập thực chiến</h2>
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium italic">Chúng tôi tối ưu hóa phương pháp học để mang lại kết quả giao tiếp thực tiễn cho học viên Việt Nam:</p>
         </div>
         
@@ -209,7 +209,7 @@ export default function HomePage() {
       <Section className="relative">
         <div className="text-center mb-20 space-y-3">
           <Badge variant="violet" className="px-4 py-1.5 font-bold uppercase tracking-widest">LỘ TRÌNH 4 BƯỚC PHẢN XẠ</Badge>
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight">Học nhại cốt lõi đầy gây nghiện</h2>
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight gradient-text-silver">Học nhại cốt lõi đầy gây nghiện</h2>
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium">Bí quyết giúp bạn làm chủ cách phát âm tự nhiên chỉ qua các bước nhập vai tối giản:</p>
         </div>
 
@@ -247,7 +247,7 @@ export default function HomePage() {
       {/* 5. CURATED POPULAR STORIES PLACARDS (KHO PHIM THỰC TẾ) */}
       <Section className="bg-secondary/40 border-y border-white/5">
         <div className="text-center mb-16 space-y-3">
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight">Phòng Chiếu Phim Học Tập</h2>
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight gradient-text-silver">Phòng Chiếu Phim Học Tập</h2>
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium">Bắt đầu ngay hôm nay với các trích đoạn điện ảnh huyền thoại được chọn lọc:</p>
         </div>
 
