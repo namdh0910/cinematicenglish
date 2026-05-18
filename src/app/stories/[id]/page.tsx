@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 import InteractiveOverlay from "@/components/stories/interactive/InteractiveOverlay";
 import { getOrGenerateAudio } from "@/app/actions/audio";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import VoiceRecorder from "@/components/coach/VoiceRecorder";
 
 const getStoryEmoji = (title: string) => {
   const t = title.toLowerCase();
@@ -75,6 +76,21 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [currentTime, setCurrentTime] = useState(0);
   const [activeCheckpoint, setActiveCheckpoint] = useState<any>(null);
   const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
+  
+  const [activeParagraphText, setActiveParagraphText] = useState(STORY_PARAGRAPHS[0].text);
+  const [isRecorderGlow, setIsRecorderGlow] = useState(false);
+  const recorderRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollToRecorder = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (recorderRef.current) {
+      recorderRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setIsRecorderGlow(true);
+      setTimeout(() => {
+        setIsRecorderGlow(false);
+      }, 1000);
+    }
+  };
 
   useEffect(() => {
     async function loadStoryData() {
@@ -560,6 +576,7 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                             const v = VOCAB.find((v) => v.word === clean);
                             setActiveVocab(v || null);
                             if (highlightMode) toggleSave(clean);
+                            setActiveParagraphText(para.text);
                           }}
                           className="cursor-pointer rounded px-0.5 transition-all"
                           style={{
@@ -580,7 +597,10 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
                   className={`mt-2 text-xs flex items-center gap-1.5 transition-colors font-bold ${
                     isParagraphPlaying ? "text-violet-400" : "text-[#8b5cf6]"
                   }`}
-                  onClick={() => handlePlayParagraph(para.id, para.text)}
+                  onClick={() => {
+                    handlePlayParagraph(para.id, para.text);
+                    setActiveParagraphText(para.text);
+                  }}
                 >
                   {isParagraphPlaying ? <Pause size={10} /> : <Play size={10} />} 
                   {isParagraphPlaying ? "Đang phát..." : "Nghe lại câu này"}
@@ -663,10 +683,50 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
           <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
             Nghe một câu, sau đó ghi âm lại chính mình. AI của chúng tôi sẽ chấm điểm phát âm của bạn ngay lập tức.
           </p>
-          <Link href={lessonId ? `/learn/lesson/${lessonId}` : "/coach"} className="btn-primary justify-center" style={{ display: "inline-flex" }}>
-            <Zap size={16} /> {lessonId ? "Bắt đầu luyện nói AI" : "Mở AI Coach"}
-          </Link>
+          <button 
+            onClick={handleScrollToRecorder} 
+            className="btn-primary justify-center cursor-pointer" 
+            style={{ display: "inline-flex" }}
+          >
+            <Zap size={16} /> Mở AI Coach 🎤
+          </button>
         </motion.div>
+
+        {/* Embedded AI Voice Studio component area */}
+        <div 
+          ref={recorderRef}
+          className={`mt-10 p-6 md:p-8 rounded-[32px] bg-black/40 border transition-all duration-500 ${
+            isRecorderGlow 
+              ? "border-amber-400 ring-4 ring-amber-400/20 shadow-[0_0_30px_rgba(245,158,11,0.25)] scale-[1.02]" 
+              : "border-white/5"
+          }`}
+        >
+          <div className="text-center mb-6">
+            <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest block mb-1">AI Voice Coach</span>
+            <h3 className="text-xl font-display font-black text-white">Phòng Luyện Nói Phản Xạ</h3>
+            <p className="text-xs text-white/50 max-w-md mx-auto mt-1">
+              Đọc to câu thoại dưới đây để AI phân tích phát âm, ngữ điệu và độ lưu loát của bạn ngay lập tức.
+            </p>
+          </div>
+
+          {/* Active Sentence to read */}
+          <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/5 text-center mb-8">
+            <p className="text-lg md:text-xl font-bold text-white mb-2 leading-relaxed">
+              "{activeParagraphText}"
+            </p>
+            <span className="text-[10px] text-white/40 uppercase font-black tracking-wider">
+              Nhấp bất kỳ câu thoại hoặc từ nào ở trên để đổi câu luyện tập
+            </span>
+          </div>
+
+          <VoiceRecorder 
+            sentence={activeParagraphText}
+            onComplete={(blob, feedback) => {
+              console.log("Story recording complete", feedback);
+            }}
+            accentColor="#f59e0b"
+          />
+        </div>
       </div>
 
       {/* Interactive Quiz Overlay */}
