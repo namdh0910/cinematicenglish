@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Badge from "../ui/Badge";
-import { deleteStory } from "@/app/admin/actions";
+import { deleteStory, updateStory } from "@/app/admin/actions";
+import { useRouter } from "next/navigation";
 
 export interface StoryItem {
   id: string;
@@ -35,7 +36,27 @@ interface StoryTableProps {
 }
 
 export default function StoryTable({ stories }: StoryTableProps) {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const handleStatusToggle = async (id: string, currentStatus: StoryItem['status']) => {
+    setUpdatingId(id);
+    const nextStatus = currentStatus === 'published' ? 'draft' : 'published';
+    try {
+      const res = await updateStory(id, { status: nextStatus });
+      if (res.success) {
+        router.refresh();
+      } else {
+        alert("Không thể cập nhật trạng thái: " + res.error);
+      }
+    } catch (err) {
+      console.error("Failed to toggle status:", err);
+      alert("Có lỗi xảy ra khi cập nhật trạng thái.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const toggleSelectAll = () => {
     if (selectedIds.length === stories.length) {
@@ -146,10 +167,20 @@ export default function StoryTable({ stories }: StoryTableProps) {
                     </div>
                   </td>
                   <td className="p-5">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${status.color}`}>
-                      <status.icon size={12} />
+                    <button 
+                      onClick={() => handleStatusToggle(story.id, story.status)}
+                      disabled={updatingId === story.id}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                        updatingId === story.id ? 'opacity-50 cursor-wait' : 'hover:scale-105 hover:bg-white/5 active:scale-95'
+                      } ${status.color}`}
+                    >
+                      {updatingId === story.id ? (
+                        <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <status.icon size={12} />
+                      )}
                       {status.label}
-                    </div>
+                    </button>
                   </td>
                   <td className="p-5">
                     <div className="flex items-center gap-4">

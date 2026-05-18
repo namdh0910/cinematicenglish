@@ -42,15 +42,6 @@ const navGroups = [
     ]
   },
   {
-    title: "LỚP HỌC",
-    items: [
-      { icon: Users, label: "Lớp học", href: "/teacher/classroom" },
-      { icon: Users, label: "Giáo viên", href: "/admin/teachers" },
-      { icon: Users, label: "Học sinh", href: "/admin/users" },
-      { icon: BookOpen, label: "Bài giao", href: "/admin/assignments" },
-    ]
-  },
-  {
     title: "PHÂN TÍCH",
     items: [
       { icon: BarChart2, label: "Hiệu suất học tập", href: "/admin/analytics" },

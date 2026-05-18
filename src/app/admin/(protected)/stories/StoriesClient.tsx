@@ -13,6 +13,8 @@ import {
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import StoryTable, { StoryItem } from "@/components/admin/StoryTable";
+import AIStoryGenerator from "@/components/admin/AIStoryGenerator";
+import { saveAIComposedStory } from "@/app/admin/actions";
 
 interface StoriesClientProps {
   initialStories: any[];
@@ -24,6 +26,93 @@ export default function StoriesClient({ initialStories }: StoriesClientProps) {
   const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('query') || "");
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleUseGenerated = async (aiData: any) => {
+    setIsSaving(true);
+    
+    // Parse the transcript into individual speaking sentences
+    const lines = aiData.transcript
+      .split("\n")
+      .map((l: string) => l.trim())
+      .filter((l: string) => l.length > 0 && !l.startsWith("(")); // Filter out stage directions
+
+    const sentences = lines.map((line: string, idx: number) => {
+      // Clean tags like [NARRATOR]: or Character:
+      const cleaned = line.replace(/^\[?([A-Z0-9\s_-]+)\]?:\s*/i, "").trim();
+      
+      // Simple heuristic IPA generator
+      const cleanWords = cleaned.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "").split(/\s+/);
+      const ipaWords = cleanWords.map(word => {
+        return word
+          .replace(/th/g, "θ")
+          .replace(/ea/g, "iː")
+          .replace(/oo/g, "uː")
+          .replace(/ee/g, "iː")
+          .replace(/ou/g, "aʊ")
+          .replace(/sh/g, "ʃ")
+          .replace(/ch/g, "tʃ")
+          .replace(/ck/g, "k")
+          .replace(/ph/g, "f")
+          .replace(/tion/g, "ʃn");
+      });
+      const ipa = `/${ipaWords.join(" ")}/`;
+
+      return {
+        transcript: cleaned,
+        translation_only: `[Bản dịch AI]: Cần hoàn chỉnh bản dịch cho câu: "${cleaned}"`,
+        ipa,
+        target_score: 80,
+        start_time: idx * 6,
+        end_time: (idx + 1) * 6,
+        metadata: {
+          pacing_type: idx === 0 ? "easy" : idx === lines.length - 1 ? "recovery" : "medium",
+          speech_speed: "normal",
+          emotion_type: "Inspiring",
+          pronunciation_difficulty: "medium",
+          shadowing_priority: "medium",
+          replay_priority: "medium",
+          accent_type: "US",
+          dopamine_score: 80,
+          difficulty_score: Math.min(100, Math.max(10, cleanWords.length * 6))
+        }
+      };
+    });
+
+    const payload = {
+      story: {
+        title: aiData.title,
+        synopsis: aiData.description,
+        difficulty: 'medium',
+        thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
+      },
+      scene: {
+        video_url: aiData.videoUrl || 'https://www.youtube.com/watch?v=EXeTwQWrcwY',
+        thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
+      },
+      lesson: {
+        title: `Luyện nói trích đoạn: ${aiData.title}`,
+        description: `Rèn luyện phát âm tự nhiên và sắc sảo cùng câu thoại từ ${aiData.title}.`
+      },
+      sentences: sentences.slice(0, 5) // Cap at 5 scenes for optimal speaking pacing
+    };
+
+    try {
+      const res = await saveAIComposedStory(payload);
+      if (res.success) {
+        setIsAiModalOpen(false);
+        router.refresh();
+      } else {
+        alert("Lỗi lưu câu chuyện AI: " + res.error);
+      }
+    } catch (err) {
+      console.error("Failed to save AI story:", err);
+      alert("Có lỗi xảy ra khi lưu câu chuyện.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Update URL when filters change
   const updateFilters = (key: string, value: string) => {
@@ -54,11 +143,12 @@ export default function StoriesClient({ initialStories }: StoriesClientProps) {
         </div>
         
         <div className="flex items-center gap-4">
-          <Link href="/admin/stories/composer">
-            <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-purple border border-violet-500/30">
-              <Sparkles size={18} strokeWidth={3} /> AI Content Factory 🚀
-            </button>
-          </Link>
+          <button 
+            onClick={() => setIsAiModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-purple border border-violet-500/30"
+          >
+            <Sparkles size={18} strokeWidth={3} /> AI Content Factory 🚀
+          </button>
 
           <Link href="/admin/stories/new">
             <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-black font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
@@ -144,6 +234,13 @@ export default function StoriesClient({ initialStories }: StoriesClientProps) {
 
       {/* 3. Story Table Content */}
       <StoryTable stories={initialStories} />
+
+      {/* AI Content Factory Modal */}
+      <AIStoryGenerator 
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onUse={handleUseGenerated}
+      />
     </div>
   );
 }
