@@ -518,6 +518,7 @@ export async function getLessonWithDetails(lessonId: string) {
     id: lessonId,
     title: "Unit 1 Lesson 2: Speaking & Shadowing Practice",
     type: "Speaking",
+    video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     unit: {
       id: "unit-1",
       title: "Unit 1: Family Life",

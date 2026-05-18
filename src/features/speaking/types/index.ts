@@ -12,6 +12,8 @@ export interface Lesson {
   title: string;
   type: 'Listening' | 'Speaking' | 'Reading' | 'Writing' | 'Language' | 'Getting Started' | 'Exam';
   activities: Activity[];
+  video_url?: string;
+  videoUrl?: string;
   unit?: {
     id: string;
     title: string;

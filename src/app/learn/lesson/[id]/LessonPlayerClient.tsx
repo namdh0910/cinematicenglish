@@ -75,39 +75,48 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
       <main className="flex-1 flex flex-col justify-between select-none">
         
         {/* A. 40% VIDEO / VISUAL SUPPORT AREA */}
-        <div className="h-[35vh] md:h-[40vh] w-full relative flex items-center justify-center bg-black overflow-hidden border-b border-white/5 shrink-0">
+        <div className="h-[35vh] md:h-[40vh] w-full relative flex items-center justify-center bg-black overflow-hidden border-b border-white/5 shrink-0 px-4 py-3">
+          {(lesson.video_url || lesson.videoUrl) ? (
+            <video
+              src={lesson.video_url || lesson.videoUrl}
+              controls
+              playsInline
+              className="w-full h-full object-contain rounded-2xl shadow-2xl z-20 border border-white/10 bg-zinc-950"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-950 border border-white/5 rounded-2xl p-6 text-center space-y-4 z-20 shadow-2xl">
+              <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 animate-pulse">
+                <Volume2 size={28} />
+              </div>
+              <div className="space-y-1">
+                <p className="text-white/80 font-bold text-sm">Video đang được tải lên...</p>
+                <p className="text-white/40 text-xs font-medium">Bản ghi âm hướng dẫn phát âm vẫn sẵn sàng bên dưới</p>
+              </div>
+              
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={playModelSpeech}
+                className={`px-5 py-2.5 rounded-full flex items-center gap-2 text-xs font-black uppercase tracking-widest ${
+                  isPlaying ? 'bg-amber-500 text-black shadow-glow-amber' : 'bg-white/15 text-white border border-white/10'
+                } transition-all`}
+              >
+                <Volume2 size={14} fill={isPlaying ? "black" : "none"} /> Nghe giọng mẫu
+              </motion.button>
+            </div>
+          )}
+
+          {/* Cinematic dynamic background glow */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
           
           <motion.div 
-            animate={{ scale: [1, 1.05, 1], rotate: [0, 2, 0] }}
-            transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center opacity-60 filter blur-xs"
+            animate={{ scale: [1, 1.03, 1] }}
+            transition={{ repeat: Infinity, duration: 10, ease: "easeInOut" }}
+            className="absolute inset-0 bg-cover bg-center opacity-30 filter blur-xl"
             style={{ 
               backgroundImage: `url('${activeActivity.content?.thumbnailUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800'}')`
             }}
           />
-
-          <AnimatePresence>
-            {isPlaying && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.15 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-violet-600/30 flex items-center justify-center pointer-events-none"
-              />
-            )}
-          </AnimatePresence>
-
-          <motion.button 
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={playModelSpeech}
-            className={`w-20 h-20 rounded-full flex items-center justify-center z-20 ${
-              isPlaying ? 'bg-amber-500 text-black shadow-glow-amber' : 'bg-white/10 text-white border border-white/20 backdrop-blur-md'
-            } transition-all`}
-          >
-            <Volume2 size={36} fill={isPlaying ? "black" : "none"} />
-          </motion.button>
         </div>
 
         {/* B. 60% SPEAKING AREA (HERO SUBTITLES + MIC + FEEDBACK) */}
