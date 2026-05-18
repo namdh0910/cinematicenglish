@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useVoiceRecorder } from "@/features/speaking/hooks/useVoiceRecorder";
 import { Lesson } from "@/features/speaking/types";
 
-import { evaluateSpeaking } from "@/app/actions/speaking";
+import { evaluateSpeaking, saveSceneProgress } from "@/app/actions/speaking";
 
 const PASSING_SCORE = 70;
 
@@ -51,6 +51,26 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [xpReward, setXpReward] = useState(0);
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; color: string; size: number }[]>([]);
+
+  const triggerParticles = () => {
+    const colors = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ec4899", "#f43f5e"];
+    const newParticles = Array.from({ length: 24 }).map((_, idx) => {
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = 40 + Math.random() * 80;
+      return {
+        id: Date.now() + idx,
+        x: Math.cos(angle) * velocity,
+        y: Math.sin(angle) * velocity,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 4 + Math.random() * 8,
+      };
+    });
+    setParticles(newParticles);
+    setTimeout(() => {
+      setParticles([]);
+    }, 1200);
+  };
 
   // Video playback & Scene control states
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -193,6 +213,18 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
           if (response.xpEarned) {
             setXpReward(prev => prev + response.xpEarned!);
           }
+
+          // Save scene progress to Supabase and trigger visual rewards
+          saveSceneProgress({
+            userId: "guest",
+            lessonId: lesson.id,
+            sceneIndex: currentIdx,
+            highestScore: response.accuracy
+          }).then((res) => {
+            if (res.success) {
+              triggerParticles();
+            }
+          }).catch(err => console.error("Failed to save scene progress:", err));
         } else {
           alert(response.error || "Có lỗi xảy ra khi phân tích phát âm.");
         }
@@ -442,9 +474,33 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
                   {/* Dual metrics grid */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
+                    <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl relative overflow-visible">
                       <span className="text-[9px] font-bold text-white/30 uppercase tracking-wider block">Phát âm (Accuracy)</span>
-                      <h5 className="text-2xl font-display font-black text-emerald-400 mt-1">{aiFeedback.accuracy}%</h5>
+                      <div className="relative inline-block overflow-visible w-full">
+                        <h5 className="text-2xl font-display font-black text-emerald-400 mt-1">{aiFeedback.accuracy}%</h5>
+                        <AnimatePresence>
+                          {particles.map((p) => (
+                            <motion.div
+                              key={p.id}
+                              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                              animate={{ x: p.x, y: p.y, opacity: 0, scale: 0 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 1.2, ease: "easeOut" }}
+                              className="absolute rounded-full pointer-events-none"
+                              style={{
+                                backgroundColor: p.color,
+                                width: p.size,
+                                height: p.size,
+                                top: "50%",
+                                left: "20%",
+                                transform: "translate(-50%, -50%)",
+                                boxShadow: `0 0 10px ${p.color}`,
+                                zIndex: 50,
+                              }}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </div>
                       <div className="w-full bg-white/5 h-1 rounded-full mt-2 overflow-hidden">
                         <div className="h-full bg-emerald-400" style={{ width: `${aiFeedback.accuracy}%` }} />
                       </div>

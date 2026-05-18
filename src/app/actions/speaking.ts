@@ -510,3 +510,52 @@ export async function saveLessonProgress({
     return { success: false, error: err.message };
   }
 }
+
+/**
+ * Saves scene-level progress details dynamically
+ */
+export async function saveSceneProgress({
+  userId,
+  lessonId,
+  sceneIndex,
+  highestScore,
+}: {
+  userId: string;
+  lessonId: string;
+  sceneIndex: number;
+  highestScore: number;
+}) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const activeUserId = session?.user?.id || userId;
+
+    const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!isValidUuid(activeUserId) || !isValidUuid(lessonId)) {
+      return { success: false, error: 'Invalid UUID format' };
+    }
+
+    // Upsert into lesson_progress
+    const { error } = await supabase
+      .from('lesson_progress')
+      .upsert({
+        user_id: activeUserId,
+        lesson_id: lessonId,
+        last_activity_index: sceneIndex,
+        is_completed: false, // will update on lesson finish
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,lesson_id'
+      });
+
+    if (error) {
+      console.warn('Upsert into lesson_progress warning:', error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('saveSceneProgress error:', err);
+    return { success: false, error: err.message };
+  }
+}
