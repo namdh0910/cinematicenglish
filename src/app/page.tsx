@@ -47,7 +47,7 @@ function DemoPlayer() {
   };
 
   return (
-    <Card className={`max-w-3xl mx-auto p-6 md:p-10 space-y-8 border-white/10 shadow-2xl transition-all duration-500 bg-gradient-to-b ${current.bg}`}>
+    <Card className={`max-w-3xl mx-auto p-6 md:p-10 space-y-8 border-white/10 shadow-2xl transition-all duration-500 bg-gradient-to-b ${current.bg} border-glow`}>
       <div className="text-center space-y-5">
         <Badge variant="violet" className="px-4 py-1.5 font-bold tracking-widest uppercase shadow-glow-purple">Học thử ngay (Không cần đăng ký)</Badge>
         
@@ -134,9 +134,9 @@ export default function HomePage() {
               🎬 100% PHIM THỰC TẾ — KHÔNG CÓ BÀI TẬP KHÔ KHAN
             </Badge>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.05] mb-6">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.05] mb-6 text-transparent bg-clip-text bg-gradient-to-r from-slate-200 via-white to-slate-400 drop-shadow-lg">
               Luyện tiếng Anh qua <br className="hidden md:block" />
-              <span className="gradient-text-amber font-serif italic">Sub Phim Thực Tế</span> cùng AI
+              <span className="gradient-text-silver font-serif italic">Sub Phim Thực Tế</span> cùng AI
             </h1>
             
             <p className="text-base md:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed mb-10 font-medium">
@@ -145,7 +145,7 @@ export default function HomePage() {
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/signup" className="w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
+                <button className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 text-black text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-glow-amber hover:shadow-neon-purple">
                   Bắt đầu học thử miễn phí 🚀
                 </button>
               </Link>
@@ -193,7 +193,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card padding="lg" hover={true} className="h-full text-center space-y-5 bg-white/[0.01] border-white/5 hover:border-white/10 transition-all">
+              <Card padding="lg" hover={true} className="h-full text-center space-y-5 bg-white/[0.01] border-white/5 hover:border-white/10 transition-all border-glow">
                 <div className={`w-16 h-16 rounded-3xl ${b.bg} ${b.color} flex items-center justify-center mx-auto shadow-inner`}>
                   <b.icon size={28} />
                 </div>
@@ -213,31 +213,76 @@ export default function HomePage() {
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium">Bí quyết giúp bạn làm chủ cách phát âm tự nhiên chỉ qua các bước nhập vai tối giản:</p>
         </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-1/2 left-4 right-4 h-0.5 bg-gradient-to-r from-amber-500/30 via-violet-500/30 to-cyan-500/30 -translate-y-1/2 z-0" />
+        <div className="relative max-w-3xl mx-auto">
+          {/* Central Connecting Vertical Line */}
+          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-500 via-violet-500 to-cyan-500 -translate-x-1/2 z-0 opacity-20 rounded-full" />
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+          <div className="space-y-12 relative z-10">
             {[
-              { step: "01", name: "NGHE sâu", desc: "Xem trích đoạn phim gốc thực tế dài 10 - 20 giây. Cảm nhận hoàn cảnh giao tiếp, biểu cảm khẩu hình và tốc độ tự nhiên của diễn viên.", border: "border-amber-500/30" },
-              { step: "02", name: "NHẠI đuổi", desc: "Shadowing - Nói đuổi ngay theo câu thoại của nhân vật. Nhại lại chuẩn xác từ độ luyến láy, ngữ điệu đến điểm ngắt nghỉ.", border: "border-violet-500/30" },
-              { step: "03", name: "AI CHẤM điểm", desc: "Công nghệ AI độc quyền phân tích âm phát ra. Chỉnh sửa chi tiết từng lỗi phát âm phát hiện được và chấm điểm trôi chảy.", border: "border-cyan-500/30" },
-              { step: "04", name: "MỞ KHÓA tiếp", desc: "Vượt qua thử thách để tích lũy điểm thưởng XP phản xạ, thăng hạng tiến độ và mở khóa câu thoại tiếp theo trong cuộn phim.", border: "border-emerald-500/30" }
+              { 
+                step: "01", 
+                name: "NGHE SÂU 🎧", 
+                desc: "Xem trích đoạn phim gốc thực tế dài 10 - 20 giây. Cảm nhận hoàn cảnh giao tiếp, biểu cảm khẩu hình và tốc độ tự nhiên của diễn viên.", 
+                glow: "shadow-glow-gold border-amber-500/20 bg-amber-950/10",
+                dotGlow: "bg-amber-500 shadow-[0_0_15px_#f5c842]"
+              },
+              { 
+                step: "02", 
+                name: "NHẠI ĐUỔI 🗣️", 
+                desc: "Shadowing - Nói đuổi ngay theo câu thoại của nhân vật. Nhại lại chuẩn xác từ độ luyến láy, ngữ điệu đến điểm ngắt nghỉ.", 
+                glow: "shadow-glow-violet border-violet-500/20 bg-violet-950/10",
+                dotGlow: "bg-violet-500 shadow-[0_0_15px_#8b5cf6]"
+              },
+              { 
+                step: "03", 
+                name: "AI CHẤM ĐIỂM 🤖", 
+                desc: "Công nghệ AI độc quyền phân tích âm phát ra. Chỉnh sửa chi tiết từng lỗi phát âm phát hiện được và chấm điểm trôi chảy.", 
+                glow: "shadow-glow-cyan border-cyan-500/20 bg-cyan-950/10",
+                dotGlow: "bg-cyan-500 shadow-[0_0_15px_#06b6d4]"
+              },
+              { 
+                step: "04", 
+                name: "MỞ KHÓA TIẾP 🔓", 
+                desc: "Vượt qua thử thách để tích lũy điểm thưởng XP phản xạ, thăng hạng tiến độ và mở khóa câu thoại tiếp theo trong cuộn phim.", 
+                glow: "shadow-glow-emerald border-emerald-500/20 bg-emerald-950/10",
+                dotGlow: "bg-emerald-500 shadow-[0_0_15px_#10b981]"
+              }
             ].map((s, i) => (
               <motion.div 
                 key={s.step}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15, type: "spring" }}
+                initial={{ opacity: 0, x: i % 2 === 0 ? -40 : 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, type: "spring" }}
+                className={`flex flex-col md:flex-row items-start md:items-center gap-8 ${i % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
               >
-                <div className={`p-6 rounded-[32px] bg-[#0c0c0e] border ${s.border} text-center space-y-4 shadow-xl hover:scale-105 transition-all`}>
-                  <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-amber-500 font-mono font-black text-lg">
-                    {s.step}
+                {/* Timeline Card */}
+                <div className="w-full md:w-1/2 pl-12 md:pl-0">
+                  <div className={`p-6 md:p-8 rounded-[32px] border glass border-glow hover:scale-[1.02] transition-all duration-300 shadow-xl space-y-3 ${s.glow}`}>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono font-black text-[10px] text-white/40 tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                        BƯỚC {s.step}
+                      </span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-black text-white leading-tight font-display">
+                      {s.name}
+                    </h3>
+                    <p className="text-white/60 text-sm leading-relaxed font-medium">
+                      {s.desc}
+                    </p>
                   </div>
-                  <h4 className="text-lg font-black text-white uppercase tracking-wider">{s.name}</h4>
-                  <p className="text-white/40 text-xs leading-relaxed font-medium">{s.desc}</p>
                 </div>
+
+                {/* Timeline Dot Connection Point */}
+                <div className="absolute left-6 md:left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
+                  <div className={`w-8 h-8 rounded-full ${s.dotGlow} flex items-center justify-center border-2 border-[#0a0e17] relative`}>
+                    <span className="w-3 h-3 rounded-full bg-white animate-ping absolute" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-white relative z-10" />
+                  </div>
+                </div>
+
+                {/* Spacer */}
+                <div className="hidden md:block w-1/2" />
               </motion.div>
             ))}
           </div>
@@ -261,7 +306,7 @@ export default function HomePage() {
               transition={{ delay: i * 0.1 }}
               className="group"
             >
-              <div className="relative p-6 rounded-[32px] bg-gradient-to-b from-[#141416] to-[#0c0c0e] border border-white/5 group-hover:border-amber-500/30 transition-all duration-300 flex flex-col justify-between h-full shadow-2xl">
+              <div className="relative p-6 rounded-[32px] bg-gradient-to-b from-[#141416] to-[#0c0c0e] border border-white/5 group-hover:border-amber-500/30 transition-all duration-300 flex flex-col justify-between h-full shadow-2xl border-glow">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-2xl">{m.emoji}</span>
@@ -288,7 +333,7 @@ export default function HomePage() {
       {/* 6. REAL USER TESTIMONIALS */}
       <Section>
         <div className="text-center mb-16 space-y-3">
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight">Học viên Việt Nam nói gì?</h2>
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight gradient-text-silver">Học viên Việt Nam nói gì?</h2>
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium">Trải nghiệm nhại giọng đầy lôi cuốn và cải thiện phát âm vượt bậc:</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -314,12 +359,12 @@ export default function HomePage() {
       {/* 7. PRICING PLANS */}
       <Section className="bg-secondary/40 border-y border-white/5">
         <div className="text-center mb-16 space-y-3">
-          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight">Học phí phù hợp. Hiệu quả bền lâu.</h2>
+          <h2 className="text-3xl md:text-5xl font-display font-black tracking-tight gradient-text-silver">Học phí phù hợp. Hiệu quả bền lâu.</h2>
           <p className="text-white/40 text-sm md:text-lg max-w-2xl mx-auto font-medium">Học thử không giới hạn. Nâng cấp khi cần nâng cao phản xạ nói.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Free Plan */}
-          <Card padding="lg" className="bg-[#0c0c0e] border-white/5 rounded-[40px] p-8 md:p-10">
+          <Card padding="lg" className="bg-[#0c0c0e] border-white/5 rounded-[40px] p-8 md:p-10 border-glow">
             <h3 className="text-xl font-black mb-2">Gói Cơ Bản</h3>
             <div className="text-4xl font-display font-black mb-6 text-white">0đ <span className="text-xs text-white/40 font-sans font-normal">/ mãi mãi</span></div>
             <ul className="space-y-4 mb-8">
@@ -330,14 +375,14 @@ export default function HomePage() {
               ))}
             </ul>
             <Link href="/signup">
-              <button className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-black text-sm uppercase tracking-wider transition-all border border-white/10">
+              <button className="w-full py-4 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-black text-sm uppercase tracking-wider transition-all border border-white/10 hover:shadow-neon-purple">
                 Bắt đầu học ngay
               </button>
             </Link>
           </Card>
 
           {/* Pro Plan */}
-          <Card padding="lg" className="bg-gradient-to-b from-[#1a1428] to-[#0c0c0e] border-amber-500/20 rounded-[40px] p-8 md:p-10 relative shadow-[0_0_40px_rgba(245,158,11,0.05)]">
+          <Card padding="lg" className="bg-gradient-to-b from-[#1a1428] to-[#0c0c0e] border-amber-500/20 rounded-[40px] p-8 md:p-10 relative shadow-[0_0_40px_rgba(245,158,11,0.05)] border-glow">
             <div className="absolute top-0 right-8 -translate-y-1/2">
               <Badge variant="gold" className="px-3 py-1 font-bold shadow-glow-amber">Được Đăng Ký Nhiều Nhất</Badge>
             </div>
@@ -351,7 +396,7 @@ export default function HomePage() {
               ))}
             </ul>
             <Link href="/signup">
-              <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-black text-sm uppercase tracking-wider transition-all shadow-glow-amber">
+              <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 text-black font-black text-sm uppercase tracking-wider transition-all shadow-glow-amber hover:shadow-neon-purple">
                 Nâng cấp Hội Viên PRO
               </button>
             </Link>
@@ -361,7 +406,7 @@ export default function HomePage() {
 
       {/* 8. FINAL CALL TO ACTION */}
       <Section>
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-amber-950/40 to-zinc-900/40 border border-white/10 rounded-[40px] p-10 md:p-16 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-amber-950/40 to-zinc-900/40 border border-white/10 rounded-[40px] p-10 md:p-16 text-center relative overflow-hidden border-glow">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-amber-500/5 blur-[100px] pointer-events-none" />
           <h2 className="text-3xl md:text-5xl font-display font-black mb-6 text-white relative z-10 leading-tight">
             Sẵn sàng thay đổi <br /> cách bạn nghe nói tiếng Anh?
@@ -371,7 +416,7 @@ export default function HomePage() {
           </p>
           <div className="relative z-10 flex justify-center">
             <Link href="/signup">
-              <button className="px-10 py-5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-glow-amber flex items-center gap-3">
+              <button className="px-10 py-5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-600 text-black text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-glow-amber flex items-center gap-3 hover:shadow-neon-purple">
                 Bắt đầu học thử miễn phí
               </button>
             </Link>

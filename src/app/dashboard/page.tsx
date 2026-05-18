@@ -8,6 +8,19 @@ import Navbar from "@/components/Navbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { STORIES } from "@/lib/data";
 
+const getMovieImage = (title: string, fallbackUrl?: string) => {
+  const t = title?.toLowerCase() || '';
+  if (t.includes("godfather") || t.includes("bố già")) return "https://images.unsplash.com/photo-1627885449231-15b53ff9d10f?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("dark knight") || t.includes("batman")) return "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("forrest") || t.includes("gump")) return "https://images.unsplash.com/photo-1455243170701-d7031da7e9e6?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("titanic")) return "https://images.unsplash.com/photo-1500077423678-052445851415?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("lion king") || t.includes("vua sư tử")) return "https://images.unsplash.com/photo-1517825738774-7de9363ef735?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("gladiator") || t.includes("võ sĩ giác đấu")) return "https://images.unsplash.com/photo-1590135319808-16e788bc535e?auto=format&fit=crop&w=1200&q=80";
+  if (t.includes("wolf of wall street")) return "https://images.unsplash.com/photo-1611972589053-2947b1897e06?auto=format&fit=crop&w=1200&q=80";
+  
+  return fallbackUrl && fallbackUrl.length > 5 ? fallbackUrl : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80";
+};
+
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -201,18 +214,33 @@ export default function DashboardPage() {
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-xl font-black text-white shadow-lg">
                   {profile?.full_name ? profile.full_name[0].toUpperCase() : 'H'}
                 </div>
-                <div>
-                  <h1 className="text-xl md:text-2xl font-display font-black leading-tight text-white">
+                <div className="flex-1">
+                  <h1 className="text-3xl md:text-4xl font-display font-black leading-tight text-white drop-shadow-md">
                     Chào, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">{profile?.full_name || 'Học viên'}</span>.
                   </h1>
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-white/50 font-bold uppercase tracking-wider">
-                    <span className="flex items-center gap-1 text-orange-500">
-                      <Flame size={14} className="fill-orange-500 animate-pulse" /> {streak} Ngày Streak
-                    </span>
-                    <span className="h-3 w-px bg-white/10" />
-                    <span className="flex items-center gap-1 text-violet-400">
-                      <Sparkles size={12} /> Voice Architect
-                    </span>
+                  
+                  <div className="flex flex-col gap-2 mt-4">
+                    <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest">
+                      <span className="flex items-center gap-2 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] bg-orange-500/10 px-3 py-1.5 rounded-lg border border-orange-500/30">
+                        <Flame size={18} className="fill-orange-500 animate-pulse" /> {streak} NGÀY STREAK
+                      </span>
+                      <span className="flex items-center gap-2 text-violet-300 drop-shadow-[0_0_8px_rgba(167,139,250,0.6)] bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/30">
+                        <Sparkles size={16} /> LEVEL: B2 - VOICE ARCHITECT
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Thành tựu gần đây */}
+                  <div className="mt-5 pt-5 border-t border-white/5">
+                    <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">Thành tựu gần đây</h4>
+                    <div className="flex gap-3">
+                      <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs font-bold text-emerald-400 shadow-lg">
+                        <Trophy size={14} /> Phản xạ nhanh
+                      </div>
+                      <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl text-xs font-bold text-amber-400 shadow-lg">
+                        <Sparkles size={14} /> Sẵn sàng nhập vai
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -228,7 +256,7 @@ export default function DashboardPage() {
             <div className="md:w-[320px] bg-[#101014]/60 backdrop-blur-xl p-6 rounded-3xl border border-white/5 shadow-2xl flex flex-col justify-between">
               <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
                 <span className="flex items-center gap-1.5"><Mic size={14} className="text-emerald-400" /> Trình Độ Nói AI</span>
-                <span className="text-emerald-400 font-mono text-sm">{avgFluency}%</span>
+                <span className="text-emerald-400 font-mono text-3xl font-black drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]">{avgFluency}%</span>
               </div>
               <div className="space-y-3">
                 <div className="h-2.5 bg-white/5 rounded-full overflow-hidden relative">
@@ -259,13 +287,13 @@ export default function DashboardPage() {
               
               {/* Background Cover Image with Ken Burns Zoom Effect */}
               <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[4000ms] group-hover:scale-105" 
-                   style={{ backgroundImage: `url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200')` }} 
+                   style={{ backgroundImage: `url('${getMovieImage(continueLesson?.title || 'The Wolf of Wall Street')}')` }} 
               />
               
-              {/* Cinematic Vignette Gradients */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-[#050508]/60 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/90 via-[#050508]/40 to-transparent" />
-              <div className="absolute inset-0 bg-violet-950/10 mix-blend-color-dodge" />
+              {/* Cinematic Vignette Gradients - Lighter for visibility */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/80 via-[#050508]/20 to-transparent" />
+              <div className="absolute inset-0 bg-violet-950/20 mix-blend-color-dodge" />
               
               {/* Spotlight Glowing Ring */}
               <div className="absolute -left-20 -top-20 w-96 h-96 rounded-full bg-violet-600/15 blur-[120px] pointer-events-none" />
