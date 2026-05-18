@@ -1,5 +1,5 @@
 # 🎯 Cinematic English | Retention Engineering & Product Intelligence
-**Định hướng chiến lược tối thượng:** Giữ sản phẩm cực kỳ tối giản, gây nghiện, tập trung vào cảm xúc, tối ưu hiển thị Mobile-first và 100% xoay quanh khả năng Luyện Nói.
+**Định hướng chiến lược tối thượng:** Giữ sản phẩm cực kỳ tối giản ở Frontend nhưng cực kỳ kiên cố ở Backend. 100% hướng tới thói quen Luyện Nói thực chất của Học viên.
 
 ---
 
@@ -7,6 +7,31 @@
 > **TUYỆT ĐỐI KHÔNG xây dựng bất kỳ hệ thống dành cho Giáo viên (Teacher Systems) nào ở giai đoạn này.**
 
 *Hệ thống Giáo viên sẽ chỉ được xem xét khi và chỉ khi sản phẩm đạt được: Chỉ số giữ chân (Retention) vượt trội, Động cơ học tập ổn định, Lượng người dùng hàng ngày tích cực và Kho nội dung đã được mở rộng quy mô.*
+
+---
+
+## 🛠️ NGUYÊN TẮC KỸ THUẬT PRODUCTION-READY (REAL PRODUCT ONLY)
+> **Chúng ta KHÔNG xây dựng Bản thử nghiệm (Demo) nữa. Chúng ta đang vận hành một SẢN PHẨM THỰC TẾ phục vụ người dùng thật.**
+
+### 💾 1. Cơ sở dữ liệu Thực chất (Real Database Architecture)
+*   **Không dữ liệu cứng (No Hardcoded Logic):** Toàn bộ bài học, phân cảnh phim, phụ đề tiếng Anh, bản dịch tiếng Việt, độ khó và siêu dữ liệu (metadata) của bài học đều phải được truy vấn động từ cơ sở dữ liệu Supabase.
+*   **Không tiến trình ảo (No Fake Progress):** Trạng thái học tập của người dùng phải được lưu vết thực chất trong DB để đảm bảo tính nhất quán trên mọi thiết bị.
+
+### 👤 2. Trạng thái Người dùng Thực tế (Real User State)
+Học viên sở hữu các chỉ số được lưu trữ và cập nhật tự động tại Server:
+*   *Real XP:* Điểm kinh nghiệm tích lũy thực tế sau mỗi bài nói.
+*   *Real Streaks:* Chuỗi ngọn lửa tính toán động dựa trên mốc thời gian hoạt động thực chất của người dùng.
+*   *Real Lesson & Pronunciation History:* Nhật ký luyện nói và lịch sử sửa âm tiết cụ thể từng câu để phục vụ biểu đồ phân tích.
+*   *Real Subscriptions & Quotas:* Hạn ngạch (Quota) chấm điểm AI và trạng thái gói cước (Free vs PRO) được kiểm soát nghiêm ngặt.
+
+### ⚙️ 3. Phục hồi & Độ tin cậy Cao (Production Reliability)
+Hệ thống phải có khả năng tự phục hồi và chống chịu lỗi cao:
+*   *Retries & Fallbacks:* Tự động thử lại khi API Whisper/OpenAI bị nghẽn, hoặc tự động chuyển hướng qua mô hình dự phòng.
+*   *Graceful Degradation:* Khi AI offline, hệ thống vẫn cho phép người dùng ghi âm và tự động chấm điểm cục bộ (client-side matching) để buổi học không bao giờ bị gián đoạn.
+*   *Timeout handling:* Tự động ngắt kết nối và thông báo trực quan khi thời gian phân tích vượt quá 8 giây, không để người dùng chờ đợi vô hạn.
+
+### 💰 4. Kiểm soát Doanh thu từ Backend (Real Monetization)
+*   Quyền lợi sử dụng tính năng PRO và hạn mức chấm điểm miễn phí hàng ngày (AI speaking evaluation quota) phải được bảo vệ và thực thi trực tiếp tại **Server-side (API Guards & Database Triggers)**, đảm bảo không thể bị can thiệp hoặc bẻ khóa ở phía Client.
 
 ---
 
@@ -32,21 +57,9 @@ Hệ thống Telemetry tập trung đo lường 6 chỉ số sinh mệnh của s
 5.  *Repeat Sessions (Tỷ lệ quay lại bài học cũ).*
 6.  *Session Duration (Tổng thời lượng luyện tập trong 1 phiên).*
 
-### 💰 4. Tối ưu hóa Chi phí AI (AI Cost Optimization)
-Giảm tải các cuộc gọi API đắt đỏ lên OpenAI bằng cách:
-*   Sử dụng các mẫu đánh giá cố định (Deterministic Templates) khi giọng nói trùng khớp cao.
-*   Cơ chế đệm kết quả (Cached Responses) cho các trích đoạn phổ biến.
-*   Sử dụng các mô hình gọn nhẹ hoặc xử lý biên dịch cục bộ (Local Client-side parsing) khi thích hợp để duy trì chi phí vận hành ở mức tiệm cận 0đ.
-
-### 🛡️ 5. Sẵn sàng Chốt Sales (Monetization Readiness)
-Tạo phễu chuyển đổi nhẹ nhàng, tự nhiên nhưng hiệu quả:
-*   Giới hạn lượt AI chấm điểm miễn phí mỗi ngày (Free limits).
-*   Các bảng nâng cấp (PRO gating) hiển thị tinh tế khi chạm giới hạn.
-*   Các lời kêu gọi (Subscription nudges) lồng ghép ấm áp giúp người dùng hiểu giá trị của gói PRO.
-
 ---
 
-## ⚡ 6. Công thức sản phẩm: "TikTok + Duolingo + ELSA"
+## ⚡ 7. Công thức sản phẩm: "TikTok + Duolingo + ELSA"
 Chúng ta không xây dựng một hệ thống quản lý học tập (LMS) nặng nề như Coursera. Hệ thống này được tối ưu hóa để tạo thói quen luyện nói hàng ngày bằng cách kích thích các hormone hạnh phúc (Dopamine, Endorphin).
 
 ```mermaid
