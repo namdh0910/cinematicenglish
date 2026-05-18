@@ -1,5 +1,5 @@
 # 🎯 Cinematic English | Retention Engineering & Product Intelligence
-**Định hướng chiến lược tối thượng:** Giữ sản phẩm cực kỳ tối giản ở Frontend nhưng cực kỳ kiên cố ở Backend. 100% hướng tới thói quen Luyện Nói thực chất của Học viên.
+**Định hướng chiến lược tối thượng:** Giữ giao diện cực kỳ tối giản và giàu cảm xúc ở Frontend (Lightweight & Emotional UI) nhưng cực kỳ kiên cố, bảo mật và chuẩn hóa ở Backend (Production-Grade Backend).
 
 ---
 
@@ -10,8 +10,8 @@
 
 ---
 
-## 🛠️ NGUYÊN TẮC KỸ THUẬT PRODUCTION-READY (REAL PRODUCT ONLY)
-> **Chúng ta KHÔNG xây dựng Bản thử nghiệm (Demo) nữa. Chúng ta đang vận hành một SẢN PHẨM THỰC TẾ phục vụ người dùng thật.**
+## 🛡️ NGUYÊN TẮC KỸ THUẬT PRODUCTION-READY (REAL PRODUCT ONLY)
+> **Chúng ta KHÔNG xây dựng Bản thử nghiệm (Demo) nữa. Chúng ta đang vận hành với TƯ DUY CỦA MỘT CÔNG TY PHẦN MỀM THỰC THỤ.**
 
 ### 💾 1. Cơ sở dữ liệu Thực chất (Real Database Architecture)
 *   **Không dữ liệu cứng (No Hardcoded Logic):** Toàn bộ bài học, phân cảnh phim, phụ đề tiếng Anh, bản dịch tiếng Việt, độ khó và siêu dữ liệu (metadata) của bài học đều phải được truy vấn động từ cơ sở dữ liệu Supabase.
@@ -30,8 +30,23 @@ Hệ thống phải có khả năng tự phục hồi và chống chịu lỗi c
 *   *Graceful Degradation:* Khi AI offline, hệ thống vẫn cho phép người dùng ghi âm và tự động chấm điểm cục bộ (client-side matching) để buổi học không bao giờ bị gián đoạn.
 *   *Timeout handling:* Tự động ngắt kết nối và thông báo trực quan khi thời gian phân tích vượt quá 8 giây, không để người dùng chờ đợi vô hạn.
 
-### 💰 4. Kiểm soát Doanh thu từ Backend (Real Monetization)
-*   Quyền lợi sử dụng tính năng PRO và hạn mức chấm điểm miễn phí hàng ngày (AI speaking evaluation quota) phải được bảo vệ và thực thi trực tiếp tại **Server-side (API Guards & Database Triggers)**, đảm bảo không thể bị can thiệp hoặc bẻ khóa ở phía Client.
+---
+
+## ⚡ CÁC QUY TẮC BACKEND NGIÊM NGẶT (STRICT SERVER RULES)
+Để phục vụ mục tiêu **tối ưu cho 100 người dùng thật với tỉ lệ giữ chân xuất sắc**, chúng ta áp dụng các chuẩn mực kỹ thuật cao nhất tại Backend:
+
+### 1. Chuẩn hóa thiết kế Database (Data Integrity):
+*   **Standardize Naming:** Toàn bộ tên bảng, tên cột phải tuân thủ chuẩn `snake_case` (ví dụ: `user_id`, `created_at`, `speaking_accuracy`).
+*   **UUID Consistency:** Sử dụng định danh duy nhất UUID làm Khóa chính (Primary Keys) cho tất cả các thực thể (Users, Lessons, Activities, Telemetry).
+*   **Time Tracking:** Bắt buộc thêm hai trường `created_at` và `updated_at` (với default value là `NOW()`) trên tất cả các bảng dữ liệu để giám sát vòng đời dữ liệu chính xác.
+
+### 2. Xác thực Hạn ngạch & Quyền lợi độc quyền tại Server (Monetization & Quota Security):
+*   **Validate Quotas Server-Side Only:** Tuyệt đối không lưu trữ hoặc kiểm tra giới hạn lượt dùng thử AI, lượt học bài hát, gói PRO ở Client. Mọi hoạt động trừ quota hay phân quyền xem phim chỉ được tính toán và thực thi thông qua **Server-side guards (API endpoint & Database RLS)**.
+*   **Never Trust Frontend:** Client chỉ gửi yêu cầu ghi âm hoặc tải dữ liệu thô. Quyết định cho phép hay chặn, cộng trừ điểm kinh nghiệm XP, ghi nhận Streak hoàn toàn thuộc về Server Logic.
+
+### 3. Chuẩn hóa Dữ liệu Nghiệp vụ & Chống Lạm dụng (Abuse Protection):
+*   **Normalize Analytics Events:** Chuẩn hóa các trường siêu dữ liệu trong `telemetry_events` để đảm bảo báo cáo trực quan sạch sẽ.
+*   **Rate Limiting & Abuse Prevention:** Tích hợp cơ chế giới hạn tần suất gọi API (Rate Limiting) trên các endpoint AI chấm âm để ngăn chặn hành vi phá hoại hoặc dùng tool spam ghi âm gây đội chi phí API của hệ thống.
 
 ---
 
@@ -59,7 +74,7 @@ Hệ thống Telemetry tập trung đo lường 6 chỉ số sinh mệnh của s
 
 ---
 
-## ⚡ 7. Công thức sản phẩm: "TikTok + Duolingo + ELSA"
+## ⚡ 8. Công thức sản phẩm: "TikTok + Duolingo + ELSA"
 Chúng ta không xây dựng một hệ thống quản lý học tập (LMS) nặng nề như Coursera. Hệ thống này được tối ưu hóa để tạo thói quen luyện nói hàng ngày bằng cách kích thích các hormone hạnh phúc (Dopamine, Endorphin).
 
 ```mermaid
