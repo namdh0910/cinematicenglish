@@ -119,7 +119,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 px-4 text-center overflow-hidden">
+      <section className="relative pt-44 pb-16 md:pt-52 md:pb-24 px-4 text-center overflow-hidden">
         {/* Theater Lighting Effect */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-amber-500/10 via-violet-500/5 to-transparent blur-[120px] pointer-events-none" />
         
