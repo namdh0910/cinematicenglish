@@ -1,7 +1,7 @@
 -- =========================================================================
--- CINEMATIC ENGLISH — COMPLETE PRODUCTION SCHEMA MIGRATION
+-- CINEMATIC ENGLISH — COMPLETE PRODUCTION SCHEMA MIGRATION (MASTER RESILIENT)
 -- Target Database: Supabase (PostgreSQL 15+)
--- Features: snake_case, UUIDs, RLS, Indexes, Triggers, RLS Policies
+-- Features: snake_case, UUIDs, RLS, Indexes, Triggers, Resilient ALTERs
 -- =========================================================================
 
 -- Enable UUID extension if not already present
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- In case profiles table already existed, ensure all customized production columns exist cleanly
+-- Ensure all customized production columns exist on profiles table
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'student' CHECK (role IN ('student', 'admin'));
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_plan TEXT NOT NULL DEFAULT 'free' CHECK (subscription_plan IN ('free', 'pro', 'team', 'school'));
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subscription_status TEXT NOT NULL DEFAULT 'active' CHECK (subscription_status IN ('active', 'trialing', 'past_due', 'canceled', 'inactive'));
@@ -45,7 +45,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
 CREATE POLICY "profiles_select_policy" ON public.profiles
-    FOR SELECT USING (TRUE); -- Profiles are readable by authenticated users
+    FOR SELECT USING (TRUE);
 
 DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
 CREATE POLICY "profiles_update_own" ON public.profiles
@@ -91,11 +91,17 @@ CREATE TABLE IF NOT EXISTS public.stories (
     title TEXT NOT NULL,
     description TEXT DEFAULT '',
     thumbnail_url TEXT,
-    difficulty TEXT NOT NULL DEFAULT 'easy' CHECK (difficulty IN ('easy', 'medium', 'hard')),
+    difficulty TEXT NOT NULL DEFAULT 'easy',
     is_published BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all customized production columns exist on stories table
+ALTER TABLE public.stories ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+ALTER TABLE public.stories ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
+ALTER TABLE public.stories ADD COLUMN IF NOT EXISTS difficulty TEXT NOT NULL DEFAULT 'easy' CHECK (difficulty IN ('easy', 'medium', 'hard'));
+ALTER TABLE public.stories ADD COLUMN IF NOT EXISTS is_published BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- Stories RLS
 ALTER TABLE public.stories ENABLE ROW LEVEL SECURITY;
@@ -130,6 +136,9 @@ CREATE TABLE IF NOT EXISTS public.story_scenes (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all customized production columns exist on story_scenes table
+ALTER TABLE public.story_scenes ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
+
 -- Story Scenes Index
 CREATE INDEX IF NOT EXISTS story_scenes_story_id_idx ON public.story_scenes (story_id, order_index ASC);
 
@@ -158,11 +167,16 @@ CREATE TABLE IF NOT EXISTS public.lessons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     description TEXT DEFAULT '',
-    type TEXT NOT NULL DEFAULT 'Speaking' CHECK (type IN ('Listening', 'Speaking', 'Reading', 'Writing', 'Language', 'Getting Started', 'Exam')),
+    type TEXT NOT NULL DEFAULT 'Speaking',
     is_published BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all customized production columns exist on lessons table
+ALTER TABLE public.lessons ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+ALTER TABLE public.lessons ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'Speaking' CHECK (type IN ('Listening', 'Speaking', 'Reading', 'Writing', 'Language', 'Getting Started', 'Exam'));
+ALTER TABLE public.lessons ADD COLUMN IF NOT EXISTS is_published BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- Lessons RLS
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
@@ -201,6 +215,12 @@ CREATE TABLE IF NOT EXISTS public.lesson_sentences (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all customized production columns exist on lesson_sentences table
+ALTER TABLE public.lesson_sentences ADD COLUMN IF NOT EXISTS audio_url TEXT;
+ALTER TABLE public.lesson_sentences ADD COLUMN IF NOT EXISTS thumbnail_url TEXT;
+ALTER TABLE public.lesson_sentences ADD COLUMN IF NOT EXISTS start_time NUMERIC;
+ALTER TABLE public.lesson_sentences ADD COLUMN IF NOT EXISTS end_time NUMERIC;
+
 -- Lesson Sentences Index
 CREATE INDEX IF NOT EXISTS lesson_sentences_lesson_id_idx ON public.lesson_sentences (lesson_id, order_index ASC);
 
@@ -236,6 +256,10 @@ CREATE TABLE IF NOT EXISTS public.lesson_progress (
     UNIQUE (user_id, lesson_id)
 );
 
+-- Ensure all customized production columns exist on lesson_progress table
+ALTER TABLE public.lesson_progress ADD COLUMN IF NOT EXISTS is_completed BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE public.lesson_progress ADD COLUMN IF NOT EXISTS last_activity_index INTEGER NOT NULL DEFAULT 0;
+
 -- Lesson Progress Indexes
 CREATE INDEX IF NOT EXISTS lesson_progress_user_idx ON public.lesson_progress (user_id);
 CREATE INDEX IF NOT EXISTS lesson_progress_lesson_idx ON public.lesson_progress (lesson_id);
@@ -267,13 +291,19 @@ CREATE TABLE IF NOT EXISTS public.speaking_attempts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     sentence_id UUID NOT NULL REFERENCES public.lesson_sentences(id) ON DELETE CASCADE,
-    accuracy_score INTEGER NOT NULL CHECK (accuracy_score >= 0 AND accuracy_score <= 100),
+    accuracy_score INTEGER NOT NULL,
     word_evaluations JSONB DEFAULT '[]'::jsonb,
     audio_url TEXT,
     coach_feedback TEXT DEFAULT '',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all customized production columns exist on speaking_attempts table
+ALTER TABLE public.speaking_attempts ADD COLUMN IF NOT EXISTS accuracy_score INTEGER NOT NULL DEFAULT 0 CHECK (accuracy_score >= 0 AND accuracy_score <= 100);
+ALTER TABLE public.speaking_attempts ADD COLUMN IF NOT EXISTS word_evaluations JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.speaking_attempts ADD COLUMN IF NOT EXISTS audio_url TEXT;
+ALTER TABLE public.speaking_attempts ADD COLUMN IF NOT EXISTS coach_feedback TEXT DEFAULT '';
 
 -- Speaking Attempts Indexes
 CREATE INDEX IF NOT EXISTS speaking_attempts_user_idx ON public.speaking_attempts (user_id, created_at DESC);
@@ -307,6 +337,11 @@ CREATE TABLE IF NOT EXISTS public.daily_streaks (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all customized production columns exist on daily_streaks table
+ALTER TABLE public.daily_streaks ADD COLUMN IF NOT EXISTS current_streak INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.daily_streaks ADD COLUMN IF NOT EXISTS max_streak INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.daily_streaks ADD COLUMN IF NOT EXISTS last_active_date DATE NOT NULL DEFAULT CURRENT_DATE;
 
 -- Daily Streaks RLS
 ALTER TABLE public.daily_streaks ENABLE ROW LEVEL SECURITY;
@@ -347,6 +382,10 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all customized production columns exist on subscriptions table
+ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS cancel_at_period_end BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
+
 -- Subscriptions RLS
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
@@ -370,6 +409,10 @@ CREATE TABLE IF NOT EXISTS public.analytics_events (
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all customized production columns exist on analytics_events table
+ALTER TABLE public.analytics_events ADD COLUMN IF NOT EXISTS page_url TEXT;
+ALTER TABLE public.analytics_events ADD COLUMN IF NOT EXISTS metadata JSONB DEFAULT '{}'::jsonb;
 
 -- Analytics Events Index
 CREATE INDEX IF NOT EXISTS analytics_events_user_idx ON public.analytics_events (user_id, created_at DESC);
@@ -395,11 +438,14 @@ CREATE TABLE IF NOT EXISTS public.quota_usage (
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     quota_date DATE NOT NULL DEFAULT CURRENT_DATE,
     speaking_count INTEGER NOT NULL DEFAULT 0,
-    max_limit INTEGER NOT NULL DEFAULT 15, -- 15 free evaluations per day standard
+    max_limit INTEGER NOT NULL DEFAULT 15,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (user_id, quota_date)
 );
+
+-- Ensure all customized production columns exist on quota_usage table
+ALTER TABLE public.quota_usage ADD COLUMN IF NOT EXISTS max_limit INTEGER NOT NULL DEFAULT 15;
 
 -- Quota Usage Index
 CREATE INDEX IF NOT EXISTS quota_usage_user_date_idx ON public.quota_usage (user_id, quota_date);
@@ -430,6 +476,9 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (ip_address, endpoint, reset_at)
 );
+
+-- Ensure all customized production columns exist on rate_limits table
+ALTER TABLE public.rate_limits ADD COLUMN IF NOT EXISTS request_count INTEGER NOT NULL DEFAULT 1;
 
 -- Rate Limits Index
 CREATE INDEX IF NOT EXISTS rate_limits_ip_endpoint_idx ON public.rate_limits (ip_address, endpoint);
