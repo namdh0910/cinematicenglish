@@ -9,6 +9,35 @@ import { Lesson } from "@/features/speaking/types";
 
 import { evaluateSpeaking } from "@/app/actions/speaking";
 
+const PASSING_SCORE = 70;
+
+function playTingSound() {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.5);
+  } catch (err) {
+    console.warn("Could not play ting sound:", err);
+  }
+}
+
 interface LessonPlayerClientProps {
   lesson: Lesson;
 }
@@ -19,6 +48,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   // Sort and list activities
   const activities = lesson.activities?.sort((a, b) => a.order_index - b.order_index) || [];
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const [xpReward, setXpReward] = useState(0);
 
@@ -53,6 +83,16 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   // Sync video time on Scene/Activity change
   useEffect(() => {
     resetStateForNewScene();
+    if (shouldAutoPlay) {
+      setShouldAutoPlay(false);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.play().catch(console.error);
+          setIsVideoPaused(false);
+          setIsVideoPlaying(true);
+        }
+      }, 150);
+    }
   }, [currentIdx, activeActivity]);
 
   const resetStateForNewScene = () => {
@@ -146,6 +186,10 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             })) || []
           });
           
+          if (response.accuracy >= PASSING_SCORE) {
+            playTingSound();
+          }
+
           if (response.xpEarned) {
             setXpReward(prev => prev + response.xpEarned!);
           }
@@ -166,6 +210,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   const handleNextScene = () => {
     if (currentIdx < activities.length - 1) {
+      setShouldAutoPlay(true);
       setCurrentIdx(prev => prev + 1);
     } else {
       setIsFinished(true);
@@ -441,21 +486,49 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                   </div>
                 </div>
 
-                {/* NEXT SCENE TRIGGER */}
-                <button
-                  onClick={handleNextScene}
-                  className="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-wider hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2"
-                >
-                  {currentIdx < activities.length - 1 ? (
+                {/* BUTTONS ACTION LOOP */}
+                <div className="space-y-3 mt-4">
+                  {aiFeedback.overall < PASSING_SCORE ? (
                     <>
-                      Phân cảnh tiếp theo <ArrowRight size={14} />
+                      {/* Retry Button - Pulsing warning light */}
+                      <button
+                        onClick={resetStateForNewScene}
+                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black uppercase text-xs tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_25px_rgba(245,158,11,0.3)] animate-pulse flex items-center justify-center gap-2"
+                      >
+                        <RefreshCw size={14} className="animate-spin" /> Thử lại ngay (Cần &ge; {PASSING_SCORE}%)
+                      </button>
+
+                      {/* Locked Next Scene Button - Disabled */}
+                      <button
+                        disabled
+                        className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/20 font-black uppercase text-xs tracking-wider cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        {currentIdx < activities.length - 1 ? "Phân cảnh tiếp theo" : "Hoàn thành bài học"} (Đã khóa)
+                      </button>
                     </>
                   ) : (
                     <>
-                      Hoàn thành bài học <Check size={14} />
+                      {/* Next Scene Button - Bouncing and Glowing Emerald/White */}
+                      <button
+                        onClick={handleNextScene}
+                        className="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-wider hover:scale-[1.03] active:scale-[0.97] transition-all shadow-[0_0_30px_rgba(255,255,255,0.4)] animate-bounce flex items-center justify-center gap-2"
+                      >
+                        {currentIdx < activities.length - 1 ? (
+                          <>
+                            Phân cảnh tiếp theo <ArrowRight size={14} />
+                          </>
+                        ) : (
+                          <>
+                            Hoàn thành bài học <Check size={14} />
+                          </>
+                        )}
+                      </button>
                     </>
                   )}
-                </button>
+                </div>
               </motion.div>
             ) : (
               <motion.div
