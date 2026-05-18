@@ -7,6 +7,34 @@ import { STORIES } from "@/lib/data";
 import { useEffect, useRef } from "react";
 import InteractiveOverlay from "@/components/stories/interactive/InteractiveOverlay";
 import { getOrGenerateAudio } from "@/app/actions/audio";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const getStoryEmoji = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("godfather") || t.includes("bố già")) return "🌹";
+  if (t.includes("dark knight") || t.includes("hiệp sĩ bóng đêm") || t.includes("batman")) return "🦇";
+  if (t.includes("forrest") || t.includes("gump")) return "🏃";
+  if (t.includes("titanic")) return "🚢";
+  if (t.includes("lion king") || t.includes("vua sư tử")) return "🦁";
+  return "🎬";
+};
+
+const getStoryColor = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("godfather")) return "from-red-950 to-bg-primary";
+  if (t.includes("dark knight")) return "from-slate-900 to-bg-primary";
+  if (t.includes("forrest")) return "from-amber-950 to-bg-primary";
+  if (t.includes("titanic")) return "from-blue-950 to-bg-primary";
+  if (t.includes("lion king")) return "from-yellow-950 to-bg-primary";
+  return "from-violet-950 to-bg-primary";
+};
+
+const getStoryCategory = (difficulty: string) => {
+  const diff = difficulty.toLowerCase();
+  if (diff === 'easy' || diff === 'beginner') return "CƠ BẢN";
+  if (diff === 'medium' || diff === 'intermediate') return "TRUNG CẤP";
+  return "NÂNG CAO";
+};
 
 const STORY_PARAGRAPHS = [
   {
@@ -34,7 +62,9 @@ const VOCAB = [
 
 export default function StoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const story = STORIES.find((s) => s.id === id) || STORIES[0];
+  const [story, setStory] = useState<any>(null);
+  const [lessonId, setLessonId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1.0);
   const [activeWord, setActiveWord] = useState<string | null>(null);
@@ -45,6 +75,65 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const [currentTime, setCurrentTime] = useState(0);
   const [activeCheckpoint, setActiveCheckpoint] = useState<any>(null);
   const [completedCheckpoints, setCompletedCheckpoints] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function loadStoryData() {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        
+        // 1. Fetch story from database
+        const { data: dbStory, error: storyError } = await supabase
+          .from("stories")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle();
+
+        let activeStory = null;
+
+        if (dbStory) {
+          activeStory = {
+            id: dbStory.id,
+            title: dbStory.title,
+            description: dbStory.description || "Học tiếng Anh qua thước phim kinh điển.",
+            coverImage: dbStory.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+            difficulty: dbStory.difficulty,
+            level: dbStory.difficulty === 'easy' ? 'B1' : dbStory.difficulty === 'medium' ? 'B2' : 'C1',
+            emoji: getStoryEmoji(dbStory.title),
+            color: getStoryColor(dbStory.title),
+            category: getStoryCategory(dbStory.difficulty),
+            duration: dbStory.difficulty === 'easy' ? '05:00' : dbStory.difficulty === 'medium' ? '08:00' : '12:00',
+            xp: dbStory.difficulty === 'easy' ? 200 : dbStory.difficulty === 'medium' ? 300 : 400
+          };
+        } else {
+          // Fallback to static STORIES match if not in DB
+          const staticMatch = STORIES.find((s) => s.id === id) || STORIES[0];
+          activeStory = staticMatch;
+        }
+
+        setStory(activeStory);
+
+        // 2. Fetch the corresponding lesson to link Mở AI Coach to a real lesson
+        if (activeStory) {
+          const { data: dbLesson } = await supabase
+            .from("lessons")
+            .select("id")
+            .ilike("title", `%${activeStory.title}%`)
+            .limit(1)
+            .maybeSingle();
+
+          if (dbLesson) {
+            setLessonId(dbLesson.id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load story details:", err);
+        setStory(STORIES.find((s) => s.id === id) || STORIES[0]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadStoryData();
+  }, [id]);
 
   // Real Audio Pipeline states
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -299,6 +388,17 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
   const toggleSave = (word: string) => {
     setSavedWords((prev) => prev.includes(word) ? prev.filter((w) => w !== word) : [...prev, word]);
   };
+
+  if (loading || !story) {
+    return (
+      <div className="bg-primary min-h-screen flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-secondary">Đang chuẩn bị thước phim...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
@@ -563,8 +663,8 @@ export default function StoryPage({ params }: { params: Promise<{ id: string }> 
           <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
             Nghe một câu, sau đó ghi âm lại chính mình. AI của chúng tôi sẽ chấm điểm phát âm của bạn ngay lập tức.
           </p>
-          <Link href="/coach" className="btn-primary justify-center" style={{ display: "inline-flex" }}>
-            <Zap size={16} /> Mở AI Coach
+          <Link href={lessonId ? `/learn/lesson/${lessonId}` : "/coach"} className="btn-primary justify-center" style={{ display: "inline-flex" }}>
+            <Zap size={16} /> {lessonId ? "Bắt đầu luyện nói AI" : "Mở AI Coach"}
           </Link>
         </motion.div>
       </div>

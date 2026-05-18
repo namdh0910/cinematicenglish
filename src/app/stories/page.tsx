@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Search, Filter, Sparkles } from "lucide-react";
@@ -8,9 +9,86 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Section from "@/components/ui/Section";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const getStoryEmoji = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("godfather") || t.includes("bố già")) return "🌹";
+  if (t.includes("dark knight") || t.includes("hiệp sĩ bóng đêm") || t.includes("batman")) return "🦇";
+  if (t.includes("forrest") || t.includes("gump")) return "🏃";
+  if (t.includes("titanic")) return "🚢";
+  if (t.includes("lion king") || t.includes("vua sư tử")) return "🦁";
+  return "🎬";
+};
+
+const getStoryColor = (title: string) => {
+  const t = title.toLowerCase();
+  if (t.includes("godfather")) return "from-red-950 to-bg-primary";
+  if (t.includes("dark knight")) return "from-slate-900 to-bg-primary";
+  if (t.includes("forrest")) return "from-amber-950 to-bg-primary";
+  if (t.includes("titanic")) return "from-blue-950 to-bg-primary";
+  if (t.includes("lion king")) return "from-yellow-950 to-bg-primary";
+  return "from-violet-950 to-bg-primary";
+};
+
+const getStoryCategory = (difficulty: string) => {
+  const diff = difficulty.toLowerCase();
+  if (diff === 'easy' || diff === 'beginner') return "CƠ BẢN";
+  if (diff === 'medium' || diff === 'intermediate') return "TRUNG CẤP";
+  return "NÂNG CAO";
+};
 
 export default function StoriesPage() {
   const categories = ["Tất cả", "Tâm Lý Học", "Điện Ảnh", "Kinh Doanh", "Triết Học", "Giao Tiếp"];
+  const [stories, setStories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStories() {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const { data, error } = await supabase
+          .from("stories")
+          .select("*")
+          .eq("is_published", true);
+        
+        if (error) {
+          console.error("Supabase error loading stories:", error);
+          setStories(STORIES);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const mappedStories = data.map((item) => {
+            const title = item.title;
+            return {
+              id: item.id,
+              title: item.title,
+              description: item.description || "Học tiếng Anh qua thước phim kinh điển.",
+              coverImage: item.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+              difficulty: item.difficulty,
+              level: item.difficulty === 'easy' ? 'B1' : item.difficulty === 'medium' ? 'B2' : 'C1',
+              emoji: getStoryEmoji(title),
+              color: getStoryColor(title),
+              category: getStoryCategory(item.difficulty),
+              duration: item.difficulty === 'easy' ? '05:00' : item.difficulty === 'medium' ? '08:00' : '12:00',
+              plays: 1200 + Math.floor(Math.random() * 5000),
+              xp: item.difficulty === 'easy' ? 200 : item.difficulty === 'medium' ? 300 : 400
+            };
+          });
+          setStories(mappedStories);
+        } else {
+          setStories(STORIES);
+        }
+      } catch (err) {
+        console.error("Failed to load stories:", err);
+        setStories(STORIES);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStories();
+  }, []);
 
   return (
     <div className="bg-primary min-h-screen">
@@ -60,7 +138,7 @@ export default function StoriesPage() {
 
           {/* Stories Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {STORIES.map((story, i) => (
+            {stories.map((story, i) => (
               <Card 
                 key={story.id} 
                 padding="none" 
