@@ -16,6 +16,10 @@ const RECENT_LESSONS = [
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [streak, setStreak] = useState<number>(0);
+  const [recentLessons, setRecentLessons] = useState<any[]>([]);
+  const [avgFluency, setAvgFluency] = useState<number>(85);
+  const [continueLesson, setContinueLesson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [editName, setEditName] = useState("");
@@ -30,6 +34,7 @@ export default function DashboardPage() {
       const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        // 1. Fetch user profile
         const { data: userProfile } = await supabase
           .from("profiles")
           .select("*")
@@ -40,9 +45,127 @@ export default function DashboardPage() {
           setProfile(userProfile);
           setEditName(userProfile.full_name || "");
         }
+
+        // 2. Fetch daily streak
+        const { data: streakData } = await supabase
+          .from("daily_streaks")
+          .select("current_streak")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        if (streakData) {
+          setStreak(streakData.current_streak || 0);
+        }
+
+        // 3. Fetch speaking attempts for Fluency progress calculation
+        const { data: attempts } = await supabase
+          .from("speaking_attempts")
+          .select("accuracy_score")
+          .eq("user_id", session.user.id);
+
+        if (attempts && attempts.length > 0) {
+          const totalAccuracy = attempts.reduce((acc, curr) => acc + (curr.accuracy_score || 0), 0);
+          setAvgFluency(Math.round(totalAccuracy / attempts.length));
+        }
+
+        // 4. Fetch recent lesson progress
+        const { data: progressData } = await supabase
+          .from("lesson_progress")
+          .select(`
+            is_completed,
+            updated_at,
+            lesson_id
+          `)
+          .eq("user_id", session.user.id)
+          .order("updated_at", { ascending: false })
+          .limit(3);
+
+        if (progressData && progressData.length > 0) {
+          const lessonIds = progressData.map(p => p.lesson_id);
+          const { data: lessons } = await supabase
+            .from("lessons")
+            .select("id, title, description")
+            .in("id", lessonIds);
+
+          if (lessons) {
+            const mappedLessons = progressData.map(p => {
+              const lessonInfo = lessons.find(l => l.id === p.lesson_id);
+              const dateObj = new Date(p.updated_at);
+              const formattedDate = dateObj.toLocaleDateString('vi-VN', { 
+                day: 'numeric', 
+                month: 'numeric', 
+                year: 'numeric' 
+              });
+              
+              return {
+                id: p.lesson_id,
+                title: lessonInfo?.title || "Bài học tiếng Anh",
+                date: formattedDate,
+                isCompleted: p.is_completed
+              };
+            });
+            setRecentLessons(mappedLessons);
+          }
+        }
+
+        // 5. Fetch a lesson to continue (Continue Learning CTA)
+        const { data: incompleteProgress } = await supabase
+          .from("lesson_progress")
+          .select("lesson_id")
+          .eq("user_id", session.user.id)
+          .eq("is_completed", false)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        let targetLessonId = "";
+        let continueText = "Bắt đầu bài học mới";
+        let lessonTitle = "The Wolf of Wall Street";
+        let lessonDesc = "Cảnh: Bài phát biểu bán hàng xuất sắc nhất.";
+
+        if (incompleteProgress) {
+          targetLessonId = incompleteProgress.lesson_id;
+          continueText = "Đang học dở";
+        }
+
+        if (targetLessonId) {
+          const { data: lessonDetails } = await supabase
+            .from("lessons")
+            .select("id, title, description")
+            .eq("id", targetLessonId)
+            .single();
+
+          if (lessonDetails) {
+            lessonTitle = lessonDetails.title;
+            lessonDesc = lessonDetails.description || "";
+          }
+        } else {
+          // Get the first available published lesson in the database
+          const { data: allLessons } = await supabase
+            .from("lessons")
+            .select("id, title, description")
+            .eq("is_published", true)
+            .order("created_at", { ascending: true })
+            .limit(1);
+
+          if (allLessons && allLessons.length > 0) {
+            targetLessonId = allLessons[0].id;
+            lessonTitle = allLessons[0].title;
+            lessonDesc = allLessons[0].description || "";
+          }
+        }
+
+        if (targetLessonId) {
+          setContinueLesson({
+            id: targetLessonId,
+            title: lessonTitle,
+            description: lessonDesc,
+            statusText: continueText
+          });
+        }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error loading dashboard data:", err);
     } finally {
       setLoading(false);
     }
@@ -64,7 +187,7 @@ export default function DashboardPage() {
               Chào, <span className="text-amber-500">{profile?.full_name || 'Học viên'}</span>.
             </h1>
             <div className="flex items-center gap-2 mt-2 text-sm text-secondary font-bold">
-              <Flame size={16} className="text-orange-500" /> Chuỗi học: <span className="text-white">5 ngày</span>
+              <Flame size={16} className="text-orange-500" /> Chuỗi học: <span className="text-white">{streak} ngày</span>
             </div>
           </div>
           <button 
@@ -83,12 +206,18 @@ export default function DashboardPage() {
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
-                <div className="inline-block px-3 py-1 rounded-full bg-black/30 text-[10px] font-black uppercase tracking-widest mb-2">Đang học dở</div>
-                <h3 className="text-2xl font-display font-black text-white">The Wolf of Wall Street</h3>
-                <p className="text-white/70 text-sm">Cảnh: Bài phát biểu bán hàng xuất sắc nhất.</p>
+                <div className="inline-block px-3 py-1 rounded-full bg-black/30 text-[10px] font-black uppercase tracking-widest mb-2">
+                  {continueLesson?.statusText || "Bắt đầu bài học mới"}
+                </div>
+                <h3 className="text-2xl font-display font-black text-white">
+                  {continueLesson?.title || "The Wolf of Wall Street"}
+                </h3>
+                <p className="text-white/70 text-sm">
+                  {continueLesson?.description || "Cảnh: Bài phát biểu bán hàng xuất sắc nhất."}
+                </p>
               </div>
               
-              <Link href="/learn/lesson/wolf-1" className="shrink-0">
+              <Link href={`/learn/lesson/${continueLesson?.id || "lesson-u1l2"}`} className="shrink-0">
                 <button className="w-full md:w-auto px-8 py-4 rounded-full bg-white text-black font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-glow-violet">
                   <Play size={18} fill="black" /> Học ngay
                 </button>
@@ -103,12 +232,18 @@ export default function DashboardPage() {
           <div className="bg-[#101014] p-6 rounded-3xl border border-white/5 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm font-bold flex items-center gap-2"><Mic size={16} className="text-emerald-400"/> Độ tự tin (Fluency)</span>
-              <span className="font-mono text-emerald-400 font-bold">85%</span>
+              <span className="font-mono text-emerald-400 font-bold">{avgFluency}%</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full w-[85%] bg-emerald-400 shadow-glow-emerald" />
+              <div className="h-full bg-emerald-400 shadow-glow-emerald transition-all duration-500" style={{ width: `${avgFluency}%` }} />
             </div>
-            <p className="text-xs text-secondary">Bạn phát âm rất rõ ràng, cần cải thiện thêm ngữ điệu nối từ (linking words).</p>
+            <p className="text-xs text-secondary">
+              {avgFluency >= 80 
+                ? "Bạn phát âm rất rõ ràng, cần cải thiện thêm ngữ điệu nối từ (linking words)."
+                : avgFluency >= 50 
+                ? "Khá tốt! Hãy cố gắng luyện tập thêm các âm đuôi và âm gió để nâng cao độ trôi chảy."
+                : "Hãy tích cực nghe lại audio mẫu từ HLV AI và luyện nói nhiều hơn nữa nhé!"}
+            </p>
           </div>
         </div>
 
@@ -116,23 +251,31 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <h2 className="text-lg font-bold text-white/60 uppercase tracking-widest text-[11px]">Lịch sử luyện tập</h2>
           <div className="space-y-3">
-            {RECENT_LESSONS.map((lesson) => (
-              <div key={lesson.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#101014] border border-white/5 hover:border-white/20 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40">
-                    <Clock size={16} />
+            {recentLessons.length > 0 ? (
+              recentLessons.map((lesson) => (
+                <div key={lesson.id} className="flex items-center justify-between p-4 rounded-2xl bg-[#101014] border border-white/5 hover:border-white/20 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40">
+                      <Clock size={16} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-white">{lesson.title}</h4>
+                      <span className="text-xs text-secondary">{lesson.date}</span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-white">{lesson.title}</h4>
-                    <span className="text-xs text-secondary">{lesson.date}</span>
+                  <div className="text-right">
+                    <div className="text-amber-400 font-black font-mono">
+                      {lesson.isCompleted ? "ĐÃ XONG" : "ĐANG HỌC"}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-widest text-white/30">Trạng thái</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-amber-400 font-black font-mono">{lesson.score}</div>
-                  <div className="text-[9px] uppercase tracking-widest text-white/30">Điểm AI</div>
-                </div>
+              ))
+            ) : (
+              <div className="text-center p-6 bg-[#101014] rounded-2xl border border-white/5 text-sm text-secondary italic">
+                Chưa có lịch sử học gần đây. Hãy chọn "Học ngay" để bắt đầu!
               </div>
-            ))}
+            )}
           </div>
         </div>
       </main>

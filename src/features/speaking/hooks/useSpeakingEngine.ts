@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { evaluateSpeaking } from "@/app/actions/speaking";
+import { evaluateSpeaking, saveLessonProgress } from "@/app/actions/speaking";
 import { trackTelemetry } from "@/lib/observability/observability";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Activity, SpeakingResult } from "../types";
@@ -233,6 +233,20 @@ export function useSpeakingEngine(lessonId: string, activities: Activity[]) {
   };
 
   const handleAutoNext = () => {
+    // Save progress to database asynchronously without blocking transition
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const isLast = currentIdx >= activities.length - 1;
+        saveLessonProgress({
+          userId: session.user.id,
+          lessonId,
+          isCompleted: isLast,
+          lastActivityIndex: currentIdx
+        }).catch(err => console.error("Failed to save progress:", err));
+      }
+    });
+
     if (currentIdx < activities.length - 1) {
       setCurrentIdx(prev => prev + 1);
     } else {

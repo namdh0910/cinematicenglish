@@ -311,6 +311,9 @@ export async function evaluateSpeaking({
         .from('profiles')
         .update({ xp_score: currentXp + xpEarned })
         .eq('id', activeUserId);
+
+      // C. Update Daily Streak
+      await updateDailyStreak(supabase, activeUserId);
     }
 
     return {
@@ -338,5 +341,121 @@ export async function evaluateSpeaking({
       coachFeedback: 'Hệ thống đánh giá phát âm AI đang bận. Vui lòng thử nói lại.',
       error: err.message,
     };
+  }
+}
+
+/**
+ * Updates the user's daily streak in daily_streaks table.
+ * If the user's last active date was today, do nothing.
+ * If yesterday, increment current_streak.
+ * If older, reset current_streak to 1.
+ */
+async function updateDailyStreak(supabase: any, userId: string) {
+  try {
+    const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    // Fetch streak info
+    const { data: streak, error } = await supabase
+      .from('daily_streaks')
+      .select('current_streak, max_streak, last_active_date')
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching streak:', error);
+      return;
+    }
+
+    if (!streak) {
+      // First streak ever!
+      await supabase
+        .from('daily_streaks')
+        .insert({
+          user_id: userId,
+          current_streak: 1,
+          max_streak: 1,
+          last_active_date: todayStr
+        });
+    } else {
+      const lastActive = streak.last_active_date;
+      
+      if (lastActive === todayStr) {
+        // Already active today, maintain streak but don't increment
+        return;
+      }
+      
+      // Calculate yesterday's date
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      let newStreak = 1;
+      if (lastActive === yesterdayStr) {
+        // Streak continues!
+        newStreak = (streak.current_streak || 0) + 1;
+      } else {
+        // Streak was broken, reset to 1
+        newStreak = 1;
+      }
+
+      const newMaxStreak = Math.max(streak.max_streak || 0, newStreak);
+
+      await supabase
+        .from('daily_streaks')
+        .update({
+          current_streak: newStreak,
+          max_streak: newMaxStreak,
+          last_active_date: todayStr,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+    }
+  } catch (err) {
+    console.error('Failed to update daily streak:', err);
+  }
+}
+
+/**
+ * Saves lesson completion / sentence progress to Supabase
+ */
+export async function saveLessonProgress({
+  userId,
+  lessonId,
+  isCompleted,
+  lastActivityIndex,
+}: {
+  userId: string;
+  lessonId: string;
+  isCompleted: boolean;
+  lastActivityIndex: number;
+}) {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    
+    if (!isValidUuid(userId) || !isValidUuid(lessonId)) {
+      return { success: false, error: 'Invalid UUID format' };
+    }
+
+    const { error } = await supabase
+      .from('lesson_progress')
+      .upsert({
+        user_id: userId,
+        lesson_id: lessonId,
+        is_completed: isCompleted,
+        last_activity_index: lastActivityIndex,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,lesson_id'
+      });
+
+    if (error) {
+      console.error('Error saving lesson progress:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.error('saveLessonProgress error:', err);
+    return { success: false, error: err.message };
   }
 }

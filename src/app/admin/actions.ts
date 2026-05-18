@@ -491,30 +491,57 @@ export async function getLessonWithDetails(lessonId: string) {
     return mockLesson;
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: lesson, error } = await supabase
-    .from('lessons')
-    .select(`
-      *,
-      unit:unit_id (
-        *,
-        semester:semester_id (
-          *,
-          grade:grade_id (
-            *
-          )
-        )
-      ),
-      activities (
-        *
-      )
-    `)
-    .eq('id', lessonId)
-    .single();
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // 1. Fetch lesson
+    const { data: lesson, error: lessonError } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('id', lessonId)
+      .single();
 
-  if (error || !lesson) {
-    console.error("Error fetching lesson details, using fallback:", error);
+    if (lessonError || !lesson) {
+      console.error("Error fetching lesson:", lessonError);
+      return mockLesson;
+    }
+
+    // 2. Fetch lesson sentences (which represent activities in the frontend model)
+    const { data: sentences, error: sentencesError } = await supabase
+      .from('lesson_sentences')
+      .select('*')
+      .eq('lesson_id', lessonId)
+      .order('order_index', { ascending: true });
+
+    if (sentencesError) {
+      console.error("Error fetching lesson sentences:", sentencesError);
+      return {
+        ...lesson,
+        activities: []
+      };
+    }
+
+    // 3. Map sentences to frontend activities structure
+    const activities = (sentences || []).map((sentence) => ({
+      id: sentence.id,
+      title: "Luyện nói",
+      type: "shadowing",
+      instructions: "Nhấn nút ghi âm và bắt chước phát âm cụm từ dưới đây với ngữ điệu tự nhiên nhất.",
+      order_index: sentence.order_index,
+      content: {
+        transcript: sentence.transcript,
+        translation: sentence.translation,
+        thumbnailUrl: sentence.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+        audioUrl: sentence.audio_url || '',
+      }
+    }));
+
+    return {
+      ...lesson,
+      activities
+    };
+  } catch (err) {
+    console.error("Error inside getLessonWithDetails server action:", err);
     return mockLesson;
   }
-  return lesson;
 }
