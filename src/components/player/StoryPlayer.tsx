@@ -385,6 +385,7 @@ export default function StoryPlayer({ storyId, onClose }: StoryPlayerProps) {
       <AnimatePresence>
         {showReflection && (
           <ReflectionEngine 
+            lessonId={storyId}
             mood={currentStory.mood}
             prompt="What stayed with you after this story?"
             onClose={() => {

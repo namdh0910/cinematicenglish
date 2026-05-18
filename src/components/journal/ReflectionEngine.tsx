@@ -3,12 +3,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Sparkles, Heart, Zap, Coffee, Moon, Sun, Check, MessageSquare } from 'lucide-react';
+import { saveReflection } from '@/app/actions/reflection';
 
 interface ReflectionEngineProps {
   onClose: () => void;
-  onSave: (reflection: { content: string, tags: string[] }) => void;
+  onSave?: (reflection: { content: string, tags: string[] }) => void;
   prompt?: string;
   mood?: 'the-void' | 'the-pulse' | 'the-calm';
+  lessonId: string; // Dynamic identifier mapped to the lesson/story database record
 }
 
 const EMOTIONAL_TAGS = [
@@ -20,10 +22,23 @@ const EMOTIONAL_TAGS = [
   { id: 'brave', label: 'Courageous', icon: Heart, color: 'text-red-400', bg: 'bg-red-400/10' },
 ];
 
-export default function ReflectionEngine({ onClose, onSave, prompt = "What stayed with you?", mood = 'the-void' }: ReflectionEngineProps) {
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error';
+}
+
+export default function ReflectionEngine({ 
+  onClose, 
+  onSave, 
+  prompt = "What stayed with you?", 
+  mood = 'the-void',
+  lessonId
+}: ReflectionEngineProps) {
   const [content, setContent] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'success' });
 
   const toggleTag = (id: string) => {
     setSelectedTags(prev => 
@@ -31,13 +46,55 @@ export default function ReflectionEngine({ onClose, onSave, prompt = "What staye
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!content.trim() && selectedTags.length === 0) return;
+    
     setIsSaving(true);
-    setTimeout(() => {
-      onSave({ content, tags: selectedTags });
+    
+    // Map selected tags array into a single descriptive string for database tracking
+    const emotionTag = selectedTags.join(', ') || 'reflective';
+    
+    try {
+      const result = await saveReflection({
+        lessonId: lessonId || 'general-lesson',
+        emotionTag,
+        note: content,
+      });
+
+      if (result.success) {
+        // Display premium glassmorphism success toast
+        setToast({
+          show: true,
+          message: 'Nhật ký cảm xúc học tập đã được lưu trữ an toàn trong khoảnh khắc của bạn! 🌹',
+          type: 'success'
+        });
+
+        // Trigger optional callback for component updates
+        if (onSave) {
+          onSave({ content, tags: selectedTags });
+        }
+
+        // Delay close slightly so student can appreciate the gorgeous success state
+        setTimeout(() => {
+          onClose();
+        }, 2200);
+      } else {
+        // Display dynamic database error toast
+        setToast({
+          show: true,
+          message: result.error || 'Gặp sự cố khi lưu nhật ký. Vui lòng đăng nhập lại!',
+          type: 'error'
+        });
+      }
+    } catch (err: any) {
+      setToast({
+        show: true,
+        message: err.message || 'Lỗi kết nối máy chủ. Vui lòng kiểm tra lại mạng!',
+        type: 'error'
+      });
+    } finally {
       setIsSaving(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -48,6 +105,38 @@ export default function ReflectionEngine({ onClose, onSave, prompt = "What staye
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         className="w-full max-w-xl bg-[#0d0d18] border border-white/10 rounded-[48px] overflow-hidden shadow-2xl relative"
       >
+        {/* Custom Toast Notification inside the card */}
+        <AnimatePresence>
+          {toast.show && (
+            <motion.div
+              initial={{ opacity: 0, y: -50, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute top-6 left-1/2 -translate-x-1/2 z-[150] w-[90%] max-w-md px-6 py-4 rounded-3xl backdrop-blur-xl border flex items-center gap-3 shadow-2xl"
+              style={{
+                backgroundColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                borderColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+                color: toast.type === 'success' ? '#10b981' : '#f87171'
+              }}
+            >
+              {toast.type === 'success' ? (
+                <Check size={20} className="shrink-0" />
+              ) : (
+                <X size={20} className="shrink-0 text-red-400" />
+              )}
+              <div className="flex-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5">
+                  {toast.type === 'success' ? 'Lưu thành công' : 'Gặp lỗi lưu trữ'}
+                </p>
+                <p className="text-xs font-light text-white/90 leading-tight">
+                  {toast.message}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Background Atmosphere */}
         <div className={`absolute -right-40 -top-40 w-80 h-80 rounded-full blur-[120px] opacity-20 ${
           mood === 'the-void' ? 'bg-violet-900' :
@@ -99,8 +188,8 @@ export default function ReflectionEngine({ onClose, onSave, prompt = "What staye
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Your thoughts... (Optional)"
-              className="w-full bg-transparent border-none text-xl md:text-2xl text-white/80 placeholder:text-white/20 focus:ring-0 resize-none min-h-[120px] font-light leading-relaxed"
+              placeholder="Cảm nghĩ của bạn về thước phim vừa nhại... (Không bắt buộc)"
+              className="w-full bg-transparent border-none text-xl md:text-2xl text-white/80 placeholder:text-white/20 focus:ring-0 resize-none min-h-[120px] font-light leading-relaxed outline-none"
             />
           </div>
 
@@ -111,17 +200,23 @@ export default function ReflectionEngine({ onClose, onSave, prompt = "What staye
               onClick={handleSave}
               disabled={isSaving || (!content.trim() && selectedTags.length === 0)}
               className={`px-10 py-4 rounded-3xl font-display font-black text-lg transition-all duration-500 flex items-center gap-3 ${
-                isSaving ? 'bg-green-500 text-white' : 'bg-white text-black hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)]'
+                isSaving 
+                  ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-95' 
+                  : 'bg-white text-black hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.1)]'
               }`}
             >
               {isSaving ? (
                 <>
-                  <Check size={20} />
-                  <span>Preserved</span>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                  />
+                  <span>Đang lưu...</span>
                 </>
               ) : (
                 <>
-                  <span>Preserve Moment</span>
+                  <span>Lưu Khoảnh Khắc</span>
                 </>
               )}
             </button>
@@ -131,3 +226,4 @@ export default function ReflectionEngine({ onClose, onSave, prompt = "What staye
     </div>
   );
 }
+
