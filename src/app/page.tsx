@@ -1,492 +1,263 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Play, ChevronDown, Star, Flame, ArrowRight, Sparkles, Volume2, Zap } from "lucide-react";
+import { Play, Star, Video, Mic, CheckCircle2, Zap, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Section from "@/components/ui/Section";
-import StoryPlayer from "@/components/player/StoryPlayer";
-import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
-import { STORIES, TESTIMONIALS, PRICING, AI_CHARACTERS } from "@/lib/data";
-import { AnimatePresence } from "framer-motion";
-import { getOrGenerateAudio } from "@/app/actions/audio";
+import VoiceRecorder from "@/components/coach/VoiceRecorder";
 
-/* ── Animated background orbs ── */
-function HeroBackground() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="orb orb-violet w-[700px] h-[700px] -top-48 left-1/4 opacity-60" />
-      <div className="orb orb-gold w-[400px] h-[400px] top-1/3 right-0 opacity-50" />
-      <div className="orb orb-cyan w-[300px] h-[300px] bottom-0 left-10 opacity-40" />
-    </div>
-  );
-}
-
-/* ── Waveform ── */
-function Waveform({ active }: { active: boolean }) {
-  const [heights, setHeights] = useState<number[]>([]);
-  useEffect(() => {
-    setHeights(Array.from({ length: 24 }, () => Math.random() * 32 + 8));
-  }, []);
-
-  return (
-    <div className="flex items-end gap-[3px] h-10">
-      {Array.from({ length: 24 }).map((_, i) => (
-        <div
-          key={i}
-          className="waveform-bar"
-          style={{
-            height: active ? (heights[i] || 8) : "8px",
-            animationDelay: `${i * 0.05}s`,
-            animationPlayState: active ? "running" : "paused",
-            opacity: active ? 1 : 0.3,
-            transition: "height 0.2s",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-export default function HomePage() {
-  const [demoPlaying, setDemoPlaying] = useState(false);
-  const [demoAudioUrl, setDemoAudioUrl] = useState<string | null>(null);
-  const [loadingDemo, setLoadingDemo] = useState(false);
-  const demoAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    }
-  }, []);
-
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => {
-      if (demoAudioRef.current) {
-        demoAudioRef.current.pause();
-        demoAudioRef.current = null;
-      }
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, []);
-
-  const playClientSpeech = (text: string, onEnd?: () => void) => {
+// ─── INSTANT DEMO PLAYER ──────────────────────────────────────────────────
+function DemoPlayer() {
+  const sentence = "I'm going to make him an offer he can't refuse.";
+  const playAudio = () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(sentence);
       utterance.lang = 'en-US';
-      utterance.rate = 1.0;
-      
       const voices = window.speechSynthesis.getVoices();
       const premiumVoice = voices.find(v => 
-        v.lang.startsWith('en') && 
-        (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'))
+        v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural'))
       );
       if (premiumVoice) utterance.voice = premiumVoice;
-      if (onEnd) utterance.onend = onEnd;
-      
       window.speechSynthesis.speak(utterance);
-      return true;
-    }
-    return false;
-  };
-
-  const handlePlayDemo = async () => {
-    const teaserText = "Power is not given. It is taken — quietly, patiently, and with the grace of someone who never reveals their intention. Robert Greene studied history's most dangerous men and found a disturbing truth: the rules of power have never changed — only the players.";
-
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
-      setDemoPlaying(false);
-      return;
-    }
-
-    if (demoAudioUrl) {
-      if (demoPlaying) {
-        demoAudioRef.current?.pause();
-        setDemoPlaying(false);
-      } else {
-        demoAudioRef.current?.play().catch(() => {
-          setDemoPlaying(true);
-          playClientSpeech(teaserText, () => setDemoPlaying(false));
-        });
-        setDemoPlaying(true);
-      }
-      return;
-    }
-
-    setLoadingDemo(true);
-    const res = await getOrGenerateAudio({
-      text: teaserText,
-      category: 'stories',
-      voice: 'onyx'
-    });
-
-    setLoadingDemo(false);
-    if (res.success && res.audioUrl) {
-      setDemoAudioUrl(res.audioUrl);
-      const audio = new Audio(res.audioUrl);
-      
-      const fallbackToSpeech = () => {
-        setDemoPlaying(true);
-        playClientSpeech(teaserText, () => setDemoPlaying(false));
-      };
-
-      audio.addEventListener('error', () => {
-        fallbackToSpeech();
-      });
-
-      audio.addEventListener('ended', () => {
-        setDemoPlaying(false);
-      });
-      
-      demoAudioRef.current = audio;
-      audio.play().catch((err) => {
-        console.warn("Play failed, trying client speech:", err);
-        fallbackToSpeech();
-      });
-      setDemoPlaying(true);
-    } else {
-      // Direct offline/CORS fallback
-      setDemoPlaying(true);
-      playClientSpeech(teaserText, () => setDemoPlaying(false));
     }
   };
 
   return (
-    <div className="bg-primary min-h-screen">
+    <Card className="max-w-3xl mx-auto p-6 md:p-10 space-y-8 bg-[#0a0a0f] border-white/10 shadow-2xl">
+      <div className="text-center space-y-5">
+        <Badge variant="violet" className="px-4 py-1">Học thử ngay (Không cần đăng nhập)</Badge>
+        <h3 className="text-2xl md:text-3xl font-display font-bold">Trích đoạn: The Godfather (1972)</h3>
+        
+        <div className="p-6 md:p-8 rounded-[32px] bg-white/5 border border-white/10 flex flex-col items-center gap-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl" />
+          
+          <button 
+            onClick={playAudio} 
+            className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] z-10"
+          >
+            <Play size={24} fill="black" className="ml-1" />
+          </button>
+          
+          <p className="text-xl md:text-2xl font-display italic text-white/90 z-10 text-center">
+            "{sentence}"
+          </p>
+          <p className="text-sm text-white/50 z-10 text-center">
+            "Tôi sẽ đưa ra một lời đề nghị mà hắn không thể từ chối."
+          </p>
+        </div>
+      </div>
+      
+      <div className="pt-6 border-t border-white/5 space-y-6">
+        <div className="text-center">
+          <h4 className="text-base font-bold text-amber-500 mb-1">Đến lượt bạn</h4>
+          <p className="text-sm text-secondary">Bấm ghi âm và đọc lại câu trên để AI chấm điểm phát âm:</p>
+        </div>
+        
+        <VoiceRecorder 
+          sentence={sentence} 
+          onComplete={(blob, feedback) => {
+            console.log("Demo recording complete");
+          }} 
+        />
+      </div>
+    </Card>
+  );
+}
+
+// ─── MAIN PAGE COMPONENT ──────────────────────────────────────────────────
+export default function HomePage() {
+  return (
+    <div className="bg-primary min-h-screen text-white selection:bg-amber-500/30">
       <Navbar />
 
-      {/* ─── HERO ─── */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-        <HeroBackground />
-        <div className="container-custom relative z-10 py-24 md:py-32">
+      {/* 1. HERO SECTION */}
+      <section className="pt-32 pb-16 md:pt-40 md:pb-24 px-4 text-center">
+        <div className="container-custom max-w-4xl mx-auto space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-w-5xl mx-auto flex flex-col items-center justify-center text-center"
+            transition={{ duration: 0.6 }}
           >
-            <Badge variant="violet" className="mb-8 px-4 py-1.5">
-              <Sparkles size={12} className="mr-2" /> Học Tiếng Anh Cùng AI — Phiên bản Beta
+            <Badge variant="gold" className="mx-auto mb-6 px-4 py-1.5 font-bold tracking-widest uppercase">
+              Ra mắt phiên bản 2.0
             </Badge>
-
-            <h1 className="text-hero mb-6" style={{ textAlign: 'center', fontFamily: 'var(--font-display), sans-serif' }}>
-              Học Tiếng Anh Như{" "}
-              <span className="gradient-text-gold">Netflix</span>,{" "}
-              <br className="hidden md:block" />
-              Không Phải Trường Học.
+            
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display font-black tracking-tight leading-[1.1] mb-6">
+              Học tiếng Anh qua phim <br className="hidden md:block" />
+              <span className="gradient-text-violet">cùng AI</span>
             </h1>
-
-            <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed text-secondary text-center font-sans">
-              Những câu chuyện điện ảnh. Huấn luyện viên AI. Giao tiếp thực tế. Không còn những bài tập ngữ pháp nhàm chán — chỉ còn sự{" "}
-              <span style={{ color: 'var(--accent-violet-bright)', display: 'inline' }}>lôi cuốn, ám ảnh và tiếng Anh</span>
-              {" "}thấm sâu vào tâm trí bạn.
+            
+            <p className="text-lg md:text-xl text-secondary max-w-2xl mx-auto leading-relaxed mb-10 font-medium">
+              Luyện nghe, nói và phát âm tự nhiên như người bản xứ. Không bài tập ngữ pháp khô khan, chỉ có những trích đoạn điện ảnh lôi cuốn nhất.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 w-full">
-              <Button variant="gold" size="lg" onClick={() => setActiveStoryId('1')}>
-                <Flame size={18} /> Bắt đầu miễn phí — Không cần thẻ
-              </Button>
-              <Button variant="ghost" size="lg" onClick={handlePlayDemo} disabled={loadingDemo}>
-                <Volume2 size={18} /> {loadingDemo ? "Đang tải..." : demoPlaying ? "Dừng nghe" : "Nghe thử câu chuyện"}
-              </Button>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/signup" className="w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white text-black text-base font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+                  Bắt đầu miễn phí
+                </button>
+              </Link>
             </div>
-
-            {/* Demo waveform card */}
-            <div className="glass-card max-w-xl mx-auto p-5" style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '576px' }}>
-              <button
-                onClick={handlePlayDemo}
-                disabled={loadingDemo}
-                className="w-12 h-12 rounded-full flex-center pulse-ring transition-transform hover:scale-105 active:scale-95"
-                style={{ background: "var(--gradient-violet)", flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                {loadingDemo ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : demoPlaying ? (
-                  <span className="text-white font-bold text-lg">‖</span>
-                ) : (
-                  <Play size={18} className="text-white ml-0.5" />
-                )}
-              </button>
-              <div style={{ flex: 1, textAlign: 'left' }}>
-                <div className="text-sm font-semibold mb-2">Tâm Lý Học Của Quyền Lực — Bản nghe thử</div>
-                <Waveform active={demoPlaying} />
-              </div>
-              <div className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>1:24</div>
-            </div>
-
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="mt-16 flex justify-center opacity-40"
-            >
-              <ChevronDown size={24} />
-            </motion.div>
+            
+            <p className="mt-6 text-sm text-white/30 flex items-center justify-center gap-2">
+              <ShieldCheck size={16} /> Không yêu cầu thẻ tín dụng
+            </p>
           </motion.div>
         </div>
       </section>
 
-      {/* ─── SOCIAL PROOF ─── */}
-      <section className="py-12 border-y border-subtle">
-        <div className="container-custom grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* 2. INSTANT DEMO */}
+      <Section className="pt-0">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <DemoPlayer />
+        </motion.div>
+      </Section>
+
+      {/* 3. BENEFITS */}
+      <Section className="bg-secondary/40 border-y border-white/5">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Phương pháp học khác biệt</h2>
+          <p className="text-secondary text-lg max-w-2xl mx-auto">Được thiết kế để giúp bạn giao tiếp tự tin chỉ sau 30 ngày, thông qua việc nhập vai vào các nhân vật yêu thích.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {[
-            { value: "380K+", label: "Người học tích cực" },
-            { value: "4.9★", label: "Đánh giá ứng dụng" },
-            { value: "194", label: "Quốc gia" },
-            { value: "98%", label: "Tỷ lệ giới thiệu" },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-3xl font-display font-black gradient-text-violet mb-1">{s.value}</div>
-              <div className="text-sm text-secondary">{s.label}</div>
+            { icon: Zap, color: "text-amber-500", bg: "bg-amber-500/10", title: "Luyện phản xạ", desc: "Học qua các tình huống giao tiếp thực tế trong phim, giúp não bộ phản xạ tiếng Anh tự nhiên không cần dịch trong đầu." },
+            { icon: Mic, color: "text-cyan-400", bg: "bg-cyan-500/10", title: "Sửa phát âm", desc: "Công nghệ AI độc quyền phân tích từng âm tiết, nhịp điệu và ngữ điệu để chỉnh sửa lỗi sai cho bạn ngay lập tức." },
+            { icon: Video, color: "text-violet-400", bg: "bg-violet-500/10", title: "Học qua phim yêu thích", desc: "Hàng ngàn trích đoạn từ các bộ phim bom tấn Hollywood, giúp việc học trở nên gây nghiện và thú vị như xem Netflix." }
+          ].map((b, i) => (
+            <motion.div 
+              key={b.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <Card padding="lg" hover={false} className="h-full text-center space-y-5 bg-white/[0.02]">
+                <div className={`w-16 h-16 rounded-3xl ${b.bg} ${b.color} flex items-center justify-center mx-auto`}>
+                  <b.icon size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-white">{b.title}</h3>
+                <p className="text-secondary text-sm leading-relaxed">{b.desc}</p>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* 4. SOCIAL PROOF */}
+      <Section>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Hàng ngàn học viên đã lột xác</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { name: "Minh Thư", role: "Nhân viên văn phòng", quote: "Lần đầu tiên tôi không thấy buồn ngủ khi học tiếng Anh. Nhại lại giọng của The Dark Knight làm tôi thấy mình rất ngầu!" },
+            { name: "Hoàng Đức", role: "Sinh viên IT", quote: "AI chấm điểm cực chuẩn, chỉ ra đúng chỗ tôi hay nuốt âm. Phản xạ nghe của tôi tăng lên rõ rệt sau 3 tuần." },
+            { name: "Thanh Trúc", role: "Freelancer", quote: "Giao diện siêu đẹp, cảm giác như đang dùng một app cao cấp của Apple vậy. Học tiếng Anh chưa bao giờ cuốn đến thế." }
+          ].map((t, i) => (
+            <Card key={t.name} className="bg-[#101014] border-white/5 space-y-4">
+              <div className="flex gap-1 mb-2">
+                {Array(5).fill(0).map((_, j) => <Star key={j} size={14} className="fill-amber-500 text-amber-500" />)}
+              </div>
+              <p className="text-secondary text-sm leading-relaxed italic">"{t.quote}"</p>
+              <div className="pt-4 border-t border-white/5">
+                <div className="font-bold text-white text-sm">{t.name}</div>
+                <div className="text-xs text-white/40">{t.role}</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* 5. PRICING */}
+      <Section className="bg-secondary/40 border-y border-white/5">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Bắt đầu dễ dàng. Nâng cấp khi cần.</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Free Plan */}
+          <Card padding="lg" className="bg-[#101014] border-white/5">
+            <h3 className="text-xl font-bold mb-2">Gói Cơ Bản</h3>
+            <div className="text-4xl font-display font-black mb-6 text-white">0đ <span className="text-sm text-secondary font-sans font-normal">/ mãi mãi</span></div>
+            <ul className="space-y-4 mb-8">
+              {['Học 3 video mỗi ngày', '5 lượt AI chấm điểm phát âm/ngày', 'Lưu 20 từ vựng', 'Theo dõi lộ trình học tập'].map((f) => (
+                <li key={f} className="flex items-start gap-3 text-sm text-secondary">
+                  <CheckCircle2 size={18} className="text-white/30 shrink-0" /> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/signup">
+              <Button variant="ghost" fullWidth className="border border-white/10">Đăng ký miễn phí</Button>
+            </Link>
+          </Card>
+
+          {/* Pro Plan */}
+          <Card padding="lg" className="bg-gradient-to-b from-[#1a1528] to-[#101014] border-violet-500/30 relative shadow-[0_0_30px_rgba(139,92,246,0.1)]">
+            <div className="absolute top-0 right-8 -translate-y-1/2">
+              <Badge variant="violet" className="px-3 py-1 font-bold shadow-glow-violet">Phổ Biến Nhất</Badge>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── FEATURES ─── */}
-      <Section>
-        <div className="text-center mb-16">
-          <Badge variant="violet" className="mb-4">Tại sao chọn Cinematic English</Badge>
-          <h2 className="text-display mb-4">
-            Giải trí <span className="gradient-text-gold">kết hợp</span> học tập
-          </h2>
-          <p className="text-lg max-w-2xl mx-auto text-secondary">
-            Quên đi những bài tập ngữ pháp khô khan. Chúng tôi xây dựng trải nghiệm học tập mà bạn thực sự khao khát mỗi ngày.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[
-            { icon: "🎬", title: "Câu Chuyện Điện Ảnh", desc: "Lời dẫn truyện đầy lôi cuốn về tâm lý, triết học, kinh doanh. Học tiếng Anh như đang xem phim tài liệu Netflix.", color: "var(--accent-violet)" },
-            { icon: "🤖", title: "AI Coach Phát Âm", desc: "Ghi âm giọng nói của bạn. Nhận điểm số phát âm, phản hồi về sự trôi chảy và tốc độ ngay lập tức từ AI.", color: "var(--accent-cyan)" },
-            { icon: "🎭", title: "Chat Với Nhân Vật AI", desc: "Trò chuyện với bác sĩ tâm lý, CEO, trùm Mafia hoặc một người bạn Mỹ. Giọng nói và trí nhớ thực tế.", color: "var(--accent-gold)" },
-            { icon: "📱", title: "Khám Phá Kiểu TikTok", desc: "Lướt qua các bài học siêu ngắn — thành ngữ, danh ngôn, cụm từ quyền lực — được thiết kế để gây nghiện.", color: "var(--accent-rose)" },
-            { icon: "🔥", title: "Chuỗi Streak & XP", desc: "Thăng cấp mỗi ngày. Tích lũy XP, mở khóa thành tích, giữ lửa chuỗi học tập và cạnh tranh trên bảng xếp hạng.", color: "var(--accent-orange)" },
-            { icon: "🌍", title: "Cộng Đồng Toàn Cầu", desc: "Học cùng hơn 380,000 học viên khác. Thử thách hằng tuần, hệ thống bạn bè và bảng vinh danh công khai.", color: "var(--accent-emerald)" },
-          ].map((f, i) => (
-            <Card key={f.title} transition={{ delay: i * 0.05 }}>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 text-2xl"
-                style={{ background: `rgba(255,255,255,0.05)`, border: `1px solid var(--border-subtle)` }}>
-                {f.icon}
-              </div>
-              <h3 className="font-display font-bold text-lg mb-2">{f.title}</h3>
-              <p className="text-sm leading-relaxed text-secondary">{f.desc}</p>
-            </Card>
-          ))}
+            <h3 className="text-xl font-bold mb-2 text-violet-300">Gói PRO</h3>
+            <div className="text-4xl font-display font-black mb-6 text-white">199k <span className="text-sm text-secondary font-sans font-normal">/ tháng</span></div>
+            <ul className="space-y-4 mb-8">
+              {['Học không giới hạn video', 'AI chấm điểm phát âm vô hạn', 'Chat giao tiếp với 6 nhân vật AI', 'Lưu từ vựng không giới hạn', 'Tải video học Offline'].map((f) => (
+                <li key={f} className="flex items-start gap-3 text-sm text-white/90">
+                  <CheckCircle2 size={18} className="text-violet-400 shrink-0" /> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/signup">
+              <Button variant="primary" fullWidth className="bg-violet-600 hover:bg-violet-500 text-white shadow-glow-violet">Nâng cấp PRO</Button>
+            </Link>
+          </Card>
         </div>
       </Section>
 
-      {/* ─── STORIES PREVIEW ─── */}
-      <Section className="bg-secondary/30">
-        <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
-          <div>
-            <Badge variant="gold" className="mb-3">Thư Viện Câu Chuyện</Badge>
-            <h2 className="text-display">
-              Những Câu Chuyện <span className="gradient-text-violet">Chạm Đến Cảm Xúc</span>
-            </h2>
+      {/* 6. FINAL CTA */}
+      <Section>
+        <div className="max-w-4xl mx-auto bg-gradient-to-r from-violet-900/40 to-slate-900/40 border border-white/10 rounded-[40px] p-10 md:p-16 text-center relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-violet-500/10 blur-[100px] pointer-events-none" />
+          <h2 className="text-3xl md:text-5xl font-display font-black mb-6 text-white relative z-10">
+            Sẵn sàng thay đổi <br className="md:hidden" /> cách bạn học?
+          </h2>
+          <p className="text-lg text-secondary mb-10 relative z-10 max-w-xl mx-auto">
+            Hàng ngàn học viên đã lột xác khả năng tiếng Anh của mình. Bây giờ đến lượt bạn.
+          </p>
+          <div className="relative z-10 flex justify-center">
+            <Link href="/signup">
+              <button className="px-10 py-5 rounded-2xl bg-white text-black text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.15)] flex items-center gap-3">
+                Bắt đầu học miễn phí
+              </button>
+            </Link>
           </div>
-          <Button variant="ghost" onClick={() => window.location.href='/stories'}>
-            Xem Tất Cả <ArrowRight size={16} />
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {STORIES.map((story, i) => (
-            <Card key={story.id} padding="none" className="overflow-hidden group" transition={{ delay: i * 0.1 }}>
-              <div className={`h-40 bg-gradient-to-br ${story.color} flex items-center justify-center text-5xl relative`}>
-                <span>{story.emoji}</span>
-                <div className="absolute inset-0 bg-black/20" />
-                <Badge variant="violet" className="absolute top-3 right-3">{story.category}</Badge>
-                <div className="absolute bottom-3 left-3">
-                  <Badge variant="outline" className="bg-black/50 backdrop-blur-md">▶ {story.duration}</Badge>
-                </div>
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-display font-bold text-base leading-tight group-hover:text-accent-gold transition-colors">{story.title}</h3>
-                  <Badge variant="gold" className="shrink-0 text-[10px]">+{story.xp} XP</Badge>
-                </div>
-                <p className="text-sm mb-4 line-clamp-2 text-secondary">{story.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted">🎧 {story.plays} plays</span>
-                  <button 
-                    onClick={() => setActiveStoryId(story.id)}
-                    className="flex items-center gap-1 text-xs font-semibold text-accent-violet-bright hover:gap-2 transition-all cursor-pointer"
-                  >
-                    Nghe ngay <ArrowRight size={12} />
-                  </button>
-                </div>
-              </div>
-            </Card>
-          ))}
         </div>
       </Section>
 
-      {/* ─── AI CHARACTERS ─── */}
-      <Section>
-        <div className="text-center mb-12">
-          <Badge variant="emerald" className="mb-4">Nhân Vật AI</Badge>
-          <h2 className="text-display mb-4">
-            Thực Hành Với <span className="gradient-text-gold">Những Cá Tính Thật</span>
-          </h2>
-          <p className="text-lg max-w-xl mx-auto text-secondary">
-            Sáu nhân vật AI độc đáo. Mỗi người có giọng nói, tính cách và phong cách trò chuyện riêng biệt.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {AI_CHARACTERS.map((c, i) => (
-            <Card key={c.id} transition={{ delay: i * 0.05 }} className="group">
-              <div className="text-3xl mb-3">{c.emoji}</div>
-              <div className="font-bold font-display mb-0.5">{c.name}</div>
-              <div className="text-xs mb-2" style={{ color: c.color }}>{c.role}</div>
-              <p className="text-xs leading-relaxed text-secondary">{c.description}</p>
-              <Link href={`/chat?character=${c.id}`} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold hover:gap-2 transition-all" style={{ color: c.color }}>
-                Trò chuyện ngay <ArrowRight size={10} />
-              </Link>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* ─── TESTIMONIALS ─── */}
-      <Section className="bg-secondary/30">
-        <div className="text-center mb-12">
-          <Badge variant="violet" className="mb-4">Cảm Nhận Học Viên</Badge>
-          <h2 className="text-display">
-            Người Thật, <span className="gradient-text-gold">Kết Quả Thật</span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {TESTIMONIALS.map((t, i) => (
-            <Card key={t.name} transition={{ delay: i * 0.1 }}>
-              <div className="flex gap-1 mb-4">
-                {Array(5).fill(0).map((_, j) => <Star key={j} size={14} className="fill-accent-gold text-accent-gold" />)}
-              </div>
-              <p className="text-sm leading-relaxed mb-5 text-secondary">"{t.text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-glow-violet"
-                  style={{ background: "var(--gradient-violet)" }}>
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">{t.name}</div>
-                  <div className="text-xs text-secondary">{t.role} · {t.country}</div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* ─── PRICING ─── */}
-      <Section id="pricing">
-        <div className="text-center mb-16">
-          <Badge variant="gold" className="mb-4">Bảng Giá</Badge>
-          <h2 className="text-display mb-4">
-            Đầu Tư <span className="gradient-text-violet">Xứng Đáng</span> Cho Bản Thân
-          </h2>
-          <p className="text-lg max-w-xl mx-auto text-secondary">
-            Bắt đầu miễn phí. Nâng cấp khi bạn sẵn sàng mở khóa toàn bộ trải nghiệm điện ảnh.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {PRICING.map((plan, i) => (
-            <Card key={plan.name} transition={{ delay: i * 0.1 }} className={`relative ${plan.highlight ? "border-accent shadow-glow-violet" : ""}`}>
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge variant="violet" className="px-4 py-1.5">{plan.badge}</Badge>
-                </div>
-              )}
-              <div className="mb-6">
-                <div className="text-sm font-semibold mb-1 text-secondary">{plan.name}</div>
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-4xl font-display font-black">{plan.price}</span>
-                  <span className="text-sm text-secondary">/{plan.period}</span>
-                </div>
-                <p className="text-sm text-secondary">{plan.description}</p>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm">
-                    <span className="text-accent-emerald shrink-0">✓</span>
-                    <span className="text-secondary">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button variant={plan.highlight ? "primary" : "ghost"} fullWidth>
-                {plan.cta}
-              </Button>
-            </Card>
-          ))}
-        </div>
-      </Section>
-
-      {/* ─── FINAL CTA ─── */}
-      <Section>
-        <Card className="p-12 md:p-20 text-center relative overflow-hidden border-accent" hover={false}>
-          <div className="orb orb-violet w-80 h-80 -top-20 left-1/2 -translate-x-1/2 opacity-30" />
-          <div className="relative z-10">
-            <h2 className="text-display mb-4">
-              Hành Trình Tiếng Anh Của Bạn<br />
-              Bắt Đầu <span className="gradient-text-gold">Ngay Hôm Nay</span>
-            </h2>
-            <p className="text-lg mb-10 max-w-xl mx-auto text-secondary">
-              Gia nhập cùng hơn 380,000 học viên đã chọn những câu chuyện thay vì sách giáo khoa. Không cần thẻ tín dụng.
-            </p>
-            <Button variant="gold" size="lg" className="px-10 py-5">
-              <Flame size={20} /> Bắt Đầu Học Miễn Phí
-            </Button>
-          </div>
-        </Card>
-      </Section>
-
-      {/* ─── STORY PLAYER VERTICAL SLICE ─── */}
-      <AnimatePresence>
-        {activeStoryId && (
-          <StoryPlayer 
-            storyId={activeStoryId} 
-            onClose={() => setActiveStoryId(null)} 
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ─── ONBOARDING FLOW ─── */}
-      <AnimatePresence>
-        {showOnboarding && (
-          <OnboardingFlow 
-            onComplete={() => {
-              localStorage.setItem("hasSeenOnboarding", "true");
-              setShowOnboarding(false);
-            }} 
-          />
-        )}
-      </AnimatePresence>
-
-      {/* ─── FOOTER ─── */}
-      <footer className="py-20 border-t border-subtle bg-secondary/20">
-        <div className="container-custom flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* FOOTER */}
+      <footer className="py-12 border-t border-white/5 bg-[#050508] text-center">
+        <div className="container-custom flex flex-col items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-glow-violet" style={{ background: "var(--gradient-violet)" }}>
-              <Zap size={16} className="text-white" fill="white" />
+            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center">
+              <Play size={14} fill="black" className="ml-0.5 text-black" />
             </div>
-            <span className="font-display font-bold text-lg">Cinematic<span className="gradient-text-gold">English</span></span>
+            <span className="font-display font-black text-lg">Cinematic English</span>
           </div>
           <div className="flex gap-6 text-sm text-secondary">
-            <Link href="/privacy" className="hover:text-white transition-colors">Bảo mật</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Điều khoản</Link>
-            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Liên hệ</Link>
+            <Link href="#" className="hover:text-white transition-colors">Về chúng tôi</Link>
+            <Link href="#" className="hover:text-white transition-colors">Điều khoản</Link>
+            <Link href="#" className="hover:text-white transition-colors">Bảo mật</Link>
           </div>
-          <div className="text-sm text-muted">
-            © 2025 Cinematic English. All rights reserved.
-          </div>
+          <p className="text-xs text-white/20 mt-4">© 2026 Cinematic English. All rights reserved.</p>
         </div>
       </footer>
     </div>
