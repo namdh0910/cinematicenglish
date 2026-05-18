@@ -545,3 +545,243 @@ export async function getLessonWithDetails(lessonId: string) {
     return mockLesson;
   }
 }
+
+// --- REAL-TIME DASHBOARD ANALYTICS ---
+
+export async function getDashboardStats() {
+  const supabase = await createSupabaseServerClient();
+  
+  try {
+    // 1. Get counts
+    const { count: storiesCount } = await supabase
+      .from('stories')
+      .select('id', { count: 'exact', head: true });
+      
+    const { count: lessonsCount } = await supabase
+      .from('lessons')
+      .select('id', { count: 'exact', head: true });
+      
+    const { count: usersCount } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true });
+      
+    const { count: proUsersCount } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('plan', 'Pro');
+      
+    // 2. Fetch plays from stories
+    const { data: playsData } = await supabase
+      .from('stories')
+      .select('plays');
+    const totalPlays = playsData?.reduce((acc: number, curr: any) => acc + (curr.plays || 0), 0) || 0;
+
+    // 3. Fetch latest 5 registered users
+    const { data: latestUsers } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, created_at, role')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // 4. Fetch top 5 popular stories
+    const { data: popularStories } = await supabase
+      .from('stories')
+      .select('id, title, category, plays, difficulty')
+      .order('plays', { ascending: false })
+      .limit(5);
+
+    return {
+      success: true,
+      stats: {
+        totalStories: storiesCount || 0,
+        totalLessons: lessonsCount || 0,
+        totalUsers: usersCount || 0,
+        totalProUsers: proUsersCount || 0,
+        totalPlays,
+      },
+      latestUsers: latestUsers || [],
+      popularStories: popularStories || [],
+    };
+  } catch (err: any) {
+    console.error("Error fetching dashboard stats:", err);
+    return {
+      success: false,
+      error: err.message || "Unknown error"
+    };
+  }
+}
+
+// --- STORY SCENES ACTIONS ---
+
+export async function getStoryScenes(storyId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('story_scenes')
+    .select('*')
+    .eq('story_id', storyId)
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching story scenes:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function createStoryScene(data: { story_id: string, order_index: number, video_url: string, thumbnail_url?: string }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: scene, error } = await supabase
+    .from('story_scenes')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating story scene:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: scene };
+}
+
+export async function updateStoryScene(id: string, data: any) {
+  const supabase = await createSupabaseServerClient();
+  const { data: scene, error } = await supabase
+    .from('story_scenes')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating story scene:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: scene };
+}
+
+export async function deleteStoryScene(id: string) {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('story_scenes')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error("Error deleting story scene:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+
+// --- LESSON SENTENCE ACTIONS ---
+
+export async function getLessonForStory(storyTitle: string) {
+  const supabase = await createSupabaseServerClient();
+  
+  // Try to find a lesson with a matching title
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .ilike('title', `%${storyTitle}%`)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error finding lesson for story:", error);
+    return null;
+  }
+  return lesson;
+}
+
+export async function createLessonForStory(storyTitle: string, description: string) {
+  const supabase = await createSupabaseServerClient();
+  
+  // Default values for speaking lessons
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .insert([{
+      title: `${storyTitle}: Luyện nói`,
+      description: description || `Bài học luyện nói trích đoạn phim ${storyTitle}.`,
+      type: 'Speaking',
+      order_index: 1,
+      is_published: true
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating lesson for story:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: lesson };
+}
+
+export async function getLessonSentences(lessonId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('lesson_sentences')
+    .select('*')
+    .eq('lesson_id', lessonId)
+    .order('order_index', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching lesson sentences:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function createLessonSentence(data: { 
+  lesson_id: string, 
+  order_index: number, 
+  transcript: string, 
+  translation: string, 
+  audio_url?: string, 
+  thumbnail_url?: string,
+  start_time?: number,
+  end_time?: number
+}) {
+  const supabase = await createSupabaseServerClient();
+  const { data: sentence, error } = await supabase
+    .from('lesson_sentences')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating lesson sentence:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: sentence };
+}
+
+export async function updateLessonSentence(id: string, data: any) {
+  const supabase = await createSupabaseServerClient();
+  const { data: sentence, error } = await supabase
+    .from('lesson_sentences')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating lesson sentence:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: sentence };
+}
+
+export async function deleteLessonSentence(id: string) {
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from('lesson_sentences')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error("Error deleting lesson sentence:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true };
+}
+
