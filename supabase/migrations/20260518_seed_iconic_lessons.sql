@@ -33,20 +33,23 @@ ALTER TABLE public.rate_limits ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ D
 
 
 -- ─── 2. RLS INFINITE RECURSION REPAIR ───────────────────────────────────────
--- Drop all old recursive policies to avoid Supabase infinite loops
-DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
-DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
-DROP POLICY IF EXISTS "profiles_select_all" ON public.profiles;
-DROP POLICY IF EXISTS "profiles_read_policy" ON public.profiles;
-DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+-- Dynamically find and drop EVERY single policy on profiles and stories to ensure zero leftovers
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT policyname FROM pg_policies WHERE tablename = 'profiles' AND schemaname = 'public') LOOP
+        EXECUTE 'DROP POLICY IF EXISTS ' || quote_ident(r.policyname) || ' ON public.profiles';
+    END LOOP;
 
-DROP POLICY IF EXISTS "stories_read_published" ON public.stories;
-DROP POLICY IF EXISTS "stories_select_policy" ON public.stories;
-DROP POLICY IF EXISTS "stories_admin_all" ON public.stories;
+    FOR r IN (SELECT policyname FROM pg_policies WHERE tablename = 'stories' AND schemaname = 'public') LOOP
+        EXECUTE 'DROP POLICY IF EXISTS ' || quote_ident(r.policyname) || ' ON public.stories';
+    END LOOP;
+END $$;
 
 -- Re-create clean, non-recursive policies on profiles
 CREATE POLICY "profiles_select_policy" ON public.profiles
-    FOR SELECT USING (TRUE); -- Allows anyone to read profiles (resolves infinite loops)
+    FOR SELECT USING (TRUE); -- Allows reading all profiles without infinite recursion loops
 
 CREATE POLICY "profiles_update_own" ON public.profiles
     FOR UPDATE USING (auth.uid() = id)
@@ -54,13 +57,7 @@ CREATE POLICY "profiles_update_own" ON public.profiles
 
 -- Re-create stories policies without recursion
 CREATE POLICY "stories_read_published" ON public.stories
-    FOR SELECT USING (
-      is_published = TRUE OR 
-      COALESCE((auth.jwt() ->> 'role'), '') = 'service_role' OR 
-      EXISTS (
-        SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
-      )
-    );
+    FOR SELECT USING (is_published = TRUE); -- Simple, zero-join policy (100% recursion-proof!)
 
 CREATE POLICY "stories_admin_all" ON public.stories
     FOR ALL USING (
@@ -69,6 +66,7 @@ CREATE POLICY "stories_admin_all" ON public.stories
         SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
       )
     );
+
 
 
 -- ─── 3. SEED 5 ICONIC MOVIE STORIES ─────────────────────────────────────────
