@@ -7,7 +7,8 @@ import {
   ChevronDown, 
   LayoutGrid, 
   List,
-  SortDesc
+  SortDesc,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -52,11 +53,19 @@ export default function StoriesClient({ initialStories }: StoriesClientProps) {
           <p className="text-white/40 font-medium italic">Quản lý và biên tập nội dung Cinematic English.</p>
         </div>
         
-        <Link href="/admin/stories/new">
-          <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-black font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
-            <Plus size={20} strokeWidth={3} /> Create New Story
-          </button>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/admin/stories/composer">
+            <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-purple border border-violet-500/30">
+              <Sparkles size={18} strokeWidth={3} /> AI Content Factory 🚀
+            </button>
+          </Link>
+
+          <Link href="/admin/stories/new">
+            <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500 text-black font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
+              <Plus size={20} strokeWidth={3} /> Create New Story
+            </button>
+          </Link>
+        </div>
       </div>
 
       {/* 2. Filters & Toolbar */}

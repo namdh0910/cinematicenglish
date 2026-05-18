@@ -825,4 +825,129 @@ export async function updateLessonFields(id: string, data: any) {
   return { success: true, data: lesson };
 }
 
+export async function saveAIComposedStory(payload: {
+  story: {
+    title: string;
+    synopsis: string;
+    script: string;
+    category: string;
+    difficulty: string;
+    tags: string;
+    xp_value: number;
+    thumbnail_url: string;
+  };
+  scene: {
+    video_url: string;
+    thumbnail_url: string;
+  };
+  lesson: {
+    title: string;
+    description: string;
+  };
+  sentences: Array<{
+    transcript: string;
+    translation_only: string;
+    ipa: string;
+    target_score: number;
+    start_time: number;
+    end_time: number;
+    metadata: {
+      pacing_type: string;
+      speech_speed: string;
+      emotion_type: string;
+      pronunciation_difficulty: string;
+      shadowing_priority: string;
+      replay_priority: string;
+      accent_type: string;
+      dopamine_score: number;
+      difficulty_score: number;
+    };
+  }>;
+}) {
+  const supabase = await createSupabaseServerClient();
+
+  try {
+    // 1. Insert Story
+    const { data: story, error: storyErr } = await supabase
+      .from('stories')
+      .insert([{
+        title: payload.story.title,
+        synopsis: payload.story.synopsis,
+        script: payload.story.script,
+        category: payload.story.category,
+        difficulty: payload.story.difficulty.toLowerCase(),
+        tags: payload.story.tags,
+        xp_value: payload.story.xp_value,
+        thumbnail_url: payload.story.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
+        status: 'draft',
+        is_published: false,
+        is_premium: false,
+        is_featured: false
+      }])
+      .select()
+      .single();
+
+    if (storyErr) throw storyErr;
+
+    // 2. Insert Scene
+    const { data: scene, error: sceneErr } = await supabase
+      .from('story_scenes')
+      .insert([{
+        story_id: story.id,
+        order_index: 1,
+        video_url: payload.scene.video_url || 'https://www.youtube.com/watch?v=EXeTwQWrcwY',
+        thumbnail_url: payload.scene.thumbnail_url || story.thumbnail_url
+      }])
+      .select()
+      .single();
+
+    if (sceneErr) throw sceneErr;
+
+    // 3. Insert Lesson
+    const { data: lesson, error: lessonErr } = await supabase
+      .from('lessons')
+      .insert([{
+        story_id: story.id,
+        title: payload.lesson.title,
+        description: payload.lesson.description,
+        type: 'speaking',
+        status: 'draft'
+      }])
+      .select()
+      .single();
+
+    if (lessonErr) throw lessonErr;
+
+    // 4. Insert Lesson Sentences
+    const sentencesToInsert = payload.sentences.map((s, idx) => {
+      const bundledTranslation = `${s.translation_only.trim()} [Phiên âm: ${s.ipa.trim()} | Phổ điểm đạt: ${s.target_score}]`;
+      return {
+        lesson_id: lesson.id,
+        order_index: idx + 1,
+        transcript: s.transcript,
+        translation: bundledTranslation,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        thumbnail_url: story.thumbnail_url,
+        metadata: s.metadata
+      };
+    });
+
+    const { error: sentsErr } = await supabase
+      .from('lesson_sentences')
+      .insert(sentencesToInsert);
+
+    if (sentsErr) throw sentsErr;
+
+    // Revalidate paths for admin and students
+    revalidatePath('/admin/stories');
+    revalidatePath('/stories');
+
+    return { success: true, storyId: story.id };
+  } catch (err: any) {
+    console.error("Error saving AI Composed story:", err);
+    return { success: false, error: err.message };
+  }
+}
+
 
