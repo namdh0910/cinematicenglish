@@ -829,11 +829,7 @@ export async function saveAIComposedStory(payload: {
   story: {
     title: string;
     synopsis: string;
-    script: string;
-    category: string;
     difficulty: string;
-    tags: string;
-    xp_value: number;
     thumbnail_url: string;
   };
   scene: {
@@ -867,22 +863,20 @@ export async function saveAIComposedStory(payload: {
   const supabase = await createSupabaseServerClient();
 
   try {
-    // 1. Insert Story
+    // Map difficulty standard matching CHECK constraint: 'easy', 'medium', 'hard'
+    const rawDiff = (payload.story.difficulty || 'medium').toLowerCase();
+    const cleanDifficulty = rawDiff === 'intermediate' ? 'medium' : 
+                            (rawDiff === 'easy' || rawDiff === 'medium' || rawDiff === 'hard') ? rawDiff : 'medium';
+
+    // 1. Insert Story (only actual columns existing in stories table)
     const { data: story, error: storyErr } = await supabase
       .from('stories')
       .insert([{
         title: payload.story.title,
-        synopsis: payload.story.synopsis,
-        script: payload.story.script,
-        category: payload.story.category,
-        difficulty: payload.story.difficulty.toLowerCase(),
-        tags: payload.story.tags,
-        xp_value: payload.story.xp_value,
+        description: payload.story.synopsis || `Trải nghiệm học nói tiếng Anh điện ảnh với ${payload.story.title}.`,
         thumbnail_url: payload.story.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
-        status: 'draft',
-        is_published: false,
-        is_premium: false,
-        is_featured: false
+        difficulty: cleanDifficulty,
+        is_published: false
       }])
       .select()
       .single();
@@ -903,15 +897,15 @@ export async function saveAIComposedStory(payload: {
 
     if (sceneErr) throw sceneErr;
 
-    // 3. Insert Lesson
+    // 3. Insert Lesson (using standard 'Speaking' and status matching content_intelligence migration)
     const { data: lesson, error: lessonErr } = await supabase
       .from('lessons')
       .insert([{
-        story_id: story.id,
-        title: payload.lesson.title,
-        description: payload.lesson.description,
-        type: 'speaking',
-        status: 'draft'
+        title: `${payload.story.title}: Luyện nói`, // Key link to connect story and lesson implicitly by title
+        description: payload.lesson.description || `Bài học luyện nói từ trích đoạn phim ${payload.story.title}.`,
+        type: 'Speaking', // CAPITAL 'S' matching schema CHECK constraint
+        status: 'draft',
+        is_published: false
       }])
       .select()
       .single();
@@ -939,14 +933,14 @@ export async function saveAIComposedStory(payload: {
 
     if (sentsErr) throw sentsErr;
 
-    // Revalidate paths for admin and students
+    // Revalidate Next.js cache paths
     revalidatePath('/admin/stories');
     revalidatePath('/stories');
 
     return { success: true, storyId: story.id };
   } catch (err: any) {
     console.error("Error saving AI Composed story:", err);
-    return { success: false, error: err.message };
+    return { success: false, error: err.message || "Unknown database error" };
   }
 }
 
