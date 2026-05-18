@@ -115,15 +115,38 @@ export async function getUsers(filters?: { query?: string, plan?: string, status
     query = query.or(`full_name.ilike.%${filters.query}%,email.ilike.%${filters.query}%`);
   }
   if (filters?.plan && filters.plan !== 'All Plans') {
-    query = query.eq('plan', filters.plan);
+    query = query.eq('subscription_plan', filters.plan.toLowerCase());
   }
   if (filters?.status && filters.status !== 'All Status') {
-    query = query.eq('status', filters.status);
+    query = query.eq('subscription_status', filters.status.toLowerCase());
   }
 
   const { data, error } = await query.order('created_at', { ascending: false });
   if (error) throw error;
-  return data;
+  
+  // Map database profiles to the UserDetail format expected by UI components
+  return (data || []).map(p => ({
+    id: p.id,
+    name: p.full_name || 'Học viên',
+    email: p.email,
+    avatar: p.avatar_url || `https://api.dicebear.com/7.x/adventurer/svg?seed=${p.email}`,
+    plan: p.subscription_plan === 'pro' ? 'Pro' : p.subscription_plan === 'team' || p.subscription_plan === 'school' ? 'Group' : 'Free',
+    status: p.subscription_status === 'active' || p.subscription_status === 'trialing' ? 'Active' : p.subscription_status === 'canceled' ? 'Inactive' : 'Banned',
+    joinDate: new Date(p.created_at).toLocaleDateString('vi-VN'),
+    lastActive: p.updated_at ? new Date(p.updated_at).toLocaleDateString('vi-VN') : 'Gần đây',
+    totalXP: p.xp_score || 0,
+    storiesCompleted: 0,
+    quizzesCompleted: 0,
+    avgQuizScore: 0,
+    streak: 0,
+    subscription: {
+      startDate: new Date(p.created_at).toLocaleDateString('vi-VN'),
+      expiryDate: 'Không giới hạn',
+      amountPaid: p.subscription_plan === 'pro' ? '299,000đ' : '0đ'
+    },
+    recentActivity: [],
+    xpHistory: []
+  }));
 }
 
 // --- ANALYTICS ACTIONS ---
