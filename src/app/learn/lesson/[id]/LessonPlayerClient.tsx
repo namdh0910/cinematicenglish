@@ -1,34 +1,15 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, Play, Square, Mic, Award, Zap, Volume2, Sparkles, RefreshCw } from "lucide-react";
+import { ChevronLeft, Zap, Volume2, Award, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { evaluateSpeaking } from "@/app/actions/speaking";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface Activity {
-  id: string;
-  title: string;
-  type: 'multiple_choice' | 'fill_blanks' | 'shadowing' | 'dictation' | 'matching';
-  instructions: string;
-  content: any;
-  order_index: number;
-}
-
-interface Lesson {
-  id: string;
-  title: string;
-  type: 'Listening' | 'Speaking' | 'Reading' | 'Writing' | 'Language' | 'Getting Started' | 'Exam';
-  activities: Activity[];
-  unit?: {
-    id: string;
-    title: string;
-    grade?: {
-      id: string;
-      title: string;
-    };
-  };
-}
+// Modular speaking feature components & hooks
+import { useSpeakingEngine } from "@/features/speaking/hooks/useSpeakingEngine";
+import SpeakingMic from "@/features/speaking/components/SpeakingMic";
+import SpeakingWaveform from "@/features/speaking/components/SpeakingWaveform";
+import SpeakingFeedback from "@/features/speaking/components/SpeakingFeedback";
+import { Lesson } from "@/features/speaking/types";
 
 interface LessonPlayerClientProps {
   lesson: Lesson;
@@ -37,189 +18,24 @@ interface LessonPlayerClientProps {
 export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) {
   const router = useRouter();
   
-  // Filter all activities to only treat them as shadowing/speaking lines
-  const activities = lesson.activities?.sort((a,b) => a.order_index - b.order_index) || [];
+  // Filter and sort speaking activities
+  const activities = lesson.activities?.sort((a, b) => a.order_index - b.order_index) || [];
   
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-  const [xpReward, setXpReward] = useState(0);
-
-  // Audio & Mic States
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
-  // Recording stream refs
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
-
-  // AI Evaluation Feedback
-  const [aiResponse, setAiResponse] = useState<{
-    score: number;
-    remark: string;
-    feedbackText: string;
-    wordEvaluations?: any[];
-  } | null>(null);
-
-  const activeActivity = activities[currentIdx];
-
-  // Auto-play model audio on activity enter
-  useEffect(() => {
-    setAiResponse(null);
-    setIsPlaying(false);
-    setIsRecording(false);
-    setIsAnalyzing(false);
-
-    if (activeActivity) {
-      // Auto-trigger audio play after a small delay
-      const t = setTimeout(() => {
-        playModelSpeech();
-      }, 800);
-      return () => clearTimeout(t);
-    }
-  }, [currentIdx, activeActivity]);
-
-  // Voice synthesis/audio play for movie line
-  const playModelSpeech = () => {
-    if (!activeActivity) return;
-    setIsPlaying(true);
-    
-    // Stop recording if any
-    if (isRecording) stopRecording();
-
-    // Prefer model speech synthesis or standard browser text-to-speech if audioUrl is empty
-    const sentenceText = activeActivity.content?.transcript || activeActivity.title || "Silence is not empty.";
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(sentenceText);
-      utterance.lang = 'en-US';
-      
-      const voices = window.speechSynthesis.getVoices();
-      const naturalVoice = voices.find(v => v.lang.startsWith('en') && v.name.includes('Natural'));
-      if (naturalVoice) utterance.voice = naturalVoice;
-
-      utterance.onend = () => setIsPlaying(false);
-      window.speechSynthesis.speak(utterance);
-    } else {
-      setIsPlaying(false);
-    }
-  };
-
-  // Start Mic Audio capture
-  const startRecording = async () => {
-    setAiResponse(null);
-    setIsRecording(true);
-    audioChunks.current = [];
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-
-      mediaRecorder.current = new MediaRecorder(stream);
-      mediaRecorder.current.ondataavailable = (e) => {
-        audioChunks.current.push(e.data);
-      };
-
-      mediaRecorder.current.onstop = async () => {
-        const blob = new Blob(audioChunks.current, { type: 'audio/wav' });
-        analyzeAndScoreAudio(blob);
-      };
-
-      mediaRecorder.current.start();
-    } catch (err) {
-      console.error("Mic access error:", err);
-      setIsRecording(false);
-      alert("Vui lòng cấp quyền truy cập Micro trên trình duyệt để ghi âm luyện nói!");
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder.current && isRecording) {
-      mediaRecorder.current.stop();
-      setIsRecording(false);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-    }
-  };
-
-  // Base64 helper
-  const blobToBase64 = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = (reader.result as string).split(',')[1];
-        resolve(base64String);
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
-  // Call Speech AI Evaluation
-  const analyzeAndScoreAudio = async (audioBlob: Blob) => {
-    setIsAnalyzing(true);
-    try {
-      const base64Audio = await blobToBase64(audioBlob);
-      const sentenceText = activeActivity.content?.transcript || activeActivity.title || "Silence is not empty.";
-      
-      const res = await evaluateSpeaking({
-        userId: "student-1",
-        audioBase64: base64Audio,
-        targetSentence: sentenceText,
-        durationSeconds: 4
-      });
-
-      setIsAnalyzing(false);
-
-      if (res.success) {
-        const score = res.accuracy || 75;
-        
-        // Dopamine-driven emotional feedback map
-        let remark = "Rất tốt! 👌";
-        if (score >= 90) remark = "Quá xuất sắc! 🔥";
-        else if (score >= 75) remark = "Nghe tự nhiên hơn rồi! 💖";
-        else if (score >= 50) remark = "Cố lên một chút nữa! 💪";
-        else remark = "Hãy nghe lại và thử lại nhé! 🌟";
-
-        setAiResponse({
-          score,
-          remark,
-          feedbackText: res.coachFeedback,
-          wordEvaluations: res.wordEvaluations
-        });
-
-        // XP increment
-        setXpReward(prev => prev + Math.floor(score * 1.2));
-
-        // Auto-advance loop: wait 1.5 seconds then proceed to next sentence
-        setTimeout(() => {
-          handleAutoNext();
-        }, 1600);
-      } else {
-        alert(res.error || "Có lỗi xảy ra khi chấm điểm.");
-      }
-    } catch (err) {
-      console.error(err);
-      setIsAnalyzing(false);
-    }
-  };
-
-  const handleAutoNext = () => {
-    if (currentIdx < activities.length - 1) {
-      setCurrentIdx(prev => prev + 1);
-    } else {
-      setIsFinished(true);
-    }
-  };
-
-  const handleRestart = () => {
-    setCurrentIdx(0);
-    setIsFinished(false);
-    setXpReward(0);
-    setAiResponse(null);
-  };
+  // Core Speaking engine hook
+  const {
+    currentIdx,
+    isFinished,
+    xpReward,
+    isPlaying,
+    isRecording,
+    isAnalyzing,
+    aiResponse,
+    activeActivity,
+    playModelSpeech,
+    startRecording,
+    stopRecording,
+    handleRestart
+  } = useSpeakingEngine(lesson.id, activities);
 
   if (activities.length === 0) {
     return (
@@ -232,11 +48,8 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     );
   }
 
-  // Theme
-  const bgTheme = "bg-[#050508]";
-
   return (
-    <div className={`min-h-screen ${bgTheme} flex flex-col justify-between overflow-hidden relative`}>
+    <div className="min-h-screen bg-[#050508] flex flex-col justify-between overflow-hidden relative">
       
       {/* ─── HEADER BAR ──────────────────────────────────────────────────────── */}
       <header className="px-4 py-4 border-b border-white/5 flex items-center justify-between z-10 shrink-0 bg-black/40 backdrop-blur-md">
@@ -248,7 +61,9 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
         </Link>
 
         <div className="text-center">
-          <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Câu {currentIdx + 1} / {activities.length}</span>
+          <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest">
+            Câu {currentIdx + 1} / {activities.length}
+          </span>
         </div>
 
         <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full text-amber-500 text-xs font-black">
@@ -261,10 +76,8 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
         
         {/* A. 40% VIDEO / VISUAL SUPPORT AREA */}
         <div className="h-[35vh] md:h-[40vh] w-full relative flex items-center justify-center bg-black overflow-hidden border-b border-white/5 shrink-0">
-          {/* Simulated movie screen overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
           
-          {/* Subtle moving cinematic glow background */}
           <motion.div 
             animate={{ scale: [1, 1.05, 1], rotate: [0, 2, 0] }}
             transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
@@ -274,7 +87,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             }}
           />
 
-          {/* Clean audio playing waveform pulse */}
           <AnimatePresence>
             {isPlaying && (
               <motion.div 
@@ -286,12 +98,13 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             )}
           </AnimatePresence>
 
-          {/* Centered Movie Play Audio Button */}
           <motion.button 
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={playModelSpeech}
-            className={`w-20 h-20 rounded-full flex items-center justify-center z-20 ${isPlaying ? 'bg-amber-500 text-black shadow-glow-amber' : 'bg-white/10 text-white border border-white/20 backdrop-blur-md'} transition-all`}
+            className={`w-20 h-20 rounded-full flex items-center justify-center z-20 ${
+              isPlaying ? 'bg-amber-500 text-black shadow-glow-amber' : 'bg-white/10 text-white border border-white/20 backdrop-blur-md'
+            } transition-all`}
           >
             <Volume2 size={36} fill={isPlaying ? "black" : "none"} />
           </motion.button>
@@ -300,7 +113,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
         {/* B. 60% SPEAKING AREA (HERO SUBTITLES + MIC + FEEDBACK) */}
         <div className="flex-1 px-6 py-6 flex flex-col justify-between items-center bg-[#07070a] relative">
           
-          {/* Progress timeline indicator */}
           <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden absolute top-0 left-0">
             <div 
               className="h-full bg-amber-500 transition-all duration-500" 
@@ -335,86 +147,21 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
             {/* DYNAMIC EMOTIONAL AI FEEDBACK DISPLAY */}
             <div className="h-28 flex flex-col items-center justify-center relative">
-              <AnimatePresence mode="wait">
-                {isAnalyzing ? (
-                  <motion.div 
-                    key="analyzing"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="flex flex-col items-center gap-3"
-                  >
-                    <motion.div 
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                      className="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full shadow-glow-gold"
-                    />
-                    <span className="text-xs font-black uppercase tracking-widest text-amber-400/80">AI Đang Lắng Nghe...</span>
-                  </motion.div>
-                ) : aiResponse ? (
-                  <motion.div 
-                    key="feedback"
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
-                    className="text-center space-y-2"
-                  >
-                    <h3 className="text-3xl font-display font-black text-white flex items-center justify-center gap-2">
-                      {aiResponse.remark}
-                    </h3>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-black">
-                      Độ tự tin: {aiResponse.score}%
-                    </div>
-                  </motion.div>
-                ) : isRecording ? (
-                  /* Fake Waveform Animation Response on Recording state */
-                  <motion.div 
-                    key="recording"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex items-end justify-center gap-1 h-12 w-48"
-                  >
-                    {Array.from({ length: 16 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{ height: [12, Math.random() * 36 + 12, 12] }}
-                        transition={{ repeat: Infinity, duration: 0.4 + i * 0.05, ease: "easeInOut" }}
-                        className="w-1 rounded-full bg-red-500"
-                        style={{ minHeight: "8px" }}
-                      />
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.p 
-                    key="idle"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0.3 }}
-                    className="text-xs font-black uppercase tracking-[0.2em] text-white/80"
-                  >
-                    Bấm Mic và nhại lại câu thoại
-                  </motion.p>
-                )}
-              </AnimatePresence>
+              <SpeakingFeedback 
+                isAnalyzing={isAnalyzing}
+                aiResponse={aiResponse}
+                isRecording={isRecording}
+                WaveformComponent={SpeakingWaveform}
+              />
             </div>
           </div>
 
           {/* C. CENTERED GIANT MIC PRIMARY ACTION */}
-          <div className="w-full pb-8 flex justify-center items-center shrink-0">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isAnalyzing}
-              className={`w-28 h-28 rounded-full flex items-center justify-center transition-all ${
-                isRecording 
-                  ? 'bg-red-500 text-white shadow-glow-red scale-110' 
-                  : 'bg-white text-black shadow-glow-gold'
-              } disabled:opacity-50`}
-            >
-              {isRecording ? <Square size={36} fill="white" className="text-white" /> : <Mic size={44} className="text-black" />}
-            </motion.button>
-          </div>
+          <SpeakingMic 
+            isRecording={isRecording}
+            isAnalyzing={isAnalyzing}
+            onClick={isRecording ? stopRecording : startRecording}
+          />
 
         </div>
 
