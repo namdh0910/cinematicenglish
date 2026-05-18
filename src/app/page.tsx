@@ -118,6 +118,7 @@ export default function HomePage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
+          className="w-full flex justify-center"
         >
           <DemoPlayer />
         </motion.div>

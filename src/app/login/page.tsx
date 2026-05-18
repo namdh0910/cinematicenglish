@@ -91,7 +91,7 @@ function LoginForm() {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Email</label>
+              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest">Email</label>
               <input
                 type="email"
                 value={email}
@@ -106,7 +106,7 @@ function LoginForm() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Mật khẩu</label>
+                <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest">Mật khẩu</label>
                 <Link href="/forgot-password" className="text-[11px] text-violet-400 hover:text-violet-300 transition-colors">
                   Quên mật khẩu?
                 </Link>

@@ -54,7 +54,8 @@ export default function DashboardPage() {
     <div className="bg-[#050508] min-h-screen text-white pb-24">
       <Navbar />
       
-      <main className="pt-28 px-4 max-w-2xl mx-auto space-y-8">
+      <div className="w-full flex justify-center px-4 pt-28">
+        <main className="w-full max-w-2xl space-y-8">
         
         {/* 1. WELCOME & SETTINGS */}
         <div className="flex items-center justify-between bg-[#101014] p-6 rounded-3xl border border-white/5 shadow-2xl">
@@ -135,6 +136,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      </div>
 
       {/* CÀI ĐẶT NHANH MODAL */}
       <AnimatePresence>

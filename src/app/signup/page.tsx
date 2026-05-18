@@ -155,7 +155,7 @@ function SignupForm() {
           <form onSubmit={handleSignup} className="space-y-4">
             {/* Full name */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Họ và tên</label>
+              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest">Họ và tên</label>
               <input
                 type="text"
                 value={fullName}
@@ -169,7 +169,7 @@ function SignupForm() {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Email</label>
+              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest">Email</label>
               <input
                 type="email"
                 value={email}
@@ -183,7 +183,7 @@ function SignupForm() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Mật khẩu</label>
+              <label className="block text-[11px] font-bold text-white/50 uppercase tracking-widest">Mật khẩu</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
