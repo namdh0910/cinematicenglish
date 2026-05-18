@@ -739,7 +739,8 @@ export async function createLessonSentence(data: {
   audio_url?: string, 
   thumbnail_url?: string,
   start_time?: number,
-  end_time?: number
+  end_time?: number,
+  metadata?: any
 }) {
   const supabase = await createSupabaseServerClient();
   const { data: sentence, error } = await supabase
@@ -784,4 +785,21 @@ export async function deleteLessonSentence(id: string) {
   }
   return { success: true };
 }
+
+export async function updateLessonFields(id: string, data: any) {
+  const supabase = await createSupabaseServerClient();
+  const { data: lesson, error } = await supabase
+    .from('lessons')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error updating lesson:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data: lesson };
+}
+
 

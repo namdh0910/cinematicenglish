@@ -22,7 +22,8 @@ import {
   Settings,
   Film,
   MessageSquare,
-  Award
+  Award,
+  Brain
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import QuizBuilder from "./QuizBuilder";
@@ -39,7 +40,8 @@ import {
   getLessonSentences,
   createLessonSentence,
   updateLessonSentence,
-  deleteLessonSentence 
+  deleteLessonSentence,
+  updateLessonFields
 } from "@/app/admin/actions";
 import { useRouter } from "next/navigation";
 
@@ -88,6 +90,20 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
   const [newEnd, setNewEnd] = useState(4);
   const [newAudioUrl, setNewAudioUrl] = useState("");
   const [newSentenceThumb, setNewSentenceThumb] = useState("");
+
+  // Content Intelligence Accordions & States
+  const [expandedMetaSentences, setExpandedMetaSentences] = useState<Record<string, boolean>>({});
+  const [expandedNewMeta, setExpandedNewMeta] = useState(false);
+
+  const [newPacingType, setNewPacingType] = useState("medium");
+  const [newSpeechSpeed, setNewSpeechSpeed] = useState("normal");
+  const [newEmotionType, setNewEmotionType] = useState("Inspiring");
+  const [newPronunciationDifficulty, setNewPronunciationDifficulty] = useState("medium");
+  const [newShadowingPriority, setNewShadowingPriority] = useState("medium");
+  const [newReplayPriority, setNewReplayPriority] = useState("medium");
+  const [newAccentType, setNewAccentType] = useState("US");
+  const [newDopamineScore, setNewDopamineScore] = useState(70);
+  const [newDifficultyScore, setNewDifficultyScore] = useState(50);
 
   // Helper to parse translation from DB
   function parseTranslation(rawTranslation: string) {
@@ -232,6 +248,20 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
       return alert("Vui lòng điền English Quote và Bản dịch tiếng Việt!");
     }
     const finalTranslation = bundleTranslation(newTranslationOnly, newIpa || "/.../", newTargetScore);
+    
+    // Bundle content intelligence metadata
+    const metadata = {
+      pacing_type: newPacingType,
+      speech_speed: newSpeechSpeed,
+      emotion_type: newEmotionType,
+      pronunciation_difficulty: newPronunciationDifficulty,
+      shadowing_priority: newShadowingPriority,
+      replay_priority: newReplayPriority,
+      accent_type: newAccentType,
+      dopamine_score: newDopamineScore,
+      difficulty_score: newDifficultyScore
+    };
+
     const res = await createLessonSentence({
       lesson_id: lesson.id,
       order_index: sentences.length + 1,
@@ -240,7 +270,8 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
       start_time: Number(newStart),
       end_time: Number(newEnd),
       audio_url: newAudioUrl,
-      thumbnail_url: newSentenceThumb || initialData?.thumbnail_url
+      thumbnail_url: newSentenceThumb || initialData?.thumbnail_url,
+      metadata: metadata
     });
 
     if (res.success) {
@@ -249,6 +280,18 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
       setNewIpa("");
       setNewAudioUrl("");
       setNewSentenceThumb("");
+      // Reset meta defaults
+      setNewPacingType("medium");
+      setNewSpeechSpeed("normal");
+      setNewEmotionType("Inspiring");
+      setNewPronunciationDifficulty("medium");
+      setNewShadowingPriority("medium");
+      setNewReplayPriority("medium");
+      setNewAccentType("US");
+      setNewDopamineScore(70);
+      setNewDifficultyScore(50);
+      setExpandedNewMeta(false);
+      
       loadLessonAndSentences();
     } else {
       alert("Lỗi: " + res.error);
@@ -258,10 +301,31 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
   const handleUpdateSentence = async (id: string, updatedFields: any) => {
     const res = await updateLessonSentence(id, updatedFields);
     if (res.success) {
-      alert("Cập nhật câu thoại thành công!");
-      loadLessonAndSentences();
+      // Optimistically update local sentence fields to prevent jumpy reloads
+      setSentences(prev => prev.map(s => s.id === id ? { ...s, ...updatedFields } : s));
     } else {
       alert("Lỗi: " + res.error);
+    }
+  };
+
+  const handleMetaUpdate = async (sentenceId: string, currentMeta: any, key: string, value: any) => {
+    const updatedMeta = { ...(currentMeta || {}), [key]: value };
+    const res = await updateLessonSentence(sentenceId, { metadata: updatedMeta });
+    if (res.success) {
+      setSentences(prev => prev.map(s => s.id === sentenceId ? { ...s, metadata: updatedMeta } : s));
+    } else {
+      alert("Lỗi khi cập nhật trí tuệ câu thoại: " + res.error);
+    }
+  };
+
+  const handleUpdateLessonStatus = async (newStatus: 'draft' | 'review' | 'published' | 'archived') => {
+    if (!lesson?.id) return;
+    const res = await updateLessonFields(lesson.id, { status: newStatus });
+    if (res.success) {
+      setLesson((prev: any) => ({ ...prev, status: newStatus }));
+      alert(`Đã cập nhật trạng thái bài học thành: ${newStatus.toUpperCase()}`);
+    } else {
+      alert("Lỗi khi cập nhật trạng thái bài học: " + res.error);
     }
   };
 
@@ -772,14 +836,35 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
               </div>
             ) : (
               <>
-                {/* Associated Lesson Details banner */}
-                <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex items-center justify-between">
+                {/* Associated Lesson Details banner with status workflow */}
+                <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1">
-                    <span className="text-[9px] uppercase tracking-widest text-amber-500 font-bold">Bài học liên kết</span>
+                    <span className="text-[9px] uppercase tracking-widest text-amber-500 font-bold font-display">Bài học liên kết</span>
                     <h4 className="text-sm font-bold text-white">{lesson.title}</h4>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
-                    {lesson.type}
+                  
+                  <div className="flex items-center gap-3">
+                    {/* Workflow Status Selector */}
+                    <div className="flex items-center gap-1 bg-black/40 border border-white/5 p-1 rounded-xl">
+                      {(['draft', 'review', 'published', 'archived'] as const).map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => handleUpdateLessonStatus(s)}
+                          className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${
+                            (lesson.status || 'draft') === s
+                              ? 'bg-amber-500 text-black shadow-glow-amber'
+                              : 'text-white/40 hover:text-white/60'
+                          }`}
+                        >
+                          {s === 'draft' ? 'Nháp' : s === 'review' ? 'Duyệt' : s === 'published' ? 'Đăng' : 'Kho'}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                      {lesson.type}
+                    </div>
                   </div>
                 </div>
 
@@ -874,6 +959,148 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
                           className="w-full bg-white/5 border border-white/5 rounded-2xl py-3 px-4 text-xs font-mono text-white focus:outline-none"
                         />
                       </div>
+                    </div>
+
+                    {/* Content Intelligence Accordion (Quick Add) */}
+                    <div className="border-t border-white/5 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedNewMeta(!expandedNewMeta)}
+                        className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-amber-500 hover:text-amber-400 transition-colors"
+                      >
+                        <Brain size={12} /> {expandedNewMeta ? "Ẩn chỉ số Trí tuệ nội dung" : "🧠 Thiết lập Trí tuệ & Pacing cảm xúc"}
+                      </button>
+                      
+                      {expandedNewMeta && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Emotional Pacing</label>
+                            <select
+                              value={newPacingType}
+                              onChange={(e) => setNewPacingType(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="easy">Easy (Khởi động)</option>
+                              <option value="medium">Medium (Tăng tốc)</option>
+                              <option value="hard">Hard (Thử thách)</option>
+                              <option value="emotional payoff">Payoff (Cao trào cảm xúc)</option>
+                              <option value="recovery">Recovery (Hồi sức/Thư giãn)</option>
+                            </select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Tốc độ thoại (Speed)</label>
+                            <select
+                              value={newSpeechSpeed}
+                              onChange={(e) => setNewSpeechSpeed(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="slow">Slow (Chậm)</option>
+                              <option value="normal">Normal (Vừa phải)</option>
+                              <option value="fast">Fast (Nhanh)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Emotion Type</label>
+                            <select
+                              value={newEmotionType}
+                              onChange={(e) => setNewEmotionType(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="Inspiring">Inspiring (Truyền cảm hứng)</option>
+                              <option value="Dramatic">Dramatic (Kịch tính)</option>
+                              <option value="Angry">Angry (Giận dữ/Mạnh mẽ)</option>
+                              <option value="Sad">Sad (Trầm buồn/Sâu lắng)</option>
+                              <option value="Romantic">Romantic (Lãng mạn)</option>
+                              <option value="Epic">Epic (Hào hùng/Sử thi)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Độ khó phát âm</label>
+                            <select
+                              value={newPronunciationDifficulty}
+                              onChange={(e) => setNewPronunciationDifficulty(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="low">Low (Dễ)</option>
+                              <option value="medium">Medium (Trung bình)</option>
+                              <option value="high">High (Khó)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Shadowing Priority</label>
+                            <select
+                              value={newShadowingPriority}
+                              onChange={(e) => setNewShadowingPriority(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="low">Low</option>
+                              <option value="medium">Medium</option>
+                              <option value="high">High (Uu tiên shadow)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Replay Priority</label>
+                            <select
+                              value={newReplayPriority}
+                              onChange={(e) => setNewReplayPriority(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="low">Low</option>
+                              <option value="medium">Medium</option>
+                              <option value="high">High (Ôn tập nhiều)</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Accent Type</label>
+                            <select
+                              value={newAccentType}
+                              onChange={(e) => setNewAccentType(e.target.value)}
+                              className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                            >
+                              <option value="US">US (Giọng Mỹ)</option>
+                              <option value="UK">UK (Giọng Anh)</option>
+                              <option value="AU">AU (Giọng Úc)</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Dopamine Score</label>
+                              <span className="text-[9px] font-mono text-amber-500 font-bold">{newDopamineScore}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1"
+                              max="100"
+                              value={newDopamineScore}
+                              onChange={(e) => setNewDopamineScore(Number(e.target.value))}
+                              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            />
+                          </div>
+
+                          <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-1">
+                            <div className="flex justify-between items-center">
+                              <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Difficulty Score</label>
+                              <span className="text-[9px] font-mono text-amber-500 font-bold">{newDifficultyScore}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1"
+                              max="100"
+                              value={newDifficultyScore}
+                              onChange={(e) => setNewDifficultyScore(Number(e.target.value))}
+                              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1007,6 +1234,150 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
                                     className="w-full bg-white/5 border border-white/5 rounded-2xl py-2 px-4 text-xs font-mono text-white/80"
                                   />
                                 </div>
+                              </div>
+
+                              {/* Content Intelligence Accordion (Existing Cards) */}
+                              <div className="border-t border-white/5 pt-4">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setExpandedMetaSentences(prev => ({ ...prev, [sentence.id]: !prev[sentence.id] }));
+                                  }}
+                                  className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-amber-500 hover:text-amber-400 transition-colors"
+                                >
+                                  <Brain size={12} /> {expandedMetaSentences[sentence.id] ? "Ẩn chỉ số Trí tuệ nội dung" : "🧠 Hiển thị Trí tuệ & Pacing cảm xúc"}
+                                </button>
+                                
+                                {expandedMetaSentences[sentence.id] && (
+                                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4 p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Emotional Pacing</label>
+                                      <select
+                                        value={sentence.metadata?.pacing_type || "medium"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'pacing_type', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="easy">Easy (Khởi động)</option>
+                                        <option value="medium">Medium (Tăng tốc)</option>
+                                        <option value="hard">Hard (Thử thách)</option>
+                                        <option value="emotional payoff">Payoff (Cao trào cảm xúc)</option>
+                                        <option value="recovery">Recovery (Hồi sức/Thư giãn)</option>
+                                      </select>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Tốc độ thoại (Speed)</label>
+                                      <select
+                                        value={sentence.metadata?.speech_speed || "normal"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'speech_speed', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="slow">Slow (Chậm)</option>
+                                        <option value="normal">Normal (Vừa phải)</option>
+                                        <option value="fast">Fast (Nhanh)</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Emotion Type</label>
+                                      <select
+                                        value={sentence.metadata?.emotion_type || "Inspiring"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'emotion_type', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="Inspiring">Inspiring (Truyền cảm hứng)</option>
+                                        <option value="Dramatic">Dramatic (Kịch tính)</option>
+                                        <option value="Angry">Angry (Giận dữ/Mạnh mẽ)</option>
+                                        <option value="Sad">Sad (Trầm buồn/Sâu lắng)</option>
+                                        <option value="Romantic">Romantic (Lãng mạn)</option>
+                                        <option value="Epic">Epic (Hào hùng/Sử thi)</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Độ khó phát âm</label>
+                                      <select
+                                        value={sentence.metadata?.pronunciation_difficulty || "medium"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'pronunciation_difficulty', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="low">Low (Dễ)</option>
+                                        <option value="medium">Medium (Trung bình)</option>
+                                        <option value="high">High (Khó)</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Shadowing Priority</label>
+                                      <select
+                                        value={sentence.metadata?.shadowing_priority || "medium"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'shadowing_priority', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High (Uu tiên shadow)</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Replay Priority</label>
+                                      <select
+                                        value={sentence.metadata?.replay_priority || "medium"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'replay_priority', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high">High (Ôn tập nhiều)</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Accent Type</label>
+                                      <select
+                                        value={sentence.metadata?.accent_type || "US"}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'accent_type', e.target.value)}
+                                        className="w-full bg-white/5 border border-white/5 rounded-xl py-2.5 px-4 text-xs text-white"
+                                      >
+                                        <option value="US">US (Giọng Mỹ)</option>
+                                        <option value="UK">UK (Giọng Anh)</option>
+                                        <option value="AU">AU (Giọng Úc)</option>
+                                        <option value="Other">Other</option>
+                                      </select>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between items-center">
+                                        <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Dopamine Score</label>
+                                        <span className="text-[9px] font-mono text-amber-500 font-bold">{sentence.metadata?.dopamine_score || 70}</span>
+                                      </div>
+                                      <input
+                                        type="range"
+                                        min="1"
+                                        max="100"
+                                        value={sentence.metadata?.dopamine_score || 70}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'dopamine_score', Number(e.target.value))}
+                                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                      />
+                                    </div>
+
+                                    <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-1">
+                                      <div className="flex justify-between items-center">
+                                        <label className="text-[9px] uppercase font-bold tracking-widest text-white/40">Difficulty Score</label>
+                                        <span className="text-[9px] font-mono text-amber-500 font-bold">{sentence.metadata?.difficulty_score || 50}</span>
+                                      </div>
+                                      <input
+                                        type="range"
+                                        min="1"
+                                        max="100"
+                                        value={sentence.metadata?.difficulty_score || 50}
+                                        onChange={(e) => handleMetaUpdate(sentence.id, sentence.metadata, 'difficulty_score', Number(e.target.value))}
+                                        className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
