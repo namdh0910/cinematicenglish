@@ -35,8 +35,8 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const url = req.nextUrl.clone()
 
-  // Define protected routes
-  const protectedStudentRoutes = ['/dashboard', '/practice', '/classroom', '/learn', '/chat', '/community', '/exam', '/feed', '/journal']
+  // Define protected routes (dashboard and learn will be protected client-side with a cinematic glass modal)
+  const protectedStudentRoutes = ['/practice', '/classroom', '/chat', '/community', '/exam', '/feed', '/journal']
   const isProtectedStudent = protectedStudentRoutes.some(r => url.pathname.startsWith(r) || url.pathname === r)
   
   const isTeacherRoute = url.pathname.startsWith('/teacher') || url.pathname === '/teacher'
