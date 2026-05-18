@@ -51,6 +51,16 @@ export async function createStory(data: any) {
       data.is_published = (data.status === 'published' || data.status === 'Published');
     }
 
+    // Save tags as an encapsulated suffix inside the synopsis field (which is backed by synopsis column)
+    if (data.tags !== undefined) {
+      const tagsVal = data.tags || "";
+      if (data.synopsis !== undefined) {
+        data.synopsis = data.synopsis.replace(/\s*\[TAGS:.*?\]/g, "");
+        data.synopsis = `${data.synopsis} [TAGS: ${tagsVal}]`;
+      }
+      delete data.tags;
+    }
+
     const { data: story, error } = await supabase
       .from('stories')
       .insert([data])
@@ -83,6 +93,21 @@ export async function getStoryById(id: string) {
     console.error("Error fetching story:", error);
     return null;
   }
+
+  // Reconstruct tags from synopsis field if stored as a suffix
+  if (data && data.synopsis) {
+    const match = data.synopsis.match(/\[TAGS:\s*(.*?)\]/);
+    if (match) {
+      data.tags = match[1];
+      // Clean the tags suffix from the synopsis value so the textarea shows the pure synopsis
+      data.synopsis = data.synopsis.replace(/\s*\[TAGS:.*?\]/g, "").trim();
+    } else {
+      data.tags = "";
+    }
+  } else if (data) {
+    data.tags = "";
+  }
+
   return data;
 }
 
@@ -92,6 +117,16 @@ export async function updateStory(id: string, data: any) {
   // Map status to is_published safe-mapping
   if (data.status !== undefined) {
     data.is_published = (data.status === 'published' || data.status === 'Published');
+  }
+
+  // Save tags as an encapsulated suffix inside the synopsis field (which is backed by synopsis column)
+  if (data.tags !== undefined) {
+    const tagsVal = data.tags || "";
+    if (data.synopsis !== undefined) {
+      data.synopsis = data.synopsis.replace(/\s*\[TAGS:.*?\]/g, "");
+      data.synopsis = `${data.synopsis} [TAGS: ${tagsVal}]`;
+    }
+    delete data.tags;
   }
 
   const { data: story, error } = await supabase
