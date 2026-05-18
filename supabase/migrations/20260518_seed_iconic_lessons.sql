@@ -1,10 +1,38 @@
 -- =========================================================================
--- CINEMATIC ENGLISH — RLS REPAIR & 5 ICONIC LESSONS SEED DATA MIGRATION
+-- CINEMATIC ENGLISH — RLS REPAIR, TRIGGER RESILIENCY & 5 ICONIC LESSONS SEED
 -- Target Database: Supabase (PostgreSQL 15+)
 -- Movies: The Godfather, The Dark Knight, Forrest Gump, Titanic, The Lion King
 -- =========================================================================
 
--- ─── RLS INFINITE RECURSION REPAIR ───────────────────────────────────────
+-- ─── 0. RESILIENT TRIGGER FUNCTION (IMMUNE TO MISSING updated_at COLUMN) ───
+-- Rewritten with PL/pgSQL exception block to ignore error if table lacks updated_at
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    BEGIN
+        NEW.updated_at = NOW();
+    EXCEPTION WHEN OTHERS THEN
+        -- Gracefully catch and ignore the exception if the column does not exist
+    END;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ─── 1. GUARANTEE updated_at COLUMNS EXIST ON CORE TABLES ─────────────────
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.stories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.story_scenes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.lessons ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.lesson_sentences ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.lesson_progress ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.speaking_attempts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.daily_streaks ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.quota_usage ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.rate_limits ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+
+-- ─── 2. RLS INFINITE RECURSION REPAIR ───────────────────────────────────────
 -- Drop all old recursive policies to avoid Supabase infinite loops
 DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
 DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
@@ -43,8 +71,8 @@ CREATE POLICY "stories_admin_all" ON public.stories
     );
 
 
--- ─── SEED 5 ICONIC MOVIE STORIES ─────────────────────────────────────────
--- 1. Insert Stories
+-- ─── 3. SEED 5 ICONIC MOVIE STORIES ─────────────────────────────────────────
+-- Insert Stories
 INSERT INTO public.stories (id, title, description, thumbnail_url, difficulty, is_published)
 VALUES
   (
@@ -94,7 +122,8 @@ ON CONFLICT (id) DO UPDATE SET
   difficulty = EXCLUDED.difficulty,
   is_published = EXCLUDED.is_published;
 
--- 2. Insert Lessons
+-- ─── 4. SEED LESSONS ────────────────────────────────────────────────────────
+-- Insert Lessons
 INSERT INTO public.lessons (id, title, description, type, is_published)
 VALUES
   (
@@ -138,7 +167,8 @@ ON CONFLICT (id) DO UPDATE SET
   type = EXCLUDED.type,
   is_published = EXCLUDED.is_published;
 
--- 3. Insert Lesson Sentences (with English quote, Vietnamese translation, phonetic breakdown, and target threshold)
+-- ─── 5. SEED LESSON SENTENCES (WITH IPA PHONETIC & THRESHOLD METADATA) ──────
+-- Insert Lesson Sentences
 INSERT INTO public.lesson_sentences (
   id,
   lesson_id,
