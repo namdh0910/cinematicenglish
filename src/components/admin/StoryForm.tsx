@@ -55,7 +55,7 @@ const storySchema = z.object({
   duration: z.string(),
   xp: z.number().min(0),
   difficulty: z.enum(["Beginner", "Intermediate", "Advanced"]),
-  status: z.enum(["Draft", "Published", "Archived"]),
+  status: z.enum(["Draft", "Review", "Published", "Archived"]),
   isPremium: z.boolean(),
   isFeatured: z.boolean(),
   thumbnailUrl: z.string().optional(),
@@ -150,8 +150,21 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
       emotionalTone: initialTone || "Inspiring",
       duration: initialData?.duration_seconds ? `${Math.floor(initialData.duration_seconds / 60)}:${(initialData.duration_seconds % 60).toString().padStart(2, '0')}` : "",
       xp: initialData?.xp_value || 250,
-      difficulty: initialData?.difficulty ? (initialData.difficulty.charAt(0).toUpperCase() + initialData.difficulty.slice(1)) as any : "Intermediate",
-      status: initialData?.status ? (initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1)) as any : "Draft",
+      difficulty: (() => {
+        const d = initialData?.difficulty?.toLowerCase();
+        if (d === 'easy' || d === 'beginner') return "Beginner";
+        if (d === 'medium' || d === 'intermediate') return "Intermediate";
+        if (d === 'hard' || d === 'advanced') return "Advanced";
+        return "Intermediate";
+      })() as any,
+      status: (() => {
+        const s = initialData?.status?.toLowerCase();
+        if (s === 'draft') return "Draft";
+        if (s === 'review') return "Review";
+        if (s === 'published') return "Published";
+        if (s === 'archived') return "Archived";
+        return "Draft";
+      })() as any,
       isPremium: initialData?.is_premium || false,
       isFeatured: initialData?.is_featured || false,
       thumbnailUrl: initialData?.thumbnail_url || "",
@@ -358,12 +371,23 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
         finalTags = cleanedTags ? `${cleanedTags}, tone:${data.emotionalTone}` : `tone:${data.emotionalTone}`;
       }
 
+      // Map frontend difficulty ("Beginner" | "Intermediate" | "Advanced") to DB check constraint ("easy" | "medium" | "hard")
+      let dbDifficulty = "medium";
+      const diff = data.difficulty.toLowerCase();
+      if (diff === "beginner" || diff === "easy") {
+        dbDifficulty = "easy";
+      } else if (diff === "intermediate" || diff === "medium") {
+        dbDifficulty = "medium";
+      } else if (diff === "advanced" || diff === "hard") {
+        dbDifficulty = "hard";
+      }
+
       const storyData = {
         title: data.title,
         synopsis: data.description,
         script: data.transcript,
         category: data.category.toLowerCase().replace(" & influence", ""),
-        difficulty: data.difficulty.toLowerCase(),
+        difficulty: dbDifficulty,
         duration_seconds: durationSeconds,
         xp_value: data.xp,
         is_premium: data.isPremium,
@@ -393,6 +417,12 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
       console.error("Failed to save story:", err);
       alert("Lỗi không xác định: " + err.message);
     }
+  };
+
+  const onValidationError = (errors: any) => {
+    console.error("Client-side Form Validation Failed:", errors);
+    const errorFields = Object.keys(errors).join(", ");
+    alert(`Không thể lưu! Vui lòng kiểm tra lại các trường sau bị lỗi: ${errorFields}`);
   };
 
   return (
@@ -439,7 +469,7 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            onSubmit={handleSubmit(onSubmit)} 
+            onSubmit={handleSubmit(onSubmit, onValidationError)} 
             className="space-y-12 pb-24"
           >
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-10">
@@ -645,6 +675,7 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
                           className="bg-[#1a1a1a] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white/80 focus:outline-none focus:border-amber-500"
                         >
                           <option value="Draft">Draft (Bản nháp)</option>
+                          <option value="Review">Review (Đang đánh giá)</option>
                           <option value="Published">Published (Công khai)</option>
                           <option value="Archived">Archived (Lưu trữ)</option>
                         </select>
