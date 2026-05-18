@@ -94,6 +94,7 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
   // Content Intelligence Accordions & States
   const [expandedMetaSentences, setExpandedMetaSentences] = useState<Record<string, boolean>>({});
   const [expandedNewMeta, setExpandedNewMeta] = useState(false);
+  const [expandedSentences, setExpandedSentences] = useState<Record<string, boolean>>({});
 
   const [newPacingType, setNewPacingType] = useState("medium");
   const [newSpeechSpeed, setNewSpeechSpeed] = useState("normal");
@@ -1118,11 +1119,71 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
                   <h4 className="text-xs uppercase font-bold tracking-widest text-white/30 ml-4">Các câu thoại hiện tại ({sentences.length})</h4>
 
                   {sentences.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {sentences.map((sentence, idx) => {
                         const parsed = parseTranslation(sentence.translation);
+                        
+                        // Collapsed Mode Layout (Extremely clean, modern list row)
+                        if (!expandedSentences[sentence.id]) {
+                          return (
+                            <div key={sentence.id} className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group/row">
+                              <div className="flex items-center gap-4 flex-1">
+                                <span className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 font-black text-xs flex items-center justify-center shrink-0">
+                                  {idx + 1}
+                                </span>
+                                <div className="space-y-1 min-w-0">
+                                  <div className="font-display font-bold text-sm text-white/90 group-hover/row:text-amber-500 transition-colors line-clamp-1">
+                                    {sentence.transcript}
+                                  </div>
+                                  <div className="text-xs text-white/40 flex items-center gap-2 flex-wrap">
+                                    <span className="line-clamp-1">{parsed.translation}</span>
+                                    {parsed.ipa && parsed.ipa !== '/.../' && (
+                                      <span className="font-mono text-amber-500/60 bg-amber-500/5 border border-amber-500/10 px-1.5 py-0.5 rounded text-[10px]">
+                                        {parsed.ipa}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                                {/* Core intelligence summary badges */}
+                                <div className="flex items-center gap-1.5 mr-2">
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-violet-500/10 text-violet-400 border border-violet-500/20 uppercase tracking-wider">
+                                    {sentence.metadata?.accent_type || "US"}
+                                  </span>
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                                    {sentence.metadata?.emotion_type || "Inspiring"}
+                                  </span>
+                                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                                    ⚡ {sentence.metadata?.dopamine_score || 70}
+                                  </span>
+                                </div>
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedSentences(prev => ({ ...prev, [sentence.id]: true }))}
+                                  className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] uppercase tracking-wider transition-all"
+                                >
+                                  Biên soạn ⚙️
+                                </button>
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSentence(sentence.id)}
+                                  className="p-1.5 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10 transition-all"
+                                  title="Xóa câu"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Expanded Mode Layout (Full premium sentence editor card)
                         return (
-                          <div key={sentence.id} className="p-8 rounded-[32px] bg-[#131317] border border-white/5 space-y-6 relative group/card">
+                          <div key={sentence.id} className="p-8 rounded-[32px] bg-[#131317] border border-amber-500/20 space-y-6 relative group/card">
                             
                             {/* Header row with indexes and actions */}
                             <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -1132,14 +1193,23 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
                                 </span>
                                 <span className="text-[10px] uppercase tracking-widest text-white/20 font-bold">Thoại bài học</span>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteSentence(sentence.id)}
-                                className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10 transition-all"
-                                title="Xóa câu"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedSentences(prev => ({ ...prev, [sentence.id]: false }))}
+                                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 text-[10px] font-bold uppercase tracking-wider border border-white/10 transition-all animate-pulse"
+                                >
+                                  Thu gọn 🔼
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSentence(sentence.id)}
+                                  className="p-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10 transition-all"
+                                  title="Xóa câu"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-6">

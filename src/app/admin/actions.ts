@@ -45,6 +45,12 @@ export async function getStories(filters?: {
 export async function createStory(data: any) {
   try {
     const supabase = await createSupabaseServerClient();
+    
+    // Map status to is_published safe-mapping
+    if (data.status !== undefined) {
+      data.is_published = (data.status === 'published' || data.status === 'Published');
+    }
+
     const { data: story, error } = await supabase
       .from('stories')
       .insert([data])
@@ -57,6 +63,7 @@ export async function createStory(data: any) {
     }
     
     revalidatePath('/admin/stories');
+    revalidatePath('/stories');
     return { success: true, data: story };
   } catch (err: any) {
     console.error("Server Action Error:", err);
@@ -81,6 +88,12 @@ export async function getStoryById(id: string) {
 
 export async function updateStory(id: string, data: any) {
   const supabase = await createSupabaseServerClient();
+  
+  // Map status to is_published safe-mapping
+  if (data.status !== undefined) {
+    data.is_published = (data.status === 'published' || data.status === 'Published');
+  }
+
   const { data: story, error } = await supabase
     .from('stories')
     .update(data)
@@ -90,6 +103,7 @@ export async function updateStory(id: string, data: any) {
 
   if (error) throw error;
   revalidatePath('/admin/stories');
+  revalidatePath('/stories');
   return story;
 }
 
