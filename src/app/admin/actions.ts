@@ -112,34 +112,43 @@ export async function getStoryById(id: string) {
 }
 
 export async function updateStory(id: string, data: any) {
-  const supabase = await createSupabaseServerClient();
-  
-  // Map status to is_published safe-mapping
-  if (data.status !== undefined) {
-    data.is_published = (data.status === 'published' || data.status === 'Published');
-  }
-
-  // Save tags as an encapsulated suffix inside the synopsis field (which is backed by synopsis column)
-  if (data.tags !== undefined) {
-    const tagsVal = data.tags || "";
-    if (data.synopsis !== undefined) {
-      data.synopsis = data.synopsis.replace(/\s*\[TAGS:.*?\]/g, "");
-      data.synopsis = `${data.synopsis} [TAGS: ${tagsVal}]`;
+  try {
+    const supabase = await createSupabaseServerClient();
+    
+    // Map status to is_published safe-mapping
+    if (data.status !== undefined) {
+      data.is_published = (data.status === 'published' || data.status === 'Published');
     }
-    delete data.tags;
+
+    // Save tags as an encapsulated suffix inside the synopsis field (which is backed by synopsis column)
+    if (data.tags !== undefined) {
+      const tagsVal = data.tags || "";
+      if (data.synopsis !== undefined) {
+        data.synopsis = data.synopsis.replace(/\s*\[TAGS:.*?\]/g, "");
+        data.synopsis = `${data.synopsis} [TAGS: ${tagsVal}]`;
+      }
+      delete data.tags;
+    }
+
+    const { data: story, error } = await supabase
+      .from('stories')
+      .update(data)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase Error updating story:", error);
+      return { success: false, error: error.message };
+    }
+    
+    revalidatePath('/admin/stories');
+    revalidatePath('/stories');
+    return { success: true, data: story };
+  } catch (err: any) {
+    console.error("Server Action Error updating story:", err);
+    return { success: false, error: err.message || "Unknown server error" };
   }
-
-  const { data: story, error } = await supabase
-    .from('stories')
-    .update(data)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  revalidatePath('/admin/stories');
-  revalidatePath('/stories');
-  return story;
 }
 
 export async function deleteStory(id: string) {

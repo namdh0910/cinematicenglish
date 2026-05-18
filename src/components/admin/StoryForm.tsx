@@ -400,8 +400,7 @@ export default function StoryForm({ initialData }: { initialData?: any }) {
 
       let result;
       if (initialData?.id) {
-        const updated = await updateStory(initialData.id, storyData);
-        result = { success: !!updated, data: updated };
+        result = await updateStory(initialData.id, storyData);
       } else {
         result = await createStory(storyData);
       }
