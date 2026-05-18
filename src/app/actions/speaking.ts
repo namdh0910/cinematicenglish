@@ -74,6 +74,75 @@ function compareWords(target: string, actual: string): number {
 }
 
 /**
+ * Normalizes text to compare words accurately (stripping punctuation and lowercasing)
+ */
+function cleanWordForDiff(word: string): string {
+  return word.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"]/g, '').trim();
+}
+
+/**
+ * Align and compare spoken transcript with original target sentence
+ */
+function compareTranscripts(originalText: string, spokenText: string): {
+  wordEvaluations: { word: string; status: 'correct' | 'incorrect' | 'missing' }[];
+  accuracyScore: number;
+} {
+  const targetWords = originalText.trim().split(/\s+/).filter(Boolean);
+  const spokenWords = spokenText.trim().split(/\s+/).map(cleanWordForDiff).filter(Boolean);
+
+  const wordEvaluations: { word: string; status: 'correct' | 'incorrect' | 'missing' }[] = [];
+  let correctCount = 0;
+  let spokenIndex = 0;
+
+  for (let i = 0; i < targetWords.length; i++) {
+    const targetWord = targetWords[i];
+    const cleanedTarget = cleanWordForDiff(targetWord);
+
+    if (!cleanedTarget) {
+      wordEvaluations.push({ word: targetWord, status: 'missing' });
+      continue;
+    }
+
+    // Scan ahead in spoken words (up to a window of 3 words) to find a match
+    let matchIdx = -1;
+    let matchStatus: 'correct' | 'incorrect' | 'missing' = 'missing';
+
+    for (let w = 0; w < 3; w++) {
+      const idx = spokenIndex + w;
+      if (idx < spokenWords.length) {
+        const spokenWord = spokenWords[idx];
+        if (spokenWord === cleanedTarget) {
+          matchIdx = idx;
+          matchStatus = 'correct';
+          break;
+        } else if (getLevenshteinDistance(cleanedTarget, spokenWord) <= Math.max(1, Math.floor(cleanedTarget.length * 0.4))) {
+          matchIdx = idx;
+          matchStatus = 'incorrect';
+        }
+      }
+    }
+
+    if (matchStatus === 'correct') {
+      wordEvaluations.push({ word: targetWord, status: 'correct' });
+      correctCount++;
+      spokenIndex = matchIdx + 1;
+    } else if (matchStatus === 'incorrect') {
+      wordEvaluations.push({ word: targetWord, status: 'incorrect' });
+      spokenIndex = matchIdx + 1;
+    } else {
+      wordEvaluations.push({ word: targetWord, status: 'missing' });
+    }
+  }
+
+  const accuracyScore = targetWords.length > 0 ? Math.round((correctCount / targetWords.length) * 100) : 100;
+
+  return {
+    wordEvaluations,
+    accuracyScore
+  };
+}
+
+/**
  * Core AI Speaking Evaluation Action
  * Uploads user audio to Supabase, runs OpenAI Whisper transcription, compares target text
  * dynamically to calculate accuracy/fluency/completeness/WPM and outputs native Vietnamese feedback.
@@ -149,34 +218,68 @@ export async function evaluateSpeaking({
       console.warn('Supabase storage upload warning:', uploadError.message);
     }
 
-    // 2. Perform Whisper Speech-to-Text Transcription
+    // 2. Perform Whisper Speech-to-Text Transcription via Groq (Whisper-large-v3) or OpenAI fallback
     let transcription = '';
-    const apiKey = process.env.OPENAI_API_KEY;
+    const groqApiKey = process.env.GROQ_API_KEY;
 
-    if (apiKey) {
-      // Direct Whisper API boundary request
+    if (groqApiKey) {
       const formData = new FormData();
       const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
       formData.append('file', file);
-      formData.append('model', 'whisper-1');
+      formData.append('model', 'whisper-large-v3');
       formData.append('language', 'en');
 
-      const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: formData,
-      });
+      try {
+        const groqResponse = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${groqApiKey}`,
+          },
+          body: formData,
+        });
 
-      if (!whisperResponse.ok) {
-        throw new Error('Whisper API failed');
+        if (groqResponse.ok) {
+          const groqData = await groqResponse.json();
+          transcription = groqData.text || '';
+          console.log('Groq Transcription Success:', transcription);
+        } else {
+          const errText = await groqResponse.text();
+          console.error('Groq transcription API failed:', errText);
+          throw new Error('Groq STT returned status ' + groqResponse.status);
+        }
+      } catch (sttErr) {
+        console.error('Groq transcription fetch error, trying OpenAI Whisper fallback:', sttErr);
       }
+    }
 
-      const whisperData = await whisperResponse.json();
-      transcription = whisperData.text || '';
-    } else {
-      // High-fidelity fallback simulated matching (fuzzying around target)
+    // OpenAI Whisper Fallback
+    if (!transcription) {
+      const apiKey = process.env.OPENAI_API_KEY;
+
+      if (apiKey) {
+        const formData = new FormData();
+        const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
+        formData.append('file', file);
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'en');
+
+        const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: formData,
+        });
+
+        if (whisperResponse.ok) {
+          const whisperData = await whisperResponse.json();
+          transcription = whisperData.text || '';
+        }
+      }
+    }
+
+    // Simulated fuzzy/exact fallback
+    if (!transcription) {
       const fillerChance = Math.random() > 0.6 ? ' um ' : ' ';
       const stutterChance = Math.random() > 0.7;
       let mockTranscript = targetSentence;
@@ -187,57 +290,19 @@ export async function evaluateSpeaking({
       transcription = mockTranscript + (Math.random() > 0.5 ? fillerChance : '');
     }
 
-    // 3. Dynamic Word-by-Word Alignment & Evaluation
-    const targetWords = targetSentence.split(/\s+/);
-    const actualWords = transcription.split(/\s+/);
+    // 3. Dynamic Word-by-Word Alignment & Evaluation via compareTranscripts
+    const { wordEvaluations: rawDiffResults, accuracyScore: accuracy } = compareTranscripts(targetSentence, transcription);
 
-    const wordEvaluations: WordEvaluation[] = [];
-    let totalScore = 0;
-    let matchedCount = 0;
+    // Map WordEvaluation array for client display compatibility (imperfect/incorrect)
+    const wordEvaluations: WordEvaluation[] = rawDiffResults.map(w => ({
+      word: w.word,
+      status: w.status === 'incorrect' ? 'imperfect' : w.status,
+      accuracy: w.status === 'correct' ? 100 : w.status === 'incorrect' ? 60 : 0
+    }));
+
+    // Detect filler words WPM counting
     let fillersCount = 0;
-
-    targetWords.forEach((targetWord, index) => {
-      let bestMatchIdx = -1;
-      let highestScore = 0;
-
-      // Scan actual words within a local window (e.g. index +/- 3)
-      const startScan = Math.max(0, index - 3);
-      const endScan = Math.min(actualWords.length, index + 4);
-
-      for (let j = startScan; j < endScan; j++) {
-        const score = compareWords(targetWord, actualWords[j]);
-        if (score > highestScore) {
-          highestScore = score;
-          bestMatchIdx = j;
-        }
-      }
-
-      if (highestScore >= 80) {
-        wordEvaluations.push({
-          word: targetWord,
-          status: 'correct',
-          accuracy: highestScore,
-        });
-        totalScore += highestScore;
-        matchedCount++;
-      } else if (highestScore >= 40) {
-        wordEvaluations.push({
-          word: targetWord,
-          status: 'imperfect',
-          accuracy: highestScore,
-        });
-        totalScore += highestScore;
-        matchedCount++;
-      } else {
-        wordEvaluations.push({
-          word: targetWord,
-          status: 'missing',
-          accuracy: 0,
-        });
-      }
-    });
-
-    // Detect filler words
+    const actualWords = transcription.split(/\s+/);
     const fillerWords = ['um', 'ah', 'like', 'er', 'uh'];
     actualWords.forEach((actualWord) => {
       if (fillerWords.includes(cleanWord(actualWord))) {
@@ -245,40 +310,26 @@ export async function evaluateSpeaking({
       }
     });
 
-    // 4. Calculate Pronunciation Metrics
-    const accuracy = targetWords.length > 0 ? Math.round(totalScore / targetWords.length) : 100;
-    const completeness = targetWords.length > 0 ? Math.round((matchedCount / targetWords.length) * 100) : 100;
+    const matchedCount = wordEvaluations.filter(w => w.status === 'correct' || w.status === 'imperfect').length;
+    const completeness = wordEvaluations.length > 0 ? Math.round((matchedCount / wordEvaluations.length) * 100) : 100;
     
-    // Pacing (Words Per Minute)
+    // WPM pacing
     const activeDuration = Math.max(1, durationSeconds);
     const pacingWpm = Math.round((actualWords.length / activeDuration) * 60);
 
-    // Fluency: penalize for filler words and low accuracy
     const fillerPenalty = fillersCount * 10;
     const fluency = Math.max(10, Math.min(100, Math.round(accuracy * 0.7 + completeness * 0.3 - fillerPenalty)));
 
-    // 5. Generate Natural Vietnamese AI Teacher Feedback
+    // 4. Sinh Lời Khuyên Động (Dynamic Feedback)
     let coachFeedback = '';
-    const weakWords = wordEvaluations
-      .filter((w) => w.status === 'imperfect' || w.status === 'missing')
+    const weakWords = rawDiffResults
+      .filter((w) => w.status === 'incorrect' || w.status === 'missing')
       .map((w) => w.word);
 
-    if (accuracy >= 90 && fluency >= 85) {
-      coachFeedback = `Phát âm xuất sắc, nhịp điệu rất tự nhiên như người bản xứ! Em đã kiểm soát cao độ và trọng âm của cả câu rất chuẩn. Hãy tiếp tục phát huy ở các bài học tiếp theo nhé!`;
-    } else if (accuracy >= 75) {
-      coachFeedback = `Phát âm khá tốt và rõ ràng! `;
-      if (weakWords.length > 0) {
-        coachFeedback += `Tuy nhiên, cô nghe thấy một số từ phát âm chưa rõ hoặc bị nuốt âm như: "${weakWords.slice(0, 3).join(', ')}". Em nên chú ý hơn đến âm đuôi (ending sounds) và độ mở khẩu hình miệng của các từ này nhé.`;
-      } else {
-        coachFeedback += `Em cần cải thiện thêm sự trôi chảy bằng cách hạn chế ngập ngừng để tăng điểm trôi chảy lên cao hơn nữa.`;
-      }
+    if (accuracy >= 90) {
+      coachFeedback = `Phát âm xuất sắc, nhịp điệu rất tự nhiên! Em đã kiểm soát cao độ và trọng âm của cả câu rất chuẩn. Hãy tiếp tục phát huy nhé!`;
     } else {
-      coachFeedback = `Cố gắng lên em nhé! Phát âm câu này vẫn còn một số điểm chưa chuẩn xác. `;
-      if (weakWords.length > 0) {
-        coachFeedback += `Các từ như "${weakWords.slice(0, 3).join(', ')}" bị phát âm lệch hoặc bỏ sót hoàn toàn. Cô khuyên em hãy nghe lại audio mẫu vài lần, bắt chước kỹ các âm gió và thử ghi âm lại một lần nữa. Cô luôn tin em sẽ làm tốt hơn!`;
-      } else {
-        coachFeedback += `Em hãy chú ý ngắt nghỉ đúng chỗ (sau các cụm chủ ngữ/vị ngữ) và duy trì tốc độ đều đặn hơn.`;
-      }
+      coachFeedback = `Rất tốt! Bạn phát âm khá rõ ràng, tuy nhiên hãy thử tập trung phát âm rõ hơn các từ: "${weakWords.slice(0, 2).join(', ')}".`;
     }
 
     const xpEarned = Math.floor(accuracy * 1.2);

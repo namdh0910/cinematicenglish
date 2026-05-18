@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useVoiceRecorder } from "@/features/speaking/hooks/useVoiceRecorder";
 import { Lesson } from "@/features/speaking/types";
 
+import { evaluateSpeaking } from "@/app/actions/speaking";
+
 interface LessonPlayerClientProps {
   lesson: Lesson;
 }
@@ -105,48 +107,61 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     }
   };
 
-  // Mock AI Coach analysis on recording stop
+  // Listen for recording complete to analyze audio
+  useEffect(() => {
+    if (audioBlob) {
+      handleEvaluateAudio(audioBlob);
+    }
+  }, [audioBlob]);
+
+  const handleEvaluateAudio = async (blob: Blob) => {
+    setIsAnalyzing(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64Audio = (reader.result as string).split(',')[1];
+        
+        // Call real Server Action
+        const response = await evaluateSpeaking({
+          userId: "guest",
+          audioBase64: base64Audio,
+          targetSentence: activeActivity?.content?.transcript || "",
+          durationSeconds: 4,
+          sentenceId: activeActivity?.id
+        });
+
+        setIsAnalyzing(false);
+        if (response.success) {
+          setShowAICoach(true);
+          setAiFeedback({
+            overall: response.accuracy,
+            accuracy: response.accuracy,
+            fluency: response.fluency,
+            coachFeedback: response.coachFeedback,
+            wordEvaluations: response.wordEvaluations?.map((w: any) => ({
+              word: w.word,
+              status: w.status === 'imperfect' ? 'incorrect' : w.status,
+              accuracy: w.accuracy
+            })) || []
+          });
+          
+          if (response.xpEarned) {
+            setXpReward(prev => prev + response.xpEarned!);
+          }
+        } else {
+          alert(response.error || "Có lỗi xảy ra khi phân tích phát âm.");
+        }
+      };
+    } catch (err) {
+      console.error("Evaluation error:", err);
+      setIsAnalyzing(false);
+      alert("Không thể phân tích file âm thanh.");
+    }
+  };
+
   const handleStopRecording = () => {
     stopRecording();
-    setIsAnalyzing(true);
-
-    // Simulate high-fidelity AI Speech Assessment after 1.5 seconds
-    setTimeout(() => {
-      setIsAnalyzing(false);
-      setShowAICoach(true);
-
-      const transcript = activeActivity?.content?.transcript || "Silence is not empty.";
-      const words = transcript.split(" ");
-      
-      // Build a premium mock word-by-word evaluation dataset
-      const wordEvaluations = words.map((w: string, i: number) => {
-        const cleanWord = w.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-        let status: 'correct' | 'imperfect' | 'missing' = 'correct';
-        if (i % 6 === 0) status = 'imperfect';
-        if (i % 9 === 0) status = 'missing';
-        
-        return {
-          word: cleanWord,
-          status,
-          accuracy: status === 'correct' ? 95 : status === 'imperfect' ? 68 : 0
-        };
-      });
-
-      const accuracy = 90;
-      const fluency = 85;
-      const overall = Math.round((accuracy + fluency) / 2);
-
-      setAiFeedback({
-        overall,
-        accuracy,
-        fluency,
-        coachFeedback: "Phát âm rất rõ ràng, trường hơi tốt. Tuy nhiên cần lưu ý ngắt nghỉ chính xác hơn ở các liên từ để câu thoại tự nhiên và truyền cảm hơn nữa nhé!",
-        wordEvaluations
-      });
-
-      // Award XP
-      setXpReward(prev => prev + Math.floor(overall * 1.5));
-    }, 1500);
   };
 
   const handleNextScene = () => {
