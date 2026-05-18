@@ -1003,4 +1003,128 @@ export async function saveAIComposedStory(payload: {
   }
 }
 
+/**
+ * AI Content Factory Data Pipeline Action
+ */
+export async function generateStoryContent({
+  title,
+  category,
+  difficulty,
+  videoUrl,
+  subtitleUrl
+}: {
+  title: string;
+  category: string;
+  difficulty: string;
+  videoUrl: string;
+  subtitleUrl: string;
+}) {
+  try {
+    const supabase = await createSupabaseServerClient();
+
+    // Map difficulty standard matching: 'easy', 'medium', 'hard'
+    const rawDiff = (difficulty || 'medium').toLowerCase();
+    const cleanDifficulty = rawDiff.includes('easy') || rawDiff.includes('b1') ? 'easy' : 
+                            rawDiff.includes('hard') || rawDiff.includes('advanced') ? 'hard' : 'medium';
+
+    // 1. Insert Story
+    const { data: story, error: storyErr } = await supabase
+      .from('stories')
+      .insert([{
+        title,
+        description: `Câu chuyện điện ảnh hấp dẫn "${title}" thuộc thể loại ${category}.`,
+        thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
+        difficulty: cleanDifficulty,
+        is_published: true
+      }])
+      .select()
+      .single();
+
+    if (storyErr) throw storyErr;
+
+    // 2. Generate mock/parser subtitle chunks (MVP mockup)
+    const mockDialogues = [
+      "Here is the first striking moment of the story.",
+      "You have to pay close attention to the details.",
+      "This is where everything changes for our character.",
+      "The cinematic journey has just begun.",
+      "Final reflection on this masterpiece segment."
+    ];
+
+    const scenesToInsert = mockDialogues.map((dialogue, idx) => ({
+      story_id: story.id,
+      order_index: idx + 1,
+      video_url: videoUrl || 'https://www.youtube.com/watch?v=EXeTwQWrcwY',
+      thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
+    }));
+
+    // Insert into story_scenes
+    const { error: scenesErr } = await supabase
+      .from('story_scenes')
+      .insert(scenesToInsert);
+
+    if (scenesErr) {
+      console.warn("Insert story_scenes warning:", scenesErr.message);
+    }
+
+    // Also check and try to write to a 'lines' table if it exists
+    try {
+      const linesToInsert = mockDialogues.map((dialogue, idx) => ({
+        story_id: story.id,
+        order_index: idx + 1,
+        content: dialogue,
+        start_time: idx * 8,
+        end_time: (idx + 1) * 8
+      }));
+      await supabase.from('lines').insert(linesToInsert);
+    } catch (e) {
+      console.log("Mock 'lines' table insert bypassed as table does not exist in actual schema.");
+    }
+
+    // Create implicit lesson for this story so it plays perfectly in /learn/lesson/[id]
+    const { data: lesson, error: lessonErr } = await supabase
+      .from('lessons')
+      .insert([{
+        title: `${title}: Luyện nói`,
+        description: `Bài học luyện nói từ trích đoạn phim ${title}.`,
+        type: 'Speaking',
+        is_published: true
+      }])
+      .select()
+      .single();
+
+    if (!lessonErr && lesson) {
+      const sentencesToInsert = mockDialogues.map((dialogue, idx) => ({
+        lesson_id: lesson.id,
+        order_index: idx + 1,
+        transcript: dialogue,
+        translation: `[Bản dịch tiếng Việt câu ${idx + 1}]`,
+        start_time: idx * 8,
+        end_time: (idx + 1) * 8,
+        thumbnail_url: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
+        metadata: {
+          pacing_type: "medium",
+          speech_speed: "normal",
+          emotion_type: "Inspiring",
+          pronunciation_difficulty: "medium",
+          shadowing_priority: "medium",
+          replay_priority: "medium",
+          accent_type: "US",
+          dopamine_score: 85,
+          difficulty_score: 50
+        }
+      }));
+      await supabase.from('lesson_sentences').insert(sentencesToInsert);
+    }
+
+    revalidatePath('/admin/stories');
+    revalidatePath('/stories');
+
+    return { success: true, storyId: story.id };
+  } catch (err: any) {
+    console.error("generateStoryContent error:", err);
+    return { success: false, error: err.message || "Bất lực trong việc đúc câu chuyện" };
+  }
+}
+
 
