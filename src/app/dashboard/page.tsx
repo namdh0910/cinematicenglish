@@ -230,8 +230,8 @@ export default function DashboardPage() {
 
           {/* 2. HERO SEARCH & HOMEWORK CODE SECTION (YourHomework Style) */}
           <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 text-center">
-            <h3 className="text-lg font-black text-slate-800 flex items-center justify-center gap-2">
-              <BookOpen className="text-blue-500" size={20} /> VÀO LỚP HỌC HÔM NAY
+            <h3 className="text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 tracking-tight">
+              <BookOpen className="text-blue-500" size={22} /> Vào lớp học hôm nay
             </h3>
             <div className="flex flex-col md:flex-row gap-3 max-w-2xl mx-auto">
               <div className="flex-1 relative">
@@ -252,95 +252,118 @@ export default function DashboardPage() {
 
           {/* 3. QUICK GRID TOOLS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-xl">🎤</div>
+            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
+              <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                🎤
+              </div>
               <div>
                 <h4 className="font-bold text-sm text-slate-800">Chấm Phát Âm</h4>
-                <p className="text-[10px] text-slate-500 font-medium">Luyện khẩu hình AI</p>
+                <p className="text-[10px] text-gray-500 font-medium">Luyện phát âm AI chuẩn</p>
               </div>
             </div>
-            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-xl">🎧</div>
+            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
+              <div className="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                🎧
+              </div>
               <div>
                 <h4 className="font-bold text-sm text-slate-800">Luyện Nghe (Dictation)</h4>
-                <p className="text-[10px] text-slate-500 font-medium">Chép chính tả phản xạ</p>
+                <p className="text-[10px] text-gray-500 font-medium">Nghe điền chỗ trống phản xạ</p>
               </div>
             </div>
-            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-xl">📝</div>
+            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
+              <div className="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+                📝
+              </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-800">Thi Trắc Nghiệm</h4>
-                <p className="text-[10px] text-slate-500 font-medium">Đề luyện thi học kì</p>
+                <h4 className="font-bold text-sm text-slate-800">Bài Thi Trắc Nghiệm</h4>
+                <p className="text-[10px] text-gray-500 font-medium">Đề kiểm tra thi học kì</p>
               </div>
             </div>
           </div>
 
           {/* 4. SCHOOL & GRADE CATEGORY TABS */}
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl border border-slate-200/60 shadow-sm max-w-fit mx-auto">
-              {[
-                { id: "primary", label: "Tiểu học" },
-                { id: "secondary", label: "Trung học Cơ sở (THCS)" },
-                { id: "high", label: "Trung học Phổ thông (THPT)" }
-              ].map((lvl) => (
-                <button
-                  key={lvl.id}
-                  onClick={() => {
-                    setSelectedSchool(lvl.id as any);
-                    setSelectedGrade(lvl.id === "primary" ? "Lớp 3" : lvl.id === "secondary" ? "Lớp 6" : "Lớp 10");
-                  }}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                    selectedSchool === lvl.id 
-                      ? "bg-blue-600 text-white shadow-sm" 
-                      : "text-slate-500 hover:bg-slate-50"
-                  }`}
-                >
-                  {lvl.label}
-                </button>
-              ))}
+          <div className="space-y-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+            <div className="text-center">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Chọn Cấp Học & Lớp của em</span>
             </div>
 
-            {/* Dynamic Grades selector */}
+            {/* School levels selector pills */}
             <div className="flex flex-wrap gap-2 justify-center">
-              {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => (
-                <button
-                  key={gr}
-                  onClick={() => setSelectedGrade(gr)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                    selectedGrade === gr 
-                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {gr}
-                </button>
-              ))}
-              {selectedSchool === "secondary" && ["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"].map((gr) => (
-                <button
-                  key={gr}
-                  onClick={() => setSelectedGrade(gr)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                    selectedGrade === gr 
-                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {gr}
-                </button>
-              ))}
-              {selectedSchool === "high" && ["Lớp 10", "Lớp 11", "Lớp 12"].map((gr) => (
-                <button
-                  key={gr}
-                  onClick={() => setSelectedGrade(gr)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                    selectedGrade === gr 
-                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
-                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {gr}
-                </button>
-              ))}
+              {[
+                { id: "primary", label: "Tiểu học" },
+                { id: "secondary", label: "Trung học cơ sở (THCS)" },
+                { id: "high", label: "Trung học phổ thông (THPT)" }
+              ].map((lvl) => {
+                const isActive = selectedSchool === lvl.id;
+                return (
+                  <button
+                    key={lvl.id}
+                    onClick={() => {
+                      setSelectedSchool(lvl.id as any);
+                      setSelectedGrade(lvl.id === "primary" ? "Lớp 3" : lvl.id === "secondary" ? "Lớp 6" : "Lớp 10");
+                    }}
+                    className={`text-xs transition-all ${
+                      isActive 
+                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
+                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                    }`}
+                  >
+                    {lvl.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dynamic Grades selector pills */}
+            <div className="flex flex-wrap gap-2 justify-center pt-2 border-t border-slate-100">
+              {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => {
+                const isActive = selectedGrade === gr;
+                return (
+                  <button
+                    key={gr}
+                    onClick={() => setSelectedGrade(gr)}
+                    className={`text-xs transition-all ${
+                      isActive 
+                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
+                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                    }`}
+                  >
+                    {gr}
+                  </button>
+                );
+              })}
+              {selectedSchool === "secondary" && ["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"].map((gr) => {
+                const isActive = selectedGrade === gr;
+                return (
+                  <button
+                    key={gr}
+                    onClick={() => setSelectedGrade(gr)}
+                    className={`text-xs transition-all ${
+                      isActive 
+                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
+                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                    }`}
+                  >
+                    {gr}
+                  </button>
+                );
+              })}
+              {selectedSchool === "high" && ["Lớp 10", "Lớp 11", "Lớp 12"].map((gr) => {
+                const isActive = selectedGrade === gr;
+                return (
+                  <button
+                    key={gr}
+                    onClick={() => setSelectedGrade(gr)}
+                    className={`text-xs transition-all ${
+                      isActive 
+                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
+                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                    }`}
+                  >
+                    {gr}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
