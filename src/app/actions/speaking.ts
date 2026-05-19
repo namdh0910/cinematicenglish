@@ -153,15 +153,35 @@ export async function evaluateSpeaking({
   targetSentence,
   durationSeconds,
   sentenceId,
+  lessonId,
 }: {
   userId: string;
   audioBase64: string;
   targetSentence: string;
   durationSeconds: number;
   sentenceId?: string;
+  lessonId?: string;
 }): Promise<SpeakingEvaluationResult> {
   try {
     const supabase = await createSupabaseServerClient();
+    const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    let targetSentenceToUse = targetSentence;
+    if (lessonId && isValidUuid(lessonId)) {
+      const { data: lessonData } = await supabase
+        .from('lessons')
+        .select('content, type')
+        .eq('id', lessonId)
+        .single();
+      
+      if (lessonData && lessonData.type === 'speaking') {
+        const contentObj = typeof lessonData.content === 'string'
+          ? JSON.parse(lessonData.content)
+          : lessonData.content;
+        
+        targetSentenceToUse = contentObj?.text || contentObj?.sentence || targetSentence;
+      }
+    }
     const { data: { session } } = await supabase.auth.getSession();
 
     const isGuest = !session?.user;
@@ -282,16 +302,16 @@ export async function evaluateSpeaking({
     if (!transcription) {
       const fillerChance = Math.random() > 0.6 ? ' um ' : ' ';
       const stutterChance = Math.random() > 0.7;
-      let mockTranscript = targetSentence;
+      let mockTranscript = targetSentenceToUse;
 
       if (stutterChance) {
-        mockTranscript = targetSentence.replace(' strongly ', ' strong ').replace(' housework ', ' house work ').replace(' strengthens ', ' strengthen ');
+        mockTranscript = targetSentenceToUse.replace(' strongly ', ' strong ').replace(' housework ', ' house work ').replace(' strengthens ', ' strengthen ');
       }
       transcription = mockTranscript + (Math.random() > 0.5 ? fillerChance : '');
     }
 
     // 3. Dynamic Word-by-Word Alignment & Evaluation via compareTranscripts
-    const { wordEvaluations: rawDiffResults, accuracyScore: accuracy } = compareTranscripts(targetSentence, transcription);
+    const { wordEvaluations: rawDiffResults, accuracyScore: accuracy } = compareTranscripts(targetSentenceToUse, transcription);
 
     // Map WordEvaluation array for client display compatibility (imperfect/incorrect)
     const wordEvaluations: WordEvaluation[] = rawDiffResults.map(w => ({
@@ -339,15 +359,24 @@ export async function evaluateSpeaking({
       // A. Save speaking attempt history
       const isValidUuid = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
       
+      const insertPayload: any = {
+        user_id: activeUserId,
+        accuracy_score: accuracy,
+        word_evaluations: wordEvaluations,
+        audio_url: audioUrl || null,
+        coach_feedback: coachFeedback
+      };
+
       if (sentenceId && isValidUuid(sentenceId)) {
-        await supabase.from('speaking_attempts').insert({
-          user_id: activeUserId,
-          sentence_id: sentenceId,
-          accuracy_score: accuracy,
-          word_evaluations: wordEvaluations,
-          audio_url: audioUrl || null,
-          coach_feedback: coachFeedback
-        });
+        insertPayload.sentence_id = sentenceId;
+      }
+      
+      if (lessonId && isValidUuid(lessonId)) {
+        insertPayload.lesson_id = lessonId;
+      }
+
+      if (insertPayload.sentence_id || insertPayload.lesson_id) {
+        await supabase.from('speaking_attempts').insert(insertPayload);
       }
 
       // B. Update XP score in student profile

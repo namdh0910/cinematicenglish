@@ -13,6 +13,9 @@ import { Share2 } from "lucide-react";
 import Badge from "../ui/Badge";
 import { getOrGenerateAudio } from "@/app/actions/audio";
 
+/**
+ * @deprecated This player is part of the legacy cinema/movie mode and is deprecated in favor of the new textbook curriculum layouts.
+ */
 interface StoryPlayerProps {
   storyId: string;
   onClose: () => void;

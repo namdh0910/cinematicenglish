@@ -2,6 +2,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdaptive } from "@/context/AdaptiveContext";
 
+/**
+ * @deprecated This component belongs to the legacy Cinematic Film mode and is deprecated as the platform pivots to a light-mode EdTech curriculum (SGK Global Success).
+ */
 interface AtmosphereLayerProps {
   mood: 'the-void' | 'the-pulse' | 'the-calm';
   isFocusMode: boolean;
