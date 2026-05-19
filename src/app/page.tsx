@@ -12,7 +12,8 @@ import {
   GraduationCap, 
   BookOpen,
   Volume2,
-  Edit3
+  Edit3,
+  Flame
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -25,69 +26,132 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="bg-[#F7F7F5] min-h-screen text-[#3D3D3B] selection:bg-blue-100 overflow-x-hidden relative w-full flex flex-col items-center">
+    <div className="bg-[#F5F7FB] min-h-screen text-[#3D3D3B] selection:bg-blue-100 overflow-x-hidden relative w-full flex flex-col items-center">
       <Navbar />
 
       {/* Soft Dark Top Bar Gradient to make transparent navbar text extremely readable */}
-      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#1A1A18]/5 via-[#1A1A18]/2 to-transparent pointer-events-none z-40" />
+      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#1A1A18]/3 via-transparent to-transparent pointer-events-none z-40" />
 
       {/* Decorative Soft Ambient Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-500/5 via-orange-500/5 to-transparent blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-500/5 via-purple-500/5 to-transparent blur-[120px] pointer-events-none" />
       <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-16 pb-24 md:pt-20 md:pb-32 overflow-hidden w-full flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 60%)' }}>
-        <div className="container-custom max-w-4xl w-full flex flex-col items-center justify-center text-center space-y-10 relative z-10">
+      <section className="relative pt-10 pb-24 md:pt-14 md:pb-32 overflow-hidden w-full flex flex-col items-center justify-center" style={{ background: 'linear-gradient(180deg, #EFF6FF 0%, #F5F7FB 100%)' }}>
+        <div className="container-custom w-full max-w-7xl px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Headline and CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full flex flex-col items-center justify-center text-center space-y-6"
+            className="lg:col-span-7 flex flex-col items-start text-left space-y-6"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100/80 text-blue-600 text-xs font-black uppercase tracking-widest shadow-sm select-none mx-auto">
-              <Sparkles size={12} className="text-blue-500 animate-pulse" />
-              BÁM SÁT CHƯƠNG TRÌNH SÁCH GIÁO KHOA GLOBAL SUCCESS
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-100 text-[#3B82F6] text-xs font-bold uppercase tracking-widest shadow-sm select-none">
+              <Sparkles size={12} className="text-[#3B82F6] animate-pulse" />
+              BÁM SÁT CHƯƠNG TRÌNH SGK GLOBAL SUCCESS 1 - 12
             </span>
             
-            <h1 className="text-[28px] md:text-[48px] font-bold tracking-[-0.02em] leading-[1.15] text-[#1A1A18] w-full text-center">
-              Nền tảng Luyện thi & Phát âm <br className="hidden md:block" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-violet-600 to-orange-500">
-                bám sát SGK Global Success
+            <h1 className="text-[34px] md:text-[52px] font-black tracking-[-0.025em] leading-[1.1] text-[#1A1A18]">
+              Nền tảng Luyện thi <br className="hidden md:block" />
+              & Phát âm chuẩn <br className="hidden md:block" />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3B82F6] via-[#8B5CF6] to-[#F59E0B]">
+                Global Success AI
               </span>
             </h1>
             
-            <p className="text-[15px] leading-[1.7] text-[#3D3D3B] max-w-2xl mx-auto font-medium text-center">
-              Giúp học sinh từ cấp 1 đến cấp 3 tự tin làm chủ từ vựng, ngữ pháp và phát âm chuẩn xác theo đúng chương trình học trên lớp với công nghệ AI phản xạ tự nhiên.
+            <p className="text-[16px] leading-[1.7] text-[#4B5563] max-w-xl font-medium">
+              Giúp học sinh tự tin chinh phục kỹ năng nghe, phát âm chuẩn IPA bản xứ và đạt điểm số tối đa trong các kỳ thi học kỳ thông qua lộ trình học tập vui nhộn, lôi cuốn như trò chơi.
             </p>
             
-            {/* Highly prominent, popped-out white CTA box */}
-            <div className="bg-[#FFFFFF] w-full max-w-2xl mx-auto p-8 md:p-10 rounded-2xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-300 space-y-6 relative overflow-hidden flex flex-col items-center justify-center">
-              <div className="absolute top-0 right-0 w-36 h-36 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-36 h-36 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-              
-              <h3 className="text-[16px] font-semibold text-[#1A1A18] text-center">
-                Bắt đầu nâng cao kết quả học tập tiếng Anh ngay hôm nay
-              </h3>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full">
-                <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-10 py-5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-lg transition-all shadow-[0_4px_14px_rgba(37,99,235,0.30)] hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap border-none">
-                    🎒 Dành cho Học Sinh
-                  </button>
-                </Link>
-                <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-10 py-5 rounded-full bg-[#FFFFFF] hover:bg-[#EFF6FF] text-[#2563EB] border-2 border-[#2563EB] font-bold text-lg transition-all hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
-                    👨‍🏫 Dành cho Giáo Viên
+            {/* Generous high-school EdTech Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full pt-4">
+              <Link href="/signup" className="flex-1 sm:flex-initial">
+                <button className="w-full sm:w-auto px-8 py-4.5 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-base transition-all shadow-[0_4px_16px_rgba(59,130,246,0.30)] hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap border-none">
+                  🎒 Dành cho Học Sinh
+                </button>
+              </Link>
+              <Link href="/signup" className="flex-1 sm:flex-initial">
+                <button className="w-full sm:w-auto px-8 py-4.5 rounded-2xl bg-white hover:bg-[#EFF6FF] text-[#3B82F6] border-2 border-[#3B82F6] font-bold text-base transition-all hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
+                  👨‍🏫 Dành cho Giáo Viên
+                </button>
+              </Link>
+            </div>
+            
+            <p className="text-[11px] text-[#6B7280] flex items-center gap-2 font-black uppercase tracking-wider">
+              <ShieldCheck size={16} className="text-[#22C55E]" /> Giáo trình chuẩn • AI chấm giọng nói 24/7
+            </p>
+          </motion.div>
+
+          {/* Right Column: Welcoming Student Dashboard Mockup */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="lg:col-span-5 w-full flex justify-center"
+          >
+            <div className="w-full max-w-[420px] bg-white rounded-[32px] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.06)] border border-slate-100 relative space-y-6 overflow-hidden">
+              {/* Header inside mockup */}
+              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center font-bold text-white shadow-md text-base">
+                    N
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#1A1A18]">Nam Khánh</h4>
+                    <span className="text-[10px] font-bold text-[#6B7280]">Học sinh lớp 6 • VIP</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-[#FFF3E0] text-[#B45309] rounded-full text-[11px] font-black border border-[#FFE0B2] shadow-sm select-none">
+                  <Flame size={12} className="fill-[#B45309] text-[#B45309] animate-pulse" />
+                  <span>3 NGÀY</span>
+                </div>
+              </div>
+
+              {/* Pronunciation Circle Score */}
+              <div className="flex items-center gap-5 bg-[#F5F7FB] p-4 rounded-2xl border border-slate-100">
+                <div className="relative w-16 h-16 shrink-0 flex items-center justify-center bg-white rounded-full border-4 border-[#3B82F6] shadow-sm">
+                  <span className="font-mono font-black text-sm text-[#1A1A18]">87%</span>
+                </div>
+                <div>
+                  <h5 className="font-bold text-xs text-[#1A1A18] uppercase tracking-wider">Phát âm AI hôm nay</h5>
+                  <p className="text-[11px] text-[#4B5563] mt-1 font-medium">Giọng đọc xuất sắc! Đạt chuẩn 9/10 câu thoại.</p>
+                </div>
+              </div>
+
+              {/* Learning Progress & CTA */}
+              <div className="space-y-3.5 bg-[#F0F7FF] p-4 rounded-2xl border border-blue-50">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-[#3B82F6]">Unit 1: My New School</span>
+                  <span className="font-bold text-[#4B5563]">Bài 2 / 12</span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full bg-blue-100/50 h-2 rounded-full overflow-hidden">
+                  <div className="bg-[#3B82F6] h-full rounded-full" style={{ width: '45%' }} />
+                </div>
+                
+                <Link href="/signup">
+                  <button className="w-full py-3.5 mt-2 rounded-xl bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6] hover:brightness-105 text-white font-bold text-xs uppercase tracking-widest shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer border-none">
+                    Tiếp tục học ngay 🚀
                   </button>
                 </Link>
               </div>
+
+              {/* Decorative mini stats bar */}
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block">Kinh nghiệm (XP)</span>
+                  <span className="text-sm font-black text-[#F59E0B] mt-0.5 block">+120 XP</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider block">Độ lưu loát</span>
+                  <span className="text-sm font-black text-[#22C55E] mt-0.5 block">Khá tốt (A)</span>
+                </div>
+              </div>
             </div>
-            
-            <p className="mt-6 text-[10px] text-[#6B6B68] flex items-center justify-center gap-2 font-black uppercase tracking-wider text-center">
-              <ShieldCheck size={14} className="text-emerald-500" /> Hệ thống bảo mật 100% học liệu trực quan
-            </p>
           </motion.div>
+
         </div>
       </section>
 
@@ -325,12 +389,12 @@ export default function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-[#FFFFFF] border-2 border-[#2563EB] rounded-[16px] p-[1.75rem] flex flex-col justify-between shadow-[0_4px_12px_rgba(37,99,235,0.08)] hover:scale-[1.01] relative overflow-hidden transition-all w-full max-w-md">
-              <div className="absolute top-0 right-6 -translate-y-1/2 bg-[#DCFCE7] text-[#166534] px-[10px] py-[3px] rounded-[20px] text-[11px] font-semibold tracking-wide shadow-sm border border-[#BBF7D0]">
+            <div className="bg-[#FFFFFF] border-2 border-[#3B82F6] rounded-[24px] p-[2rem] flex flex-col justify-between shadow-[0_10px_30px_rgba(59,130,246,0.08)] hover:scale-[1.02] relative overflow-hidden transition-all w-full max-w-md">
+              <div className="absolute top-0 right-6 -translate-y-1/2 bg-[#DCFCE7] text-[#166534] px-[12px] py-[4px] rounded-[20px] text-[11px] font-black tracking-wide shadow-sm border border-[#BBF7D0]">
                 Khuyến nghị
               </div>
               <div className="space-y-6">
-                <h3 className="text-base md:text-lg font-black text-[#2563EB] flex items-center gap-1.5">
+                <h3 className="text-base md:text-lg font-black text-[#3B82F6] flex items-center gap-1.5">
                   <Sparkles size={16} fill="currentColor" />
                   Tài Khoản Pro Lớp Học
                 </h3>
@@ -340,13 +404,13 @@ export default function HomePage() {
                 <ul className="space-y-4">
                   {['Mở khóa 100% lộ trình bám sát SGK', 'AI phân tích & chấm phát âm không giới hạn', 'Luyện nghe chép chính tả Dictation không giới hạn', 'Lưu từ vựng & cấu trúc ngữ pháp ôn thi', 'Nhận hỗ trợ ưu tiên từ giáo viên phụ trách'].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-xs text-slate-600 font-bold">
-                      <CheckCircle2 size={16} className="text-[#2563EB] shrink-0 mt-0.5" /> {f}
+                      <CheckCircle2 size={16} className="text-[#3B82F6] shrink-0 mt-0.5" /> {f}
                     </li>
                   ))}
                 </ul>
               </div>
               <Link href="/signup" className="mt-8 flex justify-center w-full">
-                <button className="w-full py-4 rounded-2xl bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest transition-all shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
+                <button className="w-full py-4 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xs uppercase tracking-widest transition-all shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] cursor-pointer border-none">
                   Nâng cấp tài khoản Pro
                 </button>
               </Link>

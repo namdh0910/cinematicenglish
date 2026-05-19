@@ -183,7 +183,7 @@ export default function Navbar() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-blue-600">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
               <Play size={14} fill="white" className="ml-0.5 text-white" />
             </div>
             <span className="font-display font-black text-lg tracking-tight text-[#1A1A18]">Cinematic</span>
@@ -200,8 +200,8 @@ export default function Navbar() {
                     href={l.href}
                     className={`text-[14px] font-medium tracking-[-0.01em] transition-colors flex items-center gap-1.5 pb-[2px] ${
                       isActive 
-                        ? "text-[#2563EB] border-b-2 border-[#2563EB]" 
-                        : "text-[#3D3D3B] hover:text-[#2563EB] hover:border-b-2 hover:border-[#2563EB]"
+                        ? "text-[#3B82F6] border-b-2 border-[#3B82F6]" 
+                        : "text-[#3D3D3B] hover:text-[#3B82F6] hover:border-b-2 hover:border-[#3B82F6]"
                     }`}
                   >
                     <l.icon size={15} />
@@ -218,13 +218,13 @@ export default function Navbar() {
               <>
                 <Link 
                   href="/login" 
-                  className="text-[14px] font-medium tracking-[-0.01em] text-[#3D3D3B] hover:text-[#2563EB] transition-colors"
+                  className="text-[14px] font-medium tracking-[-0.01em] text-[#3D3D3B] hover:text-[#3B82F6] transition-colors"
                 >
                   Đăng nhập
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md bg-blue-600 text-white"
+                  className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md bg-[#3B82F6] text-white"
                 >
                   Bắt đầu
                 </Link>
@@ -252,7 +252,7 @@ export default function Navbar() {
                         className="w-8 h-8 rounded-full border border-white/20 hover:border-violet-500 transition-colors object-cover" 
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm">
+                      <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-[#3B82F6] transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm">
                         {profile?.fullName ? profile.fullName.charAt(0) : <User size={14} />}
                       </div>
                     )}
@@ -309,7 +309,7 @@ export default function Navbar() {
 
                         {profile?.subscriptionPlan === 'free' && (
                           <Link href="/#pricing" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-black transition-colors ${
-                            isLightMode ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
+                            isLightMode ? "text-[#3B82F6] hover:text-blue-700 hover:bg-blue-50" : "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
                           }`}>
                             <Sparkles size={14} fill="currentColor" />
                             Nâng cấp PRO
@@ -366,7 +366,7 @@ export default function Navbar() {
                       className="w-12 h-12 rounded-full border border-blue-200 object-cover" 
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-sm font-black uppercase text-blue-600 shadow-sm">
+                    <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-sm font-black uppercase text-[#3B82F6] shadow-sm">
                       {profile.fullName.charAt(0)}
                     </div>
                   )}
@@ -380,7 +380,7 @@ export default function Navbar() {
                       </div>
                       
                       {profile.subscriptionPlan === 'pro' && (
-                        <div className="flex items-center gap-0.5 bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] font-black">
+                        <div className="flex items-center gap-0.5 bg-[#3B82F6] text-white px-2 py-0.5 rounded text-[10px] font-black">
                           <Sparkles size={8} fill="white" />
                           <span>PRO</span>
                         </div>
@@ -397,7 +397,7 @@ export default function Navbar() {
                     <Link
                       href="/stories"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
                       <Compass size={18} />
                       Khám phá
@@ -406,7 +406,7 @@ export default function Navbar() {
                     <Link
                       href="/dashboard"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
                       <LayoutDashboard size={18} />
                       Lịch sử học
@@ -416,7 +416,7 @@ export default function Navbar() {
                       <Link
                         href="/#pricing"
                         onClick={closeMenu}
-                        className="text-lg font-black text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                        className="text-lg font-black text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                       >
                         <Sparkles size={18} fill="currentColor" />
                         Nâng cấp PRO
@@ -435,7 +435,7 @@ export default function Navbar() {
                     <Link 
                       href="/signup" 
                       onClick={closeMenu} 
-                      className="py-4 text-center rounded-2xl bg-blue-600 text-white font-black uppercase tracking-wider shadow-md hover:bg-blue-750"
+                      className="py-4 text-center rounded-2xl bg-[#3B82F6] text-white font-black uppercase tracking-wider shadow-md hover:bg-[#2563EB]"
                     >
                       Bắt đầu miễn phí
                     </Link>

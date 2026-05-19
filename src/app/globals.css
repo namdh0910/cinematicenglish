@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════ */
 :root {
   /* Core Colors - Modern Warm Off-White EdTech Theme */
-  --bg-primary:     #F7F7F5; /* Warm off-white page background */
+  --bg-primary:     #F5F7FB; /* Bright friendly warm gray-blue background */
   --bg-secondary:   #FFFFFF;
   --bg-card:        #FFFFFF;
   --bg-glass:       rgba(255, 255, 255, 0.85);
@@ -16,12 +16,13 @@
   /* Accents - EdTech Kahoot/Duolingo Friendly */
   --accent-gold:          #F59E0B; /* Golden Yellow */
   --accent-gold-dim:      #D97706;
-  --accent-violet:        #2563EB; /* Bright Blue (Primary Accent) */
+  --accent-violet:        #3B82F6; /* Bright Sky Blue */
   --accent-violet-bright: #60A5FA;
   --accent-cyan:          #06B6D4;
   --accent-rose:          #EF4444; 
-  --accent-emerald:       #10B981; 
+  --accent-emerald:       #22C55E; /* Success Green */
   --accent-orange:        #F97316; 
+  --accent-purple:        #8B5CF6; /* Secondary Purple */
 
   /* Text - High Contrast Charcoal & Slate */
   --text-primary:   #1A1A18; /* Dark Headers */
@@ -107,8 +108,8 @@ html {
 }
 
 body {
-  background-color: #F7F7F5;
-  color: #3D3D3B;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
   font-family: var(--font-display);
   font-size: 15px;
   line-height: 1.7;
@@ -306,28 +307,28 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
   .btn-primary {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     padding: 12px 28px;
-    background: #2563EB;
-    color: #FFFFFF; font-weight: 600; font-size: 16px;
-    border-radius: 10px;
+    background: var(--accent-violet);
+    color: #FFFFFF; font-weight: 700; font-size: 16px;
+    border-radius: var(--radius-xl);
     border: none;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.20);
+    box-shadow: 0 4px 14px rgba(59,130,246,0.3);
     transition: all var(--t-normal);
     cursor: pointer; white-space: nowrap;
   }
   .btn-primary:hover {
-    background: #1D4ED8;
+    background: #2563EB;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+    box-shadow: 0 6px 20px rgba(59,130,246,0.4);
   }
   .btn-secondary {
     display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     background: #FFFFFF;
-    color: #2563EB;
-    border: 2px solid #2563EB;
-    border-radius: 10px;
+    color: var(--accent-violet);
+    border: 2px solid var(--accent-violet);
+    border-radius: var(--radius-xl);
     padding: 12px 28px;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 750;
     transition: all var(--t-normal);
     cursor: pointer; white-space: nowrap;
   }

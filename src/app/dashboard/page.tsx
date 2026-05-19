@@ -238,7 +238,7 @@ export default function DashboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-[#F7F7F5] min-h-screen text-[#3D3D3B] pb-24 relative overflow-y-auto overflow-x-hidden">
+    <div className="bg-[#F5F7FB] min-h-screen text-[#3D3D3B] pb-24 relative overflow-y-auto overflow-x-hidden">
       <Navbar />
 
       {/* Custom Premium Toast Notification */}
@@ -287,31 +287,31 @@ export default function DashboardPage() {
         <main className="w-full max-w-7xl mx-auto px-6 py-12 flex flex-col gap-8 relative z-10">
           
           {/* SECTION: HỌC TIẾP & BẮT ĐẦU NHANH */}
-          <section className="space-y-6 bg-[#F0F7FF] p-8 rounded-[24px] border border-blue-100/50 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <section className="space-y-6 bg-[#F0F7FF] p-8 rounded-[32px] border border-blue-100/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             <div className="flex items-center gap-2">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600">
-                <Sparkles size={14} className="fill-blue-600" />
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-[#3B82F6]">
+                <Sparkles size={14} className="fill-[#3B82F6] text-[#3B82F6]" />
               </span>
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight">Học tiếp / Bắt đầu nhanh</h2>
+              <h2 className="text-lg font-black text-gray-900 tracking-tight">Học tiếp / Bắt đầu nhanh</h2>
             </div>
             
             <div className="flex flex-col lg:flex-row gap-6 items-stretch w-full">
               {/* User Profile Card */}
-              <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-[#FFFFFF] p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 flex items-center justify-center text-xl font-black text-white shadow-md">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center text-xl font-black text-white shadow-md">
                     {profile?.full_name ? profile.full_name[0].toUpperCase() : 'H'}
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-                      Chào, <span className="text-blue-600">{profile?.full_name || 'Học viên'}</span>! 👋
+                    <h1 className="text-2xl font-black tracking-tight text-gray-900">
+                      Chào, <span className="text-[#3B82F6]">{profile?.full_name || 'Học viên'}</span>! 👋
                     </h1>
                     
                     <div className="flex flex-wrap gap-2 mt-3">
-                      <span className="flex items-center gap-1.5 text-[#B45309] bg-[#FFF3E0] px-3 py-1 rounded-full border border-[#FFE0B2] text-xs font-semibold">
-                        <Flame size={14} className="fill-[#B45309] text-[#B45309]" /> {streak} Ngày liên tiếp
+                      <span className="flex items-center gap-1.5 text-[#B45309] bg-[#FFF3E0] px-3.5 py-1 rounded-full border border-[#FFE0B2] text-xs font-bold shadow-sm">
+                        <Flame size={14} className="fill-[#B45309] text-[#B45309] animate-pulse" /> {streak} Ngày liên tiếp
                       </span>
-                      <span className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 text-xs font-bold">
+                      <span className="flex items-center gap-1.5 text-[#3B82F6] bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 text-xs font-black shadow-sm">
                         <GraduationCap size={14} /> Trình độ: {selectedGrade}
                       </span>
                     </div>
@@ -319,23 +319,23 @@ export default function DashboardPage() {
                 </div>
                 <button 
                   onClick={() => setShowSettings(true)}
-                  className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200"
+                  className="w-11 h-11 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200 shadow-sm cursor-pointer"
                 >
-                  <Settings size={18} className="text-gray-500" />
+                  <Settings size={18} className="text-gray-500 animate-spin-slow" />
                 </button>
               </div>
 
               {/* Speaking Proficiency Stats */}
-              <div className="lg:w-[320px] bg-[#FFFFFF] p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="lg:w-[320px] bg-[#FFFFFF] p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
                 <div>
-                  <span className="block text-[11px] font-bold uppercase tracking-[0.07em] text-gray-500 mb-[6px] flex items-center gap-1">
-                    <Mic size={14} className="text-blue-500" /> Phát âm AI
+                  <span className="block text-[11px] font-black uppercase tracking-[0.07em] text-[#6B7280] mb-[6px] flex items-center gap-1">
+                    <Mic size={14} className="text-[#3B82F6]" /> Phát âm AI hôm nay
                   </span>
-                  <span className="text-[28px] font-bold text-gray-900 flex items-center gap-1 font-mono">
+                  <span className="text-[32px] font-black text-gray-900 flex items-center gap-1.5 font-mono">
                     {avgFluency >= 80 ? (
-                      <span className="text-green-600 text-lg font-bold">▲</span>
+                      <span className="text-[#22C55E] text-lg">▲</span>
                     ) : (
-                      <span className="text-red-600 text-lg font-bold">▼</span>
+                      <span className="text-red-500 text-lg">▼</span>
                     )}
                     {avgFluency}%
                   </span>
@@ -346,10 +346,10 @@ export default function DashboardPage() {
                       initial={{ width: 0 }}
                       animate={{ width: `${avgFluency}%` }}
                       transition={{ duration: 1.2 }}
-                      className="h-full bg-blue-600 rounded-[99px]"
+                      className="h-full bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6] rounded-[99px]"
                     />
                   </div>
-                  <p className="text-[10px] text-gray-500 italic">
+                  <p className="text-[10px] text-[#6B7280] font-medium italic">
                     {avgFluency >= 80 
                       ? "Giọng nói rõ ràng! Hãy tiếp tục rèn luyện nhé."
                       : "Luyện nói nhiều hơn để nâng cao điểm phát âm nha."}
@@ -445,9 +445,9 @@ export default function DashboardPage() {
           </section>
 
           {/* 4. SCHOOL & GRADE CATEGORY TABS */}
-          <div className="flex flex-col gap-4 w-full mb-10 pt-4">
+          <div className="flex flex-col gap-5 w-full mb-10 pt-4 bg-white p-6 rounded-[28px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
             <div className="text-center mb-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block mb-2">Chọn Cấp Học & Lớp của em</span>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-2">Chọn Cấp Học & Lớp của em</span>
             </div>
 
             {/* School levels selector pills */}
@@ -465,10 +465,10 @@ export default function DashboardPage() {
                       setSelectedSchool(lvl.id as any);
                       setSelectedGrade(lvl.id === "primary" ? "Lớp 3" : lvl.id === "secondary" ? "Lớp 6" : "Lớp 10");
                     }}
-                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer border-none ${
+                    className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 cursor-pointer ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md" 
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/10 border-none scale-102" 
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] hover:border-[#3B82F6]/20"
                     }`}
                   >
                     {lvl.label}
@@ -478,17 +478,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Dynamic Grades selector pills */}
-            <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-gray-100 w-full">
+            <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-slate-100 w-full">
               {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => {
                 const isActive = selectedGrade === gr;
                 return (
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer border-none ${
+                    className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 cursor-pointer ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md" 
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/10 border-none scale-102" 
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] hover:border-[#3B82F6]/20"
                     }`}
                   >
                     {gr}
@@ -501,10 +501,10 @@ export default function DashboardPage() {
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer border-none ${
+                    className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 cursor-pointer ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md" 
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/10 border-none scale-102" 
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] hover:border-[#3B82F6]/20"
                     }`}
                   >
                     {gr}
@@ -517,10 +517,10 @@ export default function DashboardPage() {
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all cursor-pointer border-none ${
+                    className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 cursor-pointer ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md" 
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        ? "bg-[#3B82F6] text-white shadow-md shadow-blue-500/10 border-none scale-102" 
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-[#3B82F6]/5 hover:text-[#3B82F6] hover:border-[#3B82F6]/20"
                     }`}
                   >
                     {gr}
@@ -533,36 +533,36 @@ export default function DashboardPage() {
           {/* 5. SGK ROADMAP SECTION - Unit cards Global Success */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900">Lộ Trình Sách Giáo Khoa: Global Success ({selectedGrade})</h2>
-              <span className="text-[11px] text-blue-600 font-bold uppercase tracking-[0.07em]">Học chuẩn bám sát SGK</span>
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Lộ Trình Sách Giáo Khoa: Global Success ({selectedGrade})</h2>
+              <span className="text-[11px] text-[#3B82F6] font-black uppercase tracking-[0.07em]">Học chuẩn bám sát SGK</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {GLOBAL_SUCCESS_UNITS.map((unit) => {
                 const isCinematic = !unit.grade || unit.grade.includes("Cinematic");
                 const isHigh = unit.grade?.includes("10") || unit.grade?.includes("11") || unit.grade?.includes("12");
-                const barColor = isCinematic ? "#534AB7" : isHigh ? "#185FA5" : "#0F6E56";
+                const barColor = isCinematic ? "#8B5CF6" : isHigh ? "#3B82F6" : "#22C55E";
                 
                 const isStudying = unit.badge === "Đang học" || unit.progress > 0;
                 const statusText = isStudying ? "Đang học" : "Chưa bắt đầu";
-                const statusBg = isStudying ? "bg-[#DCFCE7] text-[#166534]" : "bg-gray-100 text-gray-500";
+                const statusBg = isStudying ? "bg-[#DCFCE7] text-[#166534]" : "bg-slate-100 text-slate-500";
 
                 return (
                   <motion.div
                     key={unit.id}
-                    whileHover={{ y: -2 }}
-                    className="bg-white p-8 rounded-2xl shadow-md border border-gray-100 flex flex-col justify-between group transition-all duration-300 relative overflow-hidden"
+                    whileHover={{ y: -4, borderColor: '#3B82F6/20', boxShadow: '0 12px 30px rgba(59,130,246,0.06)' }}
+                    className="bg-white p-8 rounded-[28px] shadow-sm border border-slate-100/80 flex flex-col justify-between group transition-all duration-300 relative overflow-hidden"
                   >
                     <div>
                       {/* Thumbnail swatch */}
                       {unit.coverImage ? (
                         <div 
-                          className="h-[100px] w-full bg-cover bg-center rounded-xl mb-4" 
+                          className="h-[120px] w-full bg-cover bg-center rounded-2xl mb-5 shadow-sm" 
                           style={{ backgroundImage: `url('${unit.coverImage}')` }}
                         />
                       ) : (
                         <div 
-                          className="h-[100px] w-full rounded-xl mb-4" 
+                          className="h-[120px] w-full rounded-2xl mb-5 shadow-sm" 
                           style={{
                             background: `linear-gradient(135deg, ${barColor}26 0%, ${barColor}0D 50%, ${barColor}1F 100%)`
                           }}
@@ -570,27 +570,27 @@ export default function DashboardPage() {
                       )}
 
                       {/* Details */}
-                      <div className="space-y-3">
+                      <div className="space-y-3.5">
                         <div className="flex justify-between items-center">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${statusBg}`}>
                             {statusText}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-bold uppercase tracking-wider">
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-[#3B82F6] border border-blue-100 text-[9px] font-black uppercase tracking-wider">
                             {unit.unitNo} • {unit.grade}
                           </span>
                         </div>
 
-                        <h4 className="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        <h4 className="text-lg font-black text-gray-900 group-hover:text-[#3B82F6] transition-colors leading-tight line-clamp-1">
                           {unit.title}
                         </h4>
 
                         {/* Unit count row with icon */}
-                        <div className="text-sm text-gray-600 font-medium flex items-center gap-1.5">
-                          <BookOpen size={14} className="text-gray-400" />
+                        <div className="text-xs text-[#6B7280] font-bold flex items-center gap-1.5">
+                          <BookOpen size={14} className="text-[#3B82F6]" />
                           <span>12 bài học luyện phản xạ</span>
                         </div>
 
-                        <p className="text-xs text-gray-600 leading-relaxed font-medium">
+                        <p className="text-xs text-[#6B7280] leading-relaxed font-medium line-clamp-2">
                           {unit.desc}
                         </p>
                       </div>

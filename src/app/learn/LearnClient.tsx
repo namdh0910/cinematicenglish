@@ -95,19 +95,19 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="bg-[#F7F7F5] min-h-screen pb-20 text-[#3D3D3B]">
+    <div className="bg-[#F5F7FB] min-h-screen pb-20 text-[#3D3D3B]">
       <Navbar />
 
       <main className="page-top container-custom flex flex-col gap-12 w-full" style={{ paddingTop: '24px' }}>
         {/* Hero Area Wrapper */}
-        <div className="w-full rounded-2xl overflow-hidden mt-6" style={{ backgroundColor: '#F0F7FF', padding: '1.5rem 1.5rem 1rem', marginBottom: '1.5rem' }}>
+        <div className="w-full rounded-[32px] overflow-hidden mt-6 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-transparent border border-blue-100/30 p-8 shadow-sm">
           {/* Sleek Header: Welcome Student + Search Bar */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight text-[#1A1A18]">
-                Chào mừng, <span className="text-[#2563EB]">{profile?.full_name || 'Học viên'}</span>! 👋
+              <h1 className="text-2xl font-black tracking-tight text-[#1A1A18]">
+                Chào mừng, <span className="text-[#3B82F6]">{profile?.full_name || 'Học viên'}</span>! 👋
               </h1>
-              <p className="text-[15px] leading-[1.7] text-[#6B6B68] font-medium">
+              <p className="text-sm leading-[1.7] text-[#6B7280] font-medium">
                 Hôm nay em muốn chinh phục bài học nào? Giáo trình chuẩn Global Success.
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               <input
                 type="text"
                 placeholder="Tìm kiếm lớp học, chủ đề hoặc bài học..."
-                className="w-full bg-[#F7F7F5] border border-[#EBEBEA] rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B6B68] focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+                className="w-full bg-[#F5F7FB] border border-slate-200 rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B7280] focus:outline-none focus:border-[#3B82F6] transition-all shadow-inner"
               />
             </div>
           </div>
@@ -124,13 +124,13 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
         {/* Student Stats Matrix */}
         <div className="space-y-4">
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
-            <TrendingUp size={14} className="text-[#2563EB]" /> Ma trận chỉ số năng lực
+          <h3 className="text-[11px] font-black uppercase tracking-[0.07em] text-[#6B7280] flex items-center gap-2">
+            <TrendingUp size={14} className="text-[#3B82F6]" /> Ma trận chỉ số năng lực
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, i) => {
               const isFirstOrSecond = i < 2;
-              const trendColor = isFirstOrSecond ? "text-[#16A34A]" : "text-[#6B6B68]";
+              const trendColor = isFirstOrSecond ? "text-[#22C55E]" : "text-[#6B7280]";
               const trendIcon = isFirstOrSecond ? "▲ " : "";
               
               return (
@@ -139,17 +139,17 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="rounded-[12px] border border-[#EBEBEA] bg-[#FFFFFF] p-[1rem_1.25rem] space-y-4 hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all relative overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                  className="rounded-3xl border border-slate-100 bg-[#FFFFFF] p-6 space-y-4 hover:border-blue-100 hover:shadow-[0_8px_24px_rgba(59,130,246,0.04)] transition-all relative overflow-hidden shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-[#6B6B68] uppercase tracking-[0.07em]">{stat.label}</span>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#EFF6FF] text-[#2563EB]`}>
+                    <span className="text-[11px] font-black text-[#6B7280] uppercase tracking-[0.07em]">{stat.label}</span>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 text-[#3B82F6]">
                       <stat.icon size={16} />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-[28px] font-bold text-[#1A1A18] font-mono">{stat.value}</h4>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${trendColor}`}>
+                    <h4 className="text-[28px] font-black text-[#1A1A18] font-mono">{stat.value}</h4>
+                    <p className={`text-[10px] font-black uppercase tracking-wider ${trendColor}`}>
                       {trendIcon}{stat.trend}
                     </p>
                   </div>
@@ -162,28 +162,28 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
         {/* Adaptive Intelligence Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-4">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
-              <Brain size={14} className="text-violet-500" /> Nhiệm vụ phục hồi khuyết điểm AI đề xuất
+            <h3 className="text-[11px] font-black uppercase tracking-[0.07em] text-[#6B7280] flex items-center gap-2">
+              <Brain size={14} className="text-[#8B5CF6]" /> Nhiệm vụ phục hồi khuyết điểm AI đề xuất
             </h3>
 
             <div className="space-y-3">
               {recoveryMissions.map((rec) => (
                 <div 
                   key={rec.id}
-                  className="rounded-xl border border-[#EBEBEA] bg-[#FFFFFF] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                  className="rounded-3xl border border-slate-100 bg-[#FFFFFF] hover:border-blue-100 hover:shadow-[0_8px_24px_rgba(59,130,246,0.04)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-sm"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-black uppercase tracking-widest bg-violet-50 text-violet-600 border border-violet-100 px-2 py-0.5 rounded-full">{rec.skill}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#6B6B68]">• {rec.difficulty}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest bg-purple-50 text-[#8B5CF6] border border-purple-100 px-2 py-0.5 rounded-full">{rec.skill}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#6B7280]">• {rec.difficulty}</span>
                     </div>
                     <h4 className="text-base font-bold text-[#1A1A18]">{rec.title}</h4>
-                    <p className="text-xs text-amber-600 font-medium italic">{rec.reason}</p>
+                    <p className="text-xs text-[#F59E0B] font-bold italic">{rec.reason}</p>
                   </div>
 
                   <button 
                     onClick={() => window.location.href = `/learn/lesson/${rec.lessonId}`}
-                    className="px-5 py-2.5 rounded-[10px] bg-[#2563EB] text-white text-xs font-semibold uppercase tracking-wider hover:bg-blue-750 transition-all flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer border-none shadow-[0_2px_8px_rgba(37,99,235,0.20)]"
+                    className="px-5 py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer border-none shadow-md shadow-blue-500/10"
                   >
                     Nhận nhiệm vụ <ArrowRight size={14} />
                   </button>
@@ -193,24 +193,24 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           </div>
 
           {/* Side quick statistics */}
-          <div className="lg:col-span-4 rounded-xl border border-[#EBEBEA] bg-[#FFFFFF] p-8 space-y-6 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="lg:col-span-4 rounded-3xl border border-slate-100 bg-[#FFFFFF] p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-[#F59E0B] shadow-sm">
                 <Zap size={22} fill="currentColor" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-xl font-bold text-[#1A1A18]">Động lực học tập ngày</h4>
-                <p className="text-[#6B6B68] text-xs leading-relaxed font-medium">
+                <h4 className="text-xl font-black text-[#1A1A18]">Động lực học tập ngày</h4>
+                <p className="text-[#6B7280] text-xs leading-relaxed font-medium">
                   Duy trì việc ôn tập 15 phút mỗi ngày để nhân 3 số điểm kinh nghiệm (XP) và mở khóa các danh hiệu Học viên Tiêu biểu.
                 </p>
               </div>
             </div>
 
             <div className="w-full bg-[#EFF6FF] rounded-full h-2">
-              <div className="bg-[#2563EB] h-2 rounded-full" style={{ width: "70%" }} />
+              <div className="bg-[#3B82F6] h-2 rounded-full" style={{ width: "70%" }} />
             </div>
             
-            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-[#6B6B68]">
+            <div className="flex items-center justify-between text-xs font-black uppercase tracking-widest text-[#6B7280]">
               <span>Mục tiêu: 15 phút/ngày</span>
               <span className="text-[#B45309]">Hoàn thành 70%</span>
             </div>
@@ -220,8 +220,8 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
         {/* Netflix Grade Streaming Library */}
         <div className="space-y-6 pt-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
-              <GraduationCap size={14} className="text-[#2563EB]" /> Chọn lớp học của bạn
+            <h3 className="text-[11px] font-black uppercase tracking-[0.07em] text-[#6B7280] flex items-center gap-2">
+              <GraduationCap size={14} className="text-[#3B82F6]" /> Chọn lớp học của bạn
             </h3>
           </div>
 
@@ -230,20 +230,20 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               const titleLower = grade.title.toLowerCase();
               const isCinematic = titleLower.includes("cinematic") || titleLower.includes("phim");
               const isHigh = titleLower.includes("10") || titleLower.includes("11") || titleLower.includes("12");
-              const barColor = isCinematic ? "#534AB7" : isHigh ? "#185FA5" : "#0F6E56";
+              const barColor = isCinematic ? "#8B5CF6" : isHigh ? "#3B82F6" : "#22C55E";
 
               // Thumbnail configuration
               let thumbBg = "#E1F5EE";
-              let thumbIconColor = "#0F6E56";
+              let thumbIconColor = "#22C55E";
               let ThumbIcon = School;
               
               if (isCinematic) {
                 thumbBg = "#EEEDFE";
-                thumbIconColor = "#534AB7";
+                thumbIconColor = "#8B5CF6";
                 ThumbIcon = Play;
               } else if (isHigh) {
                 thumbBg = "#E6F1FB";
-                thumbIconColor = "#185FA5";
+                thumbIconColor = "#3B82F6";
                 ThumbIcon = BookOpen;
               }
               
@@ -253,39 +253,39 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               return (
                 <motion.div
                   key={grade.id}
-                  whileHover={{ y: -2 }}
-                  className="group relative rounded-xl bg-white border border-[#EBEBEA] overflow-hidden flex flex-col justify-between min-h-[14rem] h-auto shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:border-[#BFDBFE] transition-all duration-300 pb-[4px]"
+                  whileHover={{ y: -4, borderColor: '#3B82F6/20', boxShadow: '0 12px 30px rgba(59,130,246,0.06)' }}
+                  className="group relative rounded-[28px] bg-white border border-slate-100 overflow-hidden flex flex-col justify-between min-h-[14rem] h-auto shadow-sm transition-all duration-300 pb-[4px]"
                 >
                   {/* Thumbnail Swatch */}
                   <div 
-                    className="w-full h-[100px] rounded-t-[10px] flex items-center justify-center shrink-0" 
+                    className="w-full h-[120px] rounded-t-[28px] flex items-center justify-center shrink-0 shadow-inner" 
                     style={{ backgroundColor: thumbBg }}
                   >
-                    <ThumbIcon size={32} style={{ color: thumbIconColor }} />
+                    <ThumbIcon size={36} style={{ color: thumbIconColor }} />
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                     <div className="space-y-3 relative z-10">
                       <div className="flex items-center justify-between">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${statusBg}`}>
                           {statusText}
                         </span>
-                        <span className="text-[#6B6B68] font-mono text-[10px]">#{grade.order_index}</span>
+                        <span className="text-[#6B7280] font-mono text-[10px] font-bold">#{grade.order_index}</span>
                       </div>
-                      <h3 className="text-[20px] font-bold text-[#1A1A18] group-hover:text-[#2563EB] transition-colors">{grade.title}</h3>
-                      <p className="text-xs text-[#6B6B68] leading-relaxed font-medium line-clamp-2">{grade.description}</p>
+                      <h3 className="text-xl font-black text-[#1A1A18] group-hover:text-[#3B82F6] transition-colors leading-tight">{grade.title}</h3>
+                      <p className="text-xs text-[#6B7280] leading-relaxed font-medium line-clamp-2">{grade.description}</p>
                     </div>
 
-                    <div className="flex items-center justify-between relative z-10 pt-3 border-t border-[#EBEBEA]">
+                    <div className="flex items-center justify-between relative z-10 pt-3.5 border-t border-slate-100">
                       {/* Unit count row with icon */}
-                      <span className="text-[13px] text-[#6B6B68] font-medium flex items-center gap-1">
-                        <BookOpen size={13} className="text-[#6B6B68]" />
+                      <span className="text-xs text-[#6B7280] font-bold flex items-center gap-1">
+                        <BookOpen size={13} className="text-[#3B82F6]" />
                         12 Unit • Đang học
                       </span>
                       <Link 
                         href={`/learn/grade/${grade.id}`}
-                        className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-100 text-[11px] font-semibold text-[#2563EB] hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all flex items-center gap-1.5 cursor-pointer"
+                        className="px-4 py-2 rounded-xl bg-blue-50 border border-blue-100 text-xs font-black text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white hover:border-[#3B82F6] transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
                       >
                         Vào học <ArrowRight size={12} />
                       </Link>
