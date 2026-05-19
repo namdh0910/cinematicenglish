@@ -1,12 +1,32 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, Zap, Volume2, Award, RefreshCw, Mic, Square, Play, Pause, Check, ArrowRight, Sparkles, Star } from "lucide-react";
+import { 
+  ChevronLeft, 
+  ChevronRight,
+  Zap, 
+  Volume2, 
+  Award, 
+  RefreshCw, 
+  Mic, 
+  Square, 
+  Play, 
+  Pause, 
+  Check, 
+  ArrowRight, 
+  Sparkles, 
+  Star,
+  BookOpen,
+  Image as ImageIcon,
+  Headphones,
+  CheckCircle,
+  HelpCircle
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVoiceRecorder } from "@/features/speaking/hooks/useVoiceRecorder";
 import { Lesson } from "@/features/speaking/types";
-
 import { evaluateSpeaking, saveSceneProgress } from "@/app/actions/speaking";
 
 const PASSING_SCORE = 70;
@@ -53,8 +73,11 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   const [xpReward, setXpReward] = useState(0);
   const [particles, setParticles] = useState<{ id: number; x: number; y: number; color: string; size: number }[]>([]);
 
+  // Toggle modes: speaking vs dictation listening
+  const [learningMode, setLearningMode] = useState<"speaking" | "listening">("speaking");
+
   const triggerParticles = () => {
-    const colors = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ec4899", "#f43f5e"];
+    const colors = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
     const newParticles = Array.from({ length: 24 }).map((_, idx) => {
       const angle = Math.random() * Math.PI * 2;
       const velocity = 40 + Math.random() * 80;
@@ -78,6 +101,11 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
+  // Dictation listening state
+  const [dictationAnswers, setDictationAnswers] = useState<string[]>([]);
+  const [dictationChecked, setDictationChecked] = useState(false);
+  const [dictationResults, setDictationResults] = useState<boolean[]>([]);
+
   // Shadow Speaking recording states
   const {
     isRecording,
@@ -96,11 +124,31 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   const activeActivity = activities[currentIdx];
 
+  const transcript = activeActivity?.content?.transcript || "";
+  const translation = activeActivity?.content?.translation || "";
+
   // Dynamic Scene Boundaries based on index
   const startSceneTime = activeActivity?.content?.start_time ?? (currentIdx * 5);
   const endSceneTime = activeActivity?.content?.end_time ?? (startSceneTime + 5);
 
-  // Sync video time on Scene/Activity change
+  // Dictation word slice generator
+  const getDictationWords = (text: string) => {
+    const words = text.split(" ");
+    return words.map((word, idx) => {
+      const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
+      // Make every 3rd word longer than 2 letters a blank
+      const isBlank = idx % 3 === 1 && cleanWord.length > 2;
+      return {
+        original: word,
+        clean: cleanWord.toLowerCase(),
+        isBlank
+      };
+    });
+  };
+
+  const dictationWords = getDictationWords(transcript);
+
+  // Sync video/state on Scene/Activity change
   useEffect(() => {
     resetStateForNewScene();
     if (shouldAutoPlay) {
@@ -121,6 +169,9 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     setAiFeedback(null);
     setIsVideoPaused(true);
     setIsVideoPlaying(false);
+    setDictationAnswers(Array(dictationWords.length).fill(""));
+    setDictationChecked(false);
+    setDictationResults([]);
 
     if (videoRef.current) {
       videoRef.current.currentTime = startSceneTime;
@@ -128,7 +179,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     }
   };
 
-  // Synchronize playback speed change
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.playbackRate = playbackSpeed;
@@ -137,8 +187,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
-    
-    // Auto Pause at the end of the current Scene
     if (video.currentTime >= endSceneTime) {
       video.pause();
       video.currentTime = endSceneTime;
@@ -149,7 +197,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   const handlePlayScene = () => {
     if (videoRef.current) {
-      // If video is at or past end, restart from beginning of scene
       if (videoRef.current.currentTime >= endSceneTime || videoRef.current.currentTime < startSceneTime) {
         videoRef.current.currentTime = startSceneTime;
       }
@@ -167,9 +214,9 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     }
   };
 
-  // Listen for recording complete to analyze audio
+  // Listen for speaking recording completion to run AI STT
   useEffect(() => {
-    if (audioBlob) {
+    if (audioBlob && learningMode === "speaking") {
       handleEvaluateAudio(audioBlob);
     }
   }, [audioBlob]);
@@ -182,11 +229,10 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
       reader.onloadend = async () => {
         const base64Audio = (reader.result as string).split(',')[1];
         
-        // Call real Server Action
         const response = await evaluateSpeaking({
           userId: "guest",
           audioBase64: base64Audio,
-          targetSentence: activeActivity?.content?.transcript || "",
+          targetSentence: transcript,
           durationSeconds: 4,
           sentenceId: activeActivity?.id
         });
@@ -208,25 +254,21 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
           
           if (response.accuracy >= PASSING_SCORE) {
             playTingSound();
+            triggerParticles();
           }
 
           if (response.xpEarned) {
             setXpReward(prev => prev + response.xpEarned!);
           }
 
-          // Save scene progress to Supabase and trigger visual rewards
           saveSceneProgress({
             userId: "guest",
             lessonId: lesson.id,
             sceneIndex: currentIdx,
             highestScore: response.accuracy
-          }).then((res) => {
-            if (res.success) {
-              triggerParticles();
-            }
-          }).catch(err => console.error("Failed to save scene progress:", err));
+          }).catch(err => console.error("Failed to save progress:", err));
         } else {
-          alert(response.error || "Có lỗi xảy ra khi phân tích phát âm.");
+          alert(response.error || "Lỗi chấm điểm giọng nói.");
         }
       };
     } catch (err) {
@@ -236,8 +278,43 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     }
   };
 
-  const handleStopRecording = () => {
-    stopRecording();
+  const handleCheckDictation = () => {
+    const results = dictationWords.map((dw, idx) => {
+      if (!dw.isBlank) return true;
+      const ans = dictationAnswers[idx]?.trim().toLowerCase();
+      return ans === dw.clean;
+    });
+
+    setDictationResults(results);
+    setDictationChecked(true);
+
+    const blanks = dictationWords.filter(w => w.isBlank);
+    const correctCount = blanks.filter((_, bIdx) => {
+      const origIdx = dictationWords.findIndex((w, i) => w.isBlank && dictationWords.filter((x, y) => x.isBlank && y < i).length === bIdx);
+      return results[origIdx];
+    }).length;
+
+    const score = blanks.length > 0 ? Math.round((correctCount / blanks.length) * 100) : 100;
+
+    setShowAICoach(true);
+    setAiFeedback({
+      overall: score,
+      accuracy: score,
+      fluency: 100,
+      coachFeedback: score >= 80 
+        ? "Quá xuất sắc! Em nghe chuẩn xác 100% và viết rất đúng chính tả." 
+        : "Em nghe còn thiếu một vài từ cốt lõi, hãy bấm nghe lại và sửa nhé!",
+      wordEvaluations: dictationWords.map((w, idx) => ({
+        word: w.original,
+        status: w.isBlank ? (results[idx] ? 'correct' : 'incorrect') : 'correct'
+      }))
+    });
+
+    if (score >= PASSING_SCORE) {
+      playTingSound();
+      triggerParticles();
+      setXpReward(prev => prev + 25);
+    }
   };
 
   const handleNextScene = () => {
@@ -258,105 +335,145 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   if (activities.length === 0) {
     return (
-      <div className="min-h-screen bg-[#050508] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <p className="text-secondary text-sm italic">Bài học này chưa có câu thoại nào được tạo.</p>
-        <Link href="/learn" className="px-6 py-3 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <p className="text-slate-500 text-sm italic font-medium">Bài học này chưa có câu thoại học tập.</p>
+        <Link href="/learn" className="px-6 py-3 rounded-full bg-blue-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-sm">
           Quay lại học tập
         </Link>
       </div>
     );
   }
 
+  // Calculate dynamic star count (1-3 stars)
+  const getStars = (score: number) => {
+    if (score >= 80) return 3;
+    if (score >= 50) return 2;
+    return 1;
+  };
+
+  const starsCount = aiFeedback ? getStars(aiFeedback.overall) : 0;
+
   return (
-    <div className="min-h-screen bg-[#07090e] flex flex-col justify-between overflow-x-hidden relative selection:bg-amber-500/30 text-white">
+    <div className="min-h-screen bg-[#F8F9FA] flex flex-col justify-between overflow-x-hidden selection:bg-blue-200 text-slate-800">
+      
       {/* ─── HEADER BAR ──────────────────────────────────────────────────────── */}
-      <header className="px-6 py-4 border-b border-white/5 flex items-center justify-between z-10 shrink-0 bg-black/40 backdrop-blur-md">
+      <header className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between z-10 shrink-0 shadow-sm">
         <Link 
-          href={lesson.unit ? `/learn/grade/${lesson.unit.id}` : "/learn"}
-          className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-xs font-black uppercase tracking-widest"
+          href="/dashboard"
+          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 transition-colors text-xs font-black uppercase tracking-widest"
         >
           <ChevronLeft size={16} /> Thoát
         </Link>
 
-        <div className="text-center">
-          <span className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] block mb-0.5">Phân Cảnh</span>
-          <span className="text-sm font-black text-white">
-            {currentIdx + 1} / {activities.length}
-          </span>
+        {/* Dynamic Mode Switcher */}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button 
+            onClick={() => { setLearningMode("speaking"); resetStateForNewScene(); }}
+            className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+              learningMode === "speaking" ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Mic size={12} /> Nói
+          </button>
+          <button 
+            onClick={() => { setLearningMode("listening"); resetStateForNewScene(); }}
+            className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+              learningMode === "listening" ? "bg-orange-500 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Volume2 size={12} /> Nghe
+          </button>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-4 py-1.5 rounded-full text-amber-500 text-xs font-black shadow-glow-amber/10">
-          <Zap size={13} fill="currentColor" /> {xpReward} XP
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Câu học</span>
+            <span className="text-sm font-black text-slate-700">{currentIdx + 1} / {activities.length}</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 px-4 py-1.5 rounded-full text-orange-600 text-xs font-black">
+            <Zap size={13} fill="currentColor" /> {xpReward} XP
+          </div>
         </div>
       </header>
 
       {/* Progress timeline */}
-      <div className="w-full bg-white/5 h-1 overflow-hidden shrink-0">
+      <div className="w-full bg-slate-200 h-1.5 overflow-hidden shrink-0">
         <div 
-          className="h-full bg-gradient-to-r from-amber-500 to-amber-300 transition-all duration-500" 
+          className="h-full bg-blue-600 transition-all duration-500" 
           style={{ width: `${((currentIdx + 1) / activities.length) * 100}%` }}
         />
       </div>
 
-      {/* ─── MAIN WORKSPACE (Split Screen on Desktop) ─────────────────────── */}
+      {/* ─── MAIN WORKSPACE (Split Screen Layout) ─────────────────────── */}
       <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-8 p-6 max-w-7xl mx-auto w-full items-stretch">
         
-        {/* LEFT COLUMN (Player & Recorders) - lg:col-span-7 */}
-        <div className="lg:col-span-7 flex flex-col space-y-6 justify-between">
-          
-          {/* A. CINEMATIC VIDEO CONTAINER */}
-          <div className="relative rounded-3xl overflow-hidden bg-black border border-white/10 shadow-2xl flex flex-col aspect-video shrink-0 group">
-            <video
-              ref={videoRef}
-              src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
-              onTimeUpdate={handleTimeUpdate}
-              playsInline
-              className="w-full h-full object-cover z-10"
-            />
-
-            {/* Ambient dynamic background glow */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none z-20" />
+        {/* LEFT COLUMN: AUDIO / TEXTBOOK ILLUSTRATION */}
+        <div className="lg:col-span-6 flex flex-col space-y-6 justify-between">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col h-full space-y-4">
             
-            {/* Grain Overlay */}
-            <div className="absolute inset-0 z-20 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")' }}></div>
+            {/* Textbook Page Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <BookOpen className="text-blue-600" size={18} />
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Tiếng Anh 6 - Global Success</span>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase tracking-wider">
+                Unit 1
+              </span>
+            </div>
 
-            {/* Scene Controller Overlay */}
-            <div className="absolute bottom-4 left-4 right-4 z-30 flex items-center justify-between bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/5 opacity-90 group-hover:opacity-100 transition-all">
+            {/* Illustration Frame */}
+            <div className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center group">
+              {/* Textbook video placeholder or direct illustration */}
+              <video
+                ref={videoRef}
+                src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                onTimeUpdate={handleTimeUpdate}
+                playsInline
+                className="w-full h-full object-cover z-10"
+              />
+              <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-black/60 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
+                <ImageIcon size={10} /> Minh họa hội thoại
+              </div>
+            </div>
+
+            {/* Textbook Audio Visualizer & Player console */}
+            <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {isVideoPlaying ? (
                   <button 
                     onClick={handlePauseScene} 
-                    className="w-10 h-10 rounded-xl bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                    className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
                   >
-                    <Pause size={16} fill="black" />
+                    <Pause size={16} fill="white" />
                   </button>
                 ) : (
                   <button 
                     onClick={handlePlayScene} 
-                    className="w-10 h-10 rounded-xl bg-amber-500 text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-glow-amber/20"
+                    className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shadow-blue-500/10"
                   >
-                    <Play size={16} fill="black" className="ml-0.5" />
+                    <Play size={16} fill="white" className="ml-0.5" />
                   </button>
                 )}
 
                 <div>
-                  <span className="text-[9px] font-black uppercase text-amber-500 block tracking-widest">Phạm vi Scene</span>
-                  <span className="text-xs font-mono font-bold text-white/80">
-                    {startSceneTime.toFixed(1)}s - {endSceneTime.toFixed(1)}s
+                  <span className="text-[9px] font-black uppercase text-blue-600 block tracking-widest">Hội thoại Audio</span>
+                  <span className="text-xs font-mono font-bold text-slate-500">
+                    Phân cảnh: {startSceneTime.toFixed(1)}s - {endSceneTime.toFixed(1)}s
                   </span>
                 </div>
               </div>
 
-              {/* Speed selectors */}
-              <div className="flex items-center gap-1.5">
-                {[0.75, 1.0, 1.25].map(speed => (
+              {/* Speed Controller */}
+              <div className="flex items-center gap-1">
+                {[0.8, 1.0, 1.2].map(speed => (
                   <button
                     key={speed}
                     onClick={() => setPlaybackSpeed(speed)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all ${
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all border ${
                       playbackSpeed === speed
-                        ? 'bg-amber-500 text-black'
-                        : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'
                     }`}
                   >
                     {speed}x
@@ -364,308 +481,359 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* B. HERO SUBTITLES CARD */}
-          <div className="glass-card p-6 flex flex-col justify-center items-center text-center space-y-4 border border-white/5 min-h-[140px] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-amber-500 to-violet-600" />
-            
-            <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight leading-tight text-white drop-shadow-md">
-              "{activeActivity.content?.transcript || "Silence is not empty."}"
-            </h2>
-            <p className="text-sm md:text-base text-white/40 italic font-medium max-w-xl">
-              {activeActivity.content?.translation || "Sự im lặng mang trong mình sức nặng của ý nghĩa."}
-            </p>
-          </div>
-
-          {/* C. RECORDER TRIGGER WORKSPACE */}
-          <div className="glass-card p-6 flex flex-col items-center justify-center border border-white/5 relative">
-            
-            {/* Analyzing overlay */}
-            {isAnalyzing && (
-              <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-30 rounded-[32px]">
-                <motion.div 
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                  className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full shadow-glow-gold"
-                />
-                <span className="text-xs font-black tracking-[0.2em] uppercase text-amber-500">Đang phân tích phát âm...</span>
-              </div>
-            )}
-
-            <div className="text-center space-y-2 mb-6">
-              <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-widest">
-                Shadowing Mode
-              </span>
-              <p className="text-xs text-white/40 font-medium max-w-xs">
-                Xem hết phân cảnh, bấm Micro thu âm, nhại lại giọng và ngừng để AI Coach đánh giá.
-              </p>
-            </div>
-
-            {/* Glowing micro controller */}
-            <div className="flex flex-col items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={isRecording ? handleStopRecording : startRecording}
-                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-500 ${
-                  isRecording 
-                    ? 'bg-red-500 scale-110 shadow-[0_0_30px_rgba(239,68,68,0.4)] animate-pulse' 
-                    : 'bg-white text-black hover:bg-amber-500 shadow-glow-white/10'
-                }`}
-              >
-                {isRecording ? (
-                  <Square size={24} fill="white" className="text-white" />
-                ) : (
-                  <Mic size={28} className="text-black" />
-                )}
-              </motion.button>
-
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-white/40">
-                {isRecording ? "ĐANG GHI ÂM (BẤM ĐỂ DỪNG)" : "BẤM ĐỂ THU ÂM"}
-              </span>
-
-              {micError && (
-                <span className="text-xs text-red-400 font-bold px-4 py-1.5 bg-red-500/10 border border-red-500/20 rounded-xl mt-2">
-                  {micError}
-                </span>
-              )}
+            {/* Helper tips */}
+            <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+              <Headphones size={13} className="text-blue-500 shrink-0" />
+              <span>Bấm phát Audio để nghe phát âm mẫu chuẩn, sau đó tiến hành tập luyện bên phải.</span>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN (AI Coach Panel) - lg:col-span-5 */}
-        <div className="lg:col-span-5 flex flex-col items-stretch">
-          <AnimatePresence mode="wait">
-            {showAICoach && aiFeedback ? (
-              <motion.div
-                key="ai-coach-report"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="glass-card p-6 flex flex-col justify-between border border-amber-500/20 shadow-glow-amber/5 h-full space-y-6"
-              >
-                <div className="space-y-6">
-                  {/* Title */}
-                  <div className="flex items-center gap-3 pb-4 border-b border-white/5">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-black shadow-glow-amber/20 shrink-0">
-                      <Sparkles size={20} />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest block">AI Feedback</span>
-                      <h4 className="text-base font-display font-black text-white">Kết Quả Phân Tích Từ Cô</h4>
-                    </div>
-                  </div>
+        {/* RIGHT COLUMN: TEXT CONTEXT & SCORECARD */}
+        <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
+          
+          {/* A. TEXT CARD (Transcript / Dictation blanks) */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5 flex-1 flex flex-col justify-center">
+            
+            {/* Header info */}
+            <div className="flex justify-between items-center text-xs font-bold text-slate-400">
+              <span className="uppercase tracking-wider">Nội dung học tập</span>
+              <span>{learningMode === "speaking" ? "Luyện phát âm" : "Luyện nghe viết"}</span>
+            </div>
 
-                  {/* Overall score gauge */}
-                  <div className="flex items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
-                    <div>
-                      <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider block">Điểm Tổng Thể</span>
-                      <span className="text-xs text-amber-400 font-black mt-0.5 block flex items-center gap-1">
-                        <Star size={10} fill="currentColor" /> XUẤT SẮC
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-4xl font-display font-black text-amber-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.3)]">
-                        {aiFeedback.overall}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Dual metrics grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl relative overflow-visible">
-                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-wider block">Phát âm (Accuracy)</span>
-                      <div className="relative inline-block overflow-visible w-full">
-                        <h5 className="text-2xl font-display font-black text-emerald-400 mt-1">{aiFeedback.accuracy}%</h5>
-                        <AnimatePresence>
-                          {particles.map((p) => (
-                            <motion.div
-                              key={p.id}
-                              initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-                              animate={{ x: p.x, y: p.y, opacity: 0, scale: 0 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 1.2, ease: "easeOut" }}
-                              className="absolute rounded-full pointer-events-none"
-                              style={{
-                                backgroundColor: p.color,
-                                width: p.size,
-                                height: p.size,
-                                top: "50%",
-                                left: "20%",
-                                transform: "translate(-50%, -50%)",
-                                boxShadow: `0 0 10px ${p.color}`,
-                                zIndex: 50,
-                              }}
-                            />
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                      <div className="w-full bg-white/5 h-1 rounded-full mt-2 overflow-hidden">
-                        <div className="h-full bg-emerald-400" style={{ width: `${aiFeedback.accuracy}%` }} />
-                      </div>
-                    </div>
-                    <div className="bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
-                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-wider block">Độ lưu loát (Fluency)</span>
-                      <h5 className="text-2xl font-display font-black text-violet-400 mt-1">{aiFeedback.fluency}%</h5>
-                      <div className="w-full bg-white/5 h-1 rounded-full mt-2 overflow-hidden">
-                        <div className="h-full bg-violet-400" style={{ width: `${aiFeedback.fluency}%` }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* AI Narrative Commentary */}
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/30 block">Lời Khuyên Của Cô:</span>
-                    <p className="text-xs text-white/80 leading-relaxed font-medium bg-white/[0.01] border border-white/5 p-4 rounded-2xl italic">
-                      "{aiFeedback.coachFeedback}"
-                    </p>
-                  </div>
-
-                  {/* Word-by-word highlighted detail */}
-                  <div className="space-y-3">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/30 block">Chi Tiết Từng Từ:</span>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {aiFeedback.wordEvaluations.map((w: any, idx: number) => (
-                        <span 
-                          key={idx}
-                          className={`px-2.5 py-1 rounded-lg border transition-all font-bold ${
-                            w.status === 'correct' ? 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' :
-                            w.status === 'imperfect' ? 'text-amber-400 bg-amber-500/5 border-amber-500/10' :
-                            'text-red-400 bg-red-500/5 border-red-500/10 line-through'
-                          }`}
-                        >
-                          {w.word}
+            {learningMode === "speaking" ? (
+              /* SPEAKING TRANSCRIPT IN TEXTBOOK FORMAT */
+              <div className="space-y-4">
+                <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-center relative overflow-hidden">
+                  <span className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500" />
+                  <h3 className="text-xl md:text-2xl font-display font-black leading-tight text-slate-800">
+                    "{transcript}"
+                  </h3>
+                </div>
+                <p className="text-sm text-slate-400 italic text-center font-medium">
+                  Bản dịch: {translation}
+                </p>
+              </div>
+            ) : (
+              /* DICTATION - BLANK BOXES IN TEXT */
+              <div className="space-y-6">
+                <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex flex-wrap gap-x-2 gap-y-3 items-center justify-center">
+                  {dictationWords.map((dw, idx) => {
+                    if (!dw.isBlank) {
+                      return (
+                        <span key={idx} className="text-base md:text-lg font-bold text-slate-800">
+                          {dw.original}
                         </span>
-                      ))}
-                    </div>
-                  </div>
+                      );
+                    }
+
+                    // Render input blank box
+                    const isCorrect = dictationResults[idx] === true;
+                    const isIncorrect = dictationResults[idx] === false;
+
+                    return (
+                      <input
+                        key={idx}
+                        type="text"
+                        disabled={dictationChecked}
+                        value={dictationAnswers[idx] || ""}
+                        onChange={(e) => {
+                          const newAns = [...dictationAnswers];
+                          newAns[idx] = e.target.value;
+                          setDictationAnswers(newAns);
+                        }}
+                        placeholder="..."
+                        className={`w-24 text-center border-b-2 font-black py-1 text-sm focus:outline-none transition-all ${
+                          isCorrect ? "border-emerald-500 text-emerald-600 bg-emerald-50 rounded" :
+                          isIncorrect ? "border-red-500 text-red-600 bg-red-50 rounded" :
+                          "border-blue-400 text-blue-600 focus:border-blue-600 bg-blue-50/30"
+                        }`}
+                      />
+                    );
+                  })}
                 </div>
 
-                {/* BUTTONS ACTION LOOP */}
-                <div className="space-y-3 mt-4">
-                  {aiFeedback.overall < PASSING_SCORE ? (
-                    <>
-                      {/* Retry Button - Pulsing warning light */}
-                      <button
-                        onClick={resetStateForNewScene}
-                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black uppercase text-xs tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_0_25px_rgba(245,158,11,0.3)] animate-pulse flex items-center justify-center gap-2"
-                      >
-                        <RefreshCw size={14} className="animate-spin" /> Thử lại ngay (Cần &ge; {PASSING_SCORE}%)
-                      </button>
+                <div className="flex justify-center">
+                  {!dictationChecked ? (
+                    <button 
+                      onClick={handleCheckDictation}
+                      className="px-8 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-sm"
+                    >
+                      Kiểm tra kết quả
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={resetStateForNewScene}
+                      className="px-6 py-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-xl transition-all"
+                    >
+                      Làm lại câu này
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
-                      {/* Locked Next Scene Button - Disabled */}
+          {/* B. DYNAMIC PRACTICE OR REPORT CARD PORTAL */}
+          <div className="relative">
+            {isAnalyzing && (
+              <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-30 rounded-3xl border border-slate-200">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                  className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full"
+                />
+                <span className="text-xs font-black tracking-widest uppercase text-blue-600">Đang chấm điểm phát âm...</span>
+              </div>
+            )}
+
+            <AnimatePresence mode="wait">
+              {showAICoach && aiFeedback ? (
+                /* PHIẾU ĐIỂM REPORT CARD */
+                <motion.div
+                  key="scorecard-report"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-[#FFFDF9] border-2 border-dashed border-slate-300 p-6 rounded-3xl shadow-md flex flex-col space-y-5 relative overflow-hidden"
+                >
+                  {/* Decorative card stripes */}
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-orange-500 to-emerald-500" />
+                  
+                  {/* Star Rating Display */}
+                  <div className="flex justify-center items-center gap-2 pt-2">
+                    {[1, 2, 3].map((sIndex) => {
+                      const isActive = sIndex <= starsCount;
+                      return (
+                        <Star 
+                          key={sIndex} 
+                          size={28} 
+                          className={isActive ? "text-amber-400 fill-amber-400 filter drop-shadow-sm" : "text-slate-200 fill-slate-100"} 
+                        />
+                      );
+                    })}
+                  </div>
+
+                  <div className="text-center">
+                    <h3 className="text-lg font-display font-black text-slate-800 uppercase tracking-widest">PHIẾU ĐIỂM AI COACH</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Học chuẩn bám sát Global Success</p>
+                  </div>
+
+                  {/* Main Score Metrics */}
+                  <div className="grid grid-cols-3 gap-3 text-center border-y border-dashed border-slate-200 py-4">
+                    <div className="border-r border-slate-100">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Phát âm</span>
+                      <h4 className={`text-xl font-black mt-0.5 ${aiFeedback.accuracy >= PASSING_SCORE ? "text-emerald-600" : "text-red-500"}`}>
+                        {aiFeedback.accuracy}%
+                      </h4>
+                    </div>
+                    <div className="border-r border-slate-100">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Lưu loát</span>
+                      <h4 className="text-xl font-black mt-0.5 text-blue-600">
+                        {aiFeedback.fluency}%
+                      </h4>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Xếp loại</span>
+                      <h4 className={`text-xs font-black mt-1.5 uppercase ${aiFeedback.overall >= PASSING_SCORE ? "text-emerald-600" : "text-red-500"}`}>
+                        {aiFeedback.overall >= PASSING_SCORE ? "Đạt yêu cầu" : "Cần cố gắng"}
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* Commentary */}
+                  <p className="text-xs text-slate-600 text-center leading-relaxed font-semibold italic bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    "{aiFeedback.coachFeedback}"
+                  </p>
+
+                  {/* Word-by-word accuracy checklist */}
+                  {learningMode === "speaking" && aiFeedback.wordEvaluations && (
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {aiFeedback.wordEvaluations.map((w: any, idx: number) => {
+                        const isCorrect = w.status === 'correct';
+                        return (
+                          <span 
+                            key={idx}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                              isCorrect 
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                : 'bg-red-50 text-red-600 border border-red-100 line-through'
+                            }`}
+                          >
+                            {w.word}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Gamification Action buttons */}
+                  <div className="pt-2">
+                    {aiFeedback.overall < PASSING_SCORE ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={resetStateForNewScene}
+                          className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                        >
+                          <RefreshCw size={13} className="animate-spin-slow" /> Thử lại ngay
+                        </button>
+                        <button
+                          disabled
+                          className="py-3 px-4 bg-slate-100 text-slate-300 border border-slate-200 font-bold uppercase text-xs tracking-widest rounded-xl cursor-not-allowed flex items-center justify-center"
+                        >
+                          Khóa 🔒
+                        </button>
+                      </div>
+                    ) : (
                       <button
-                        disabled
-                        className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-white/20 font-black uppercase text-xs tracking-wider cursor-not-allowed flex items-center justify-center gap-2"
+                        onClick={handleNextScene}
+                        className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 hover:scale-[1.01]"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        {currentIdx < activities.length - 1 ? "Phân cảnh tiếp theo" : "Hoàn thành bài học"} (Đã khóa)
+                        {currentIdx < activities.length - 1 ? (
+                          <>Câu tiếp theo <ChevronRight size={14} /></>
+                        ) : (
+                          <>Hoàn thành bài học <Check size={14} /></>
+                        )}
                       </button>
+                    )}
+                  </div>
+
+                </motion.div>
+              ) : (
+                /* IN-PRACTICE INTERACTIVE CARD */
+                <motion.div
+                  key="scorecard-empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm text-center space-y-4"
+                >
+                  {learningMode === "speaking" ? (
+                    <>
+                      <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mx-auto text-blue-500 animate-pulse">
+                        <Mic size={20} />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider">Học sinh bấm Micro thu âm</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold max-w-xs mx-auto">
+                          Nghe Audio bên trái, sau đó bấm nút Micro để luyện nói theo giọng đọc bản xứ.
+                        </p>
+                      </div>
+
+                      {/* Mic recorder widget */}
+                      <div className="pt-2 flex flex-col items-center gap-2">
+                        <button
+                          onClick={isRecording ? stopRecording : startRecording}
+                          className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                            isRecording 
+                              ? 'bg-red-500 text-white shadow-md animate-pulse' 
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                          }`}
+                        >
+                          {isRecording ? <Square size={16} fill="white" /> : <Mic size={20} />}
+                        </button>
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                          {isRecording ? "ĐANG THU ÂM (BẤM DỪNG)" : "BẤM ĐỂ NÓI"}
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <>
-                      {/* Next Scene Button - Bouncing and Glowing Emerald/White */}
-                      <button
-                        onClick={handleNextScene}
-                        className="w-full py-4 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-wider hover:scale-[1.03] active:scale-[0.97] transition-all shadow-[0_0_30px_rgba(255,255,255,0.4)] animate-bounce flex items-center justify-center gap-2"
-                      >
-                        {currentIdx < activities.length - 1 ? (
-                          <>
-                            Phân cảnh tiếp theo <ArrowRight size={14} />
-                          </>
-                        ) : (
-                          <>
-                            Hoàn thành bài học <Check size={14} />
-                          </>
-                        )}
-                      </button>
+                      <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mx-auto text-orange-500 animate-pulse">
+                        <Headphones size={20} />
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-black text-slate-800 uppercase tracking-wider">Điền từ vào chỗ trống</h4>
+                        <p className="text-[11px] text-slate-400 font-semibold max-w-xs mx-auto">
+                          Nghe thật kỹ đoạn hội thoại bên trái, sau đó gõ đúng các từ còn thiếu trong ô trống ở phía trên.
+                        </p>
+                      </div>
                     </>
                   )}
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="ai-coach-empty"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="glass-card p-8 flex flex-col items-center justify-center text-center space-y-4 border border-white/5 h-full opacity-60 min-h-[300px]"
-              >
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/30 border border-white/5 animate-pulse">
-                  <Volume2 size={24} />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-black text-white uppercase tracking-wider">Đang Đợi Ghi Âm Giọng Bạn</h4>
-                  <p className="text-xs text-white/40 max-w-xs leading-relaxed">
-                    Vui lòng phát phân cảnh phim để hiểu cảm xúc nhân vật, sau đó nhấn Micro thu âm để cô nghe phát âm của bạn.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
         </div>
 
       </main>
 
-      {/* ─── IMMERSIVE SUCCESS ARENA ────────────────────────────────────────── */}
+      {/* ─── SUCCESS ARENA PANEL ────────────────────────────────────────── */}
       <AnimatePresence>
         {isFinished && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[#07090e] flex flex-col items-center justify-center p-6 text-center space-y-8"
+            className="fixed inset-0 z-50 bg-[#F8F9FA] flex flex-col items-center justify-center p-6 text-center space-y-8"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/10 via-violet-500/5 to-transparent blur-[120px] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-orange-500/5 to-transparent pointer-events-none" />
 
-            <div className="w-24 h-24 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-glow-amber animate-pulse">
-              <Award size={48} />
+            <div className="w-20 h-20 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-500 shadow-sm animate-pulse">
+              <Award size={40} />
             </div>
 
-            <div className="space-y-3 relative z-10">
-              <span className="px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-black uppercase tracking-widest">Nghi thức Đã Hoàn Thành</span>
-              <h3 className="text-3xl font-display font-black text-white">Làm chủ Tiết học Thành công</h3>
-              <p className="text-secondary text-sm max-w-sm mx-auto">
-                Em đã hoàn thành xuất sắc tất cả câu nói của bài học "{lesson.title}". Sự tự tin nói của em đã tiến bộ vượt bậc!
+            <div className="space-y-2 relative z-10">
+              <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-black uppercase tracking-widest">Tuyệt vời!</span>
+              <h3 className="text-2xl font-display font-black text-slate-800">Hoàn Thành Hoạt Động Bài Học</h3>
+              <p className="text-slate-500 text-sm max-w-sm mx-auto font-medium">
+                Em đã hoàn thành rất tốt tất cả các câu thoại của bài học "{lesson.title}". Cố gắng rèn luyện mỗi ngày nhé!
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 max-w-xs w-full py-6 border-y border-white/5 relative z-10">
+            <div className="grid grid-cols-2 gap-8 max-w-xs w-full py-5 border-y border-dashed border-slate-200 relative z-10">
               <div>
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Điểm thưởng</span>
-                <h4 className="text-3xl font-display font-black text-amber-500 mt-1">+{xpReward} XP</h4>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Điểm thưởng</span>
+                <h4 className="text-2xl font-display font-black text-orange-500 mt-1">+{xpReward} XP</h4>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest block">Trình độ</span>
-                <h4 className="text-3xl font-display font-black text-emerald-400 mt-1">PROTAGONIST</h4>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Xếp hạng</span>
+                <h4 className="text-2xl font-display font-black text-blue-600 mt-1">CHĂM CHỈ</h4>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 w-full max-w-xs relative z-10">
+            <div className="flex flex-col gap-3 w-full max-w-xs relative z-10">
               <button 
                 onClick={handleRestart}
-                className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 text-white/70 text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-1.5"
               >
-                <RefreshCw size={14} /> Luyện tập lại
+                <RefreshCw size={12} /> Luyện tập lại
               </button>
               <button 
-                onClick={() => {
-                  if (lesson.unit) {
-                    router.push(`/learn/grade/${lesson.unit.id}`);
-                  } else {
-                    router.push("/learn");
-                  }
-                }}
-                className="w-full py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.15)]"
+                onClick={() => router.push("/dashboard")}
+                className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-blue-500/10"
               >
-                Tiếp tục lộ trình
+                Về Trang Chủ Bảng Điều Khiển
               </button>
             </div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Floating Particles Arena */}
+      <AnimatePresence>
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+            animate={{ x: p.x, y: p.y, opacity: 0, scale: 0.2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="fixed rounded-full pointer-events-none"
+            style={{
+              backgroundColor: p.color,
+              width: p.size,
+              height: p.size,
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              boxShadow: `0 0 8px ${p.color}`,
+              zIndex: 100,
+            }}
+          />
+        ))}
       </AnimatePresence>
 
     </div>
