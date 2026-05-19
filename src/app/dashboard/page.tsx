@@ -3,23 +3,66 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, Play, Flame, Clock, X, Mic, Sparkles, Trophy, ArrowRight } from "lucide-react";
+import { 
+  Settings, 
+  Play, 
+  Flame, 
+  Clock, 
+  X, 
+  Mic, 
+  Sparkles, 
+  Trophy, 
+  Search, 
+  GraduationCap, 
+  BookOpen, 
+  ChevronRight, 
+  Award 
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { STORIES } from "@/lib/data";
 
-const getMovieImage = (title: string, fallbackUrl?: string) => {
-  const t = title?.toLowerCase() || '';
-  if (t.includes("godfather") || t.includes("bố già")) return "https://images.unsplash.com/photo-1627885449231-15b53ff9d10f?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("dark knight") || t.includes("batman")) return "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("forrest") || t.includes("gump")) return "https://images.unsplash.com/photo-1455243170701-d7031da7e9e6?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("titanic")) return "https://images.unsplash.com/photo-1500077423678-052445851415?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("lion king") || t.includes("vua sư tử")) return "https://images.unsplash.com/photo-1517825738774-7de9363ef735?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("gladiator") || t.includes("võ sĩ giác đấu")) return "https://images.unsplash.com/photo-1590135319808-16e788bc535e?auto=format&fit=crop&w=1200&q=80";
-  if (t.includes("wolf of wall street")) return "https://images.unsplash.com/photo-1611972589053-2947b1897e06?auto=format&fit=crop&w=1200&q=80";
-  
-  return fallbackUrl && fallbackUrl.length > 5 ? fallbackUrl : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80";
-};
+const GLOBAL_SUCCESS_UNITS = [
+  {
+    id: "unit-1",
+    unitNo: "Unit 1",
+    title: "My New School",
+    grade: "Lớp 6",
+    desc: "Học từ vựng về đồ dùng học tập, các môn học, phát âm chuẩn /ʌ/ và /ɑː/.",
+    coverImage: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=600&q=80",
+    progress: 80,
+    badge: "Đang học"
+  },
+  {
+    id: "unit-2",
+    unitNo: "Unit 2",
+    title: "My Home",
+    grade: "Lớp 6",
+    desc: "Khám phá từ vựng về ngôi nhà, các loại phòng, đồ đạc trong phòng và giới thiệu ngôi nhà mơ ước.",
+    coverImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80",
+    progress: 45,
+    badge: "Đang học"
+  },
+  {
+    id: "unit-3",
+    unitNo: "Unit 3",
+    title: "My Friends",
+    grade: "Lớp 6",
+    desc: "Luyện phát âm chuẩn các tính từ miêu tả ngoại hình, tính cách của bạn bè và cấu trúc trò chuyện.",
+    coverImage: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=600&q=80",
+    progress: 0,
+    badge: "Chưa học"
+  },
+  {
+    id: "unit-4",
+    unitNo: "Unit 4",
+    title: "My Neighbourhood",
+    grade: "Lớp 6",
+    desc: "Luyện kỹ năng so sánh hơn của tính từ ngắn và dài để miêu tả khu phố, con đường xinh đẹp.",
+    coverImage: "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=600&q=80",
+    progress: 0,
+    badge: "Chưa học"
+  }
+];
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
@@ -27,10 +70,12 @@ export default function DashboardPage() {
   const [streak, setStreak] = useState<number>(0);
   const [recentLessons, setRecentLessons] = useState<any[]>([]);
   const [avgFluency, setAvgFluency] = useState<number>(85);
-  const [continueLesson, setContinueLesson] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSchool, setSelectedSchool] = useState<"primary" | "secondary" | "high">("secondary");
+  const [selectedGrade, setSelectedGrade] = useState<string>("Lớp 6");
   const [showSettings, setShowSettings] = useState(false);
   const [editName, setEditName] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -42,7 +87,6 @@ export default function DashboardPage() {
       const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // 1. Fetch user profile
         const { data: userProfile } = await supabase
           .from("profiles")
           .select("*")
@@ -54,7 +98,6 @@ export default function DashboardPage() {
           setEditName(userProfile.full_name || "");
         }
 
-        // 2. Fetch daily streak
         const { data: streakData } = await supabase
           .from("daily_streaks")
           .select("current_streak")
@@ -65,7 +108,6 @@ export default function DashboardPage() {
           setStreak(streakData.current_streak || 0);
         }
 
-        // 3. Fetch speaking attempts for Fluency progress calculation
         const { data: attempts } = await supabase
           .from("speaking_attempts")
           .select("accuracy_score")
@@ -76,14 +118,9 @@ export default function DashboardPage() {
           setAvgFluency(Math.round(totalAccuracy / attempts.length));
         }
 
-        // 4. Fetch recent lesson progress
         const { data: progressData } = await supabase
           .from("lesson_progress")
-          .select(`
-            is_completed,
-            updated_at,
-            lesson_id
-          `)
+          .select(`is_completed, updated_at, lesson_id`)
           .eq("user_id", session.user.id)
           .order("updated_at", { ascending: false })
           .limit(3);
@@ -115,65 +152,6 @@ export default function DashboardPage() {
             setRecentLessons(mappedLessons);
           }
         }
-
-        // 5. Fetch a lesson to continue (Continue Learning CTA)
-        const { data: incompleteProgress } = await supabase
-          .from("lesson_progress")
-          .select("lesson_id")
-          .eq("user_id", session.user.id)
-          .eq("is_completed", false)
-          .order("updated_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        let targetLessonId = "";
-        let continueText = "Đang học dở";
-        let lessonTitle = "Bố Già (The Godfather)";
-        let lessonDesc = "Học cách giao tiếp đầy uy lực, sự tôn trọng và nghệ thuật thương lượng đẳng cấp từ thế giới ngầm.";
-
-        if (incompleteProgress) {
-          targetLessonId = incompleteProgress.lesson_id;
-          continueText = "Học tiếp bài học";
-        }
-
-        if (targetLessonId) {
-          const { data: lessonDetails } = await supabase
-            .from("lessons")
-            .select("id, title, description")
-            .eq("id", targetLessonId)
-            .single();
-
-          if (lessonDetails) {
-            lessonTitle = lessonDetails.title;
-            lessonDesc = lessonDetails.description || "";
-          }
-        } else {
-          // Get the first available published lesson in the database
-          const { data: allLessons } = await supabase
-            .from("lessons")
-            .select("id, title, description")
-            .eq("is_published", true)
-            .order("created_at", { ascending: true })
-            .limit(1);
-
-          if (allLessons && allLessons.length > 0) {
-            targetLessonId = allLessons[0].id;
-            lessonTitle = allLessons[0].title;
-            lessonDesc = allLessons[0].description || "";
-            continueText = "Bắt đầu bài học mới";
-          } else {
-            // Static fallback to The Godfather
-            targetLessonId = "00000000-0000-0000-0000-000000000001";
-            continueText = "Đề xuất cho bạn";
-          }
-        }
-
-        setContinueLesson({
-          id: targetLessonId,
-          title: lessonTitle,
-          description: lessonDesc,
-          statusText: continueText
-        });
       }
     } catch (err) {
       console.error("Error loading dashboard data:", err);
@@ -182,201 +160,240 @@ export default function DashboardPage() {
     }
   };
 
-  /**
-   * Helper function to match lesson IDs to their appropriate client route
-   */
-  const getLessonLink = (id: string) => {
-    if (!id) return '/stories/00000000-0000-0000-0000-000000000001';
-    if (id.includes('0000-0000') || id === '2ba75a92-2822-45fe-9040-1cf71ef4e522') {
-      return `/stories/${id}`;
-    }
-    return `/learn/lesson/${id}`;
-  };
-
   if (!mounted) return null;
 
   return (
-    <div className="bg-[#050508] min-h-screen text-white pb-24 relative overflow-hidden">
+    <div className="bg-[#f8f9fa] min-h-screen text-slate-800 pb-24 relative overflow-hidden">
       <Navbar />
 
-      {/* Decorative Blur Spheres */}
-      <div className="absolute -left-40 top-20 w-96 h-96 rounded-full bg-violet-600/10 blur-[150px] pointer-events-none" />
-      <div className="absolute -right-40 top-80 w-96 h-96 rounded-full bg-amber-500/10 blur-[150px] pointer-events-none" />
+      {/* Decorative Warm Shapes */}
+      <div className="absolute -left-40 top-20 w-96 h-96 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute -right-40 top-80 w-96 h-96 rounded-full bg-orange-500/5 blur-[100px] pointer-events-none" />
       
       <div className="w-full flex justify-center px-4 pt-28">
-        <main className="w-full max-w-4xl space-y-12 relative z-10">
-        
-          {/* 1. WELCOME & MOTIVATIONAL LEADERBOARD */}
-          <div className="flex flex-col md:flex-row gap-4 items-stretch">
-            {/* User Profile Info Card */}
-            <div className="flex-1 flex items-center justify-between bg-[#101014]/60 backdrop-blur-xl p-6 rounded-3xl border border-white/5 shadow-2xl">
+        <main className="w-full max-w-4xl space-y-8 relative z-10">
+          
+          {/* 1. PROFILE HEADER CARD */}
+          <div className="flex flex-col md:flex-row gap-6 items-stretch">
+            {/* User Profile Card */}
+            <div className="flex-1 flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-xl font-black text-white shadow-lg">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 flex items-center justify-center text-xl font-black text-white shadow-md">
                   {profile?.full_name ? profile.full_name[0].toUpperCase() : 'H'}
                 </div>
-                <div className="flex-1">
-                  <h1 className="text-3xl md:text-4xl font-display font-black leading-tight text-white drop-shadow-md">
-                    Chào, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">{profile?.full_name || 'Học viên'}</span>.
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-display font-black leading-tight text-slate-800">
+                    Chào, <span className="text-blue-600">{profile?.full_name || 'Học viên'}</span>! 👋
                   </h1>
                   
-                  <div className="flex flex-col gap-2 mt-4">
-                    <div className="flex items-center gap-3 text-sm font-black uppercase tracking-widest">
-                      <span className="flex items-center gap-2 text-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] bg-orange-500/10 px-3 py-1.5 rounded-lg border border-orange-500/30">
-                        <Flame size={18} className="fill-orange-500 animate-pulse" /> {streak} NGÀY STREAK
-                      </span>
-                      <span className="flex items-center gap-2 text-violet-300 drop-shadow-[0_0_8px_rgba(167,139,250,0.6)] bg-violet-500/10 px-3 py-1.5 rounded-lg border border-violet-500/30">
-                        <Sparkles size={16} /> LEVEL: B2 - VOICE ARCHITECT
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Thành tựu gần đây */}
-                  <div className="mt-5 pt-5 border-t border-white/5">
-                    <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">Thành tựu gần đây</h4>
-                    <div className="flex gap-3">
-                      <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-xs font-bold text-emerald-400 shadow-lg">
-                        <Trophy size={14} /> Phản xạ nhanh
-                      </div>
-                      <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-xl text-xs font-bold text-amber-400 shadow-lg">
-                        <Sparkles size={14} /> Sẵn sàng nhập vai
-                      </div>
-                    </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className="flex items-center gap-1.5 text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100 text-xs font-bold">
+                      <Flame size={14} className="fill-orange-500 animate-pulse" /> {streak} Ngày liên tiếp
+                    </span>
+                    <span className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 text-xs font-bold">
+                      <GraduationCap size={14} /> Trình độ: {selectedGrade}
+                    </span>
                   </div>
                 </div>
               </div>
               <button 
                 onClick={() => setShowSettings(true)}
-                className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/5"
+                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200"
               >
-                <Settings size={18} className="text-white/60" />
+                <Settings size={18} className="text-slate-500" />
               </button>
             </div>
 
-            {/* Glowing Fluency score widget */}
-            <div className="md:w-[320px] bg-[#101014]/60 backdrop-blur-xl p-6 rounded-3xl border border-white/5 shadow-2xl flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
-                <span className="flex items-center gap-1.5"><Mic size={14} className="text-emerald-400" /> Trình Độ Nói AI</span>
-                <span className="text-emerald-400 font-mono text-3xl font-black drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]">{avgFluency}%</span>
+            {/* Speaking Proficiency Stats */}
+            <div className="md:w-[280px] bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                <span className="flex items-center gap-1.5"><Mic size={14} className="text-blue-500" /> Phát âm AI</span>
+                <span className="text-blue-600 font-mono text-2xl font-black">{avgFluency}%</span>
               </div>
-              <div className="space-y-3">
-                <div className="h-2.5 bg-white/5 rounded-full overflow-hidden relative">
-                  <div 
-                    className="absolute inset-0 bg-emerald-400/20 blur-xs rounded-full" 
-                    style={{ width: `${avgFluency}%` }} 
-                  />
+              <div className="space-y-2">
+                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${avgFluency}%` }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.4)] rounded-full relative z-10"
+                    transition={{ duration: 1.2 }}
+                    className="h-full bg-blue-500 rounded-full"
                   />
                 </div>
-                <p className="text-[10px] text-white/50 leading-relaxed italic">
+                <p className="text-[10px] text-slate-400 italic">
                   {avgFluency >= 80 
-                    ? "Bạn phát âm rất rõ ràng, cần cải thiện thêm ngữ điệu nối từ (linking words) để nói tự nhiên hơn."
-                    : "Hãy nhại giọng thật chuẩn các từ khóa cốt lõi để nâng cao điểm trôi chảy của mình nhé!"}
+                    ? "Giọng nói rõ ràng! Hãy tiếp tục rèn luyện kỹ năng nối từ nhé."
+                    : "Luyện nói nhiều hơn để nâng cao điểm phát âm chuẩn của mình nha."}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 2. CONTINUE LEARNING (Bài Học Tiếp Theo) */}
-          <div className="space-y-4">
-            <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.25em]">Bài Học Tiếp Theo</h2>
-            <div className="relative rounded-[40px] overflow-hidden border border-white/10 shadow-2xl group min-h-[280px] flex items-end">
-              
-              {/* Background Cover Image with Ken Burns Zoom Effect */}
-              <div className="absolute inset-0 bg-cover bg-center transition-transform duration-[4000ms] group-hover:scale-105" 
-                   style={{ backgroundImage: `url('${getMovieImage(continueLesson?.title || 'The Wolf of Wall Street')}')` }} 
-              />
-              
-              {/* Cinematic Vignette Gradients - Lighter for visibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050508]/90 via-[#050508]/30 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/80 via-[#050508]/20 to-transparent" />
-              <div className="absolute inset-0 bg-violet-950/20 mix-blend-color-dodge" />
-              
-              {/* Spotlight Glowing Ring */}
-              <div className="absolute -left-20 -top-20 w-96 h-96 rounded-full bg-violet-600/15 blur-[120px] pointer-events-none" />
+          {/* 2. HERO SEARCH & HOMEWORK CODE SECTION (YourHomework Style) */}
+          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 text-center">
+            <h3 className="text-lg font-black text-slate-800 flex items-center justify-center gap-2">
+              <BookOpen className="text-blue-500" size={20} /> VÀO LỚP HỌC HÔM NAY
+            </h3>
+            <div className="flex flex-col md:flex-row gap-3 max-w-2xl mx-auto">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input 
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Nhập mã bài tập lớp học hoặc tìm kiếm bài học..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-all"
+                />
+              </div>
+              <button className="px-8 py-3.5 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-500/10">
+                Vào học ngay
+              </button>
+            </div>
+          </div>
 
-              {/* Card Billboard Details */}
-              <div className="relative z-10 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div className="space-y-3 max-w-xl">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[10px] font-black uppercase tracking-widest">
-                    🎬 {continueLesson?.statusText || "BẮT ĐẦU BÀI HỌC MỚI"}
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-display font-black text-white leading-tight">
-                    {continueLesson?.title || "Bố Già (The Godfather)"}
-                  </h3>
-                  <p className="text-white/60 text-sm font-light leading-relaxed">
-                    {continueLesson?.description || "Học cách giao tiếp đầy uy lực, sự tôn trọng và nghệ thuật thương lượng đẳng cấp từ thế giới ngầm."}
-                  </p>
-                </div>
-                
-                <Link href={getLessonLink(continueLesson?.id)} className="shrink-0">
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-full md:w-auto px-10 py-5 rounded-[24px] bg-white text-black font-display font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 hover:bg-neutral-100 shadow-[0_0_30px_rgba(255,255,255,0.25)] transition-all"
-                  >
-                    <Play size={14} fill="black" /> HỌC NGAY
-                  </motion.button>
-                </Link>
+          {/* 3. QUICK GRID TOOLS */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-xl">🎤</div>
+              <div>
+                <h4 className="font-bold text-sm text-slate-800">Chấm Phát Âm</h4>
+                <p className="text-[10px] text-slate-500 font-medium">Luyện khẩu hình AI</p>
+              </div>
+            </div>
+            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-xl">🎧</div>
+              <div>
+                <h4 className="font-bold text-sm text-slate-800">Luyện Nghe (Dictation)</h4>
+                <p className="text-[10px] text-slate-500 font-medium">Chép chính tả phản xạ</p>
+              </div>
+            </div>
+            <div className="bg-white hover:bg-slate-50 border border-slate-200/60 p-5 rounded-3xl flex items-center gap-4 transition-all shadow-sm hover:shadow-md cursor-pointer">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-xl">📝</div>
+              <div>
+                <h4 className="font-bold text-sm text-slate-800">Thi Trắc Nghiệm</h4>
+                <p className="text-[10px] text-slate-500 font-medium">Đề luyện thi học kì</p>
               </div>
             </div>
           </div>
 
-          {/* 3. DISCOVER MORE (Khám phá thêm cho bạn) */}
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.25em]">Khám Phá Thêm Cho Bạn</h2>
-              <Link href="/stories" className="text-xs text-violet-400 hover:text-violet-300 font-bold flex items-center gap-1 uppercase tracking-wider">
-                Xem tất cả <ArrowRight size={14} />
-              </Link>
+          {/* 4. SCHOOL & GRADE CATEGORY TABS */}
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl border border-slate-200/60 shadow-sm max-w-fit mx-auto">
+              {[
+                { id: "primary", label: "Tiểu học" },
+                { id: "secondary", label: "Trung học Cơ sở (THCS)" },
+                { id: "high", label: "Trung học Phổ thông (THPT)" }
+              ].map((lvl) => (
+                <button
+                  key={lvl.id}
+                  onClick={() => {
+                    setSelectedSchool(lvl.id as any);
+                    setSelectedGrade(lvl.id === "primary" ? "Lớp 3" : lvl.id === "secondary" ? "Lớp 6" : "Lớp 10");
+                  }}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    selectedSchool === lvl.id 
+                      ? "bg-blue-600 text-white shadow-sm" 
+                      : "text-slate-500 hover:bg-slate-50"
+                  }`}
+                >
+                  {lvl.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Dynamic Grades selector */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => (
+                <button
+                  key={gr}
+                  onClick={() => setSelectedGrade(gr)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    selectedGrade === gr 
+                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {gr}
+                </button>
+              ))}
+              {selectedSchool === "secondary" && ["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"].map((gr) => (
+                <button
+                  key={gr}
+                  onClick={() => setSelectedGrade(gr)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    selectedGrade === gr 
+                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {gr}
+                </button>
+              ))}
+              {selectedSchool === "high" && ["Lớp 10", "Lớp 11", "Lớp 12"].map((gr) => (
+                <button
+                  key={gr}
+                  onClick={() => setSelectedGrade(gr)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    selectedGrade === gr 
+                      ? "bg-orange-500 border-orange-500 text-white shadow-sm" 
+                      : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {gr}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 5. SGK ROADMAP SECTION - Unit cards Global Success */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-black text-slate-800">Lộ Trình Sách Giáo Khoa: Global Success ({selectedGrade})</h2>
+              <span className="text-xs text-blue-600 font-bold uppercase tracking-wider">Học chuẩn bám sát SGK</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {STORIES.filter(s => s.id !== continueLesson?.id).slice(0, 2).map((story) => (
+              {GLOBAL_SUCCESS_UNITS.map((unit) => (
                 <motion.div
-                  key={story.id}
-                  whileHover={{ y: -6 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-[#101014]/60 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden flex flex-col justify-between group transition-all duration-300 relative"
+                  key={unit.id}
+                  whileHover={{ y: -4 }}
+                  className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between group transition-all duration-300 shadow-sm hover:shadow-md"
                 >
-                  {/* Glowing Spotlight overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-
-                  {/* Card Image Header */}
-                  <div className="h-44 w-full relative overflow-hidden">
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                         style={{ backgroundImage: `url('${story.coverImage}')` }} 
+                  {/* Card Image */}
+                  <div className="h-40 w-full relative overflow-hidden">
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-102" 
+                         style={{ backgroundImage: `url('${unit.coverImage}')` }} 
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#101014] to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     
-                    <div className="absolute top-3 left-3 px-3 py-1 rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase tracking-wider text-amber-400 shadow-lg">
-                      LEVEL {story.level}
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-xl bg-blue-600/90 text-[10px] font-black uppercase tracking-wider text-white shadow-md">
+                      {unit.unitNo}
                     </div>
-                    <div className="absolute top-3 right-3 text-xl bg-white/5 backdrop-blur-md w-8 h-8 rounded-full flex items-center justify-center border border-white/10">
-                      {story.emoji}
-                    </div>
+                    {unit.progress > 0 && (
+                      <div className="absolute bottom-3 left-3 right-3 space-y-1">
+                        <div className="flex justify-between text-[10px] font-bold text-white">
+                          <span>Đã học {unit.progress}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                          <div className="h-full bg-orange-500" style={{ width: `${unit.progress}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Card Text & CTAs */}
-                  <div className="p-6 flex-1 flex flex-col justify-between gap-5 relative z-10">
-                    <div className="space-y-2">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-white/30 block">
-                        {story.category}
-                      </span>
-                      <h4 className="text-xl font-bold text-white leading-snug group-hover:text-amber-400 transition-colors">
-                        {story.title}
+                  {/* Details & Actions */}
+                  <div className="p-6 flex-1 flex flex-col justify-between gap-4">
+                    <div className="space-y-1">
+                      <h4 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                        {unit.title}
                       </h4>
-                      <p className="text-xs text-white/50 line-clamp-2 leading-relaxed">
-                        {story.description}
+                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                        {unit.desc}
                       </p>
                     </div>
 
-                    <Link href={`/stories/${story.id}`}>
-                      <button className="w-full py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 group-hover:border-white/10">
-                        <Play size={12} fill="currentColor" /> Bắt đầu nhại giọng
+                    <Link href={`/learn`}>
+                      <button className="w-full py-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-xs font-black uppercase tracking-wider text-blue-600 transition-all flex items-center justify-center gap-2">
+                        <Play size={12} fill="currentColor" /> Vào bài học
                       </button>
                     </Link>
                   </div>
@@ -385,33 +402,32 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 4. RECENT PRACTICE HISTORY */}
+          {/* 6. RECENT ACTIVITY HISTORY */}
           <div className="space-y-4">
-            <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.25em]">Lịch Sử Luyện Tập Gần Đây</h2>
+            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.25em]">Lịch Sử Luyện Tập Gần Đây</h2>
             <div className="space-y-3">
               {recentLessons.length > 0 ? (
                 recentLessons.map((lesson) => (
-                  <div key={lesson.id} className="flex items-center justify-between p-5 rounded-2xl bg-[#101014]/40 backdrop-blur-md border border-white/5 hover:border-white/15 transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-white/5 flex items-center justify-center text-white/40 border border-white/5">
+                  <div key={lesson.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-200 transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
                         <Clock size={16} />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-white">{lesson.title}</h4>
-                        <span className="text-xs text-white/40">{lesson.date}</span>
+                        <h4 className="font-bold text-sm text-slate-800">{lesson.title}</h4>
+                        <span className="text-xs text-slate-400">{lesson.date}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-amber-400 font-display font-black text-xs uppercase tracking-widest">
-                        {lesson.isCompleted ? "ĐÃ HOÀN THÀNH" : "ĐANG HỌC DỞ"}
-                      </div>
-                      <div className="text-[9px] uppercase tracking-widest text-white/20 mt-1">Trạng thái</div>
+                      <span className="inline-block px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                        {lesson.isCompleted ? "HOÀN THÀNH" : "ĐANG HỌC DỞ"}
+                      </span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center p-8 bg-[#101014]/20 border border-dashed border-white/10 rounded-2xl text-xs text-white/40 italic">
-                  Chưa có lịch sử học gần đây. Hãy chọn "HỌC NGAY" ở trên để bắt đầu tích lũy phản xạ!
+                <div className="text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400 italic font-medium">
+                  Chưa có lịch sử học gần đây. Bấm vào bài học ở trên để tích lũy phản xạ!
                 </div>
               )}
             </div>
@@ -419,25 +435,25 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      {/* CÀI ĐẶT NHANH MODAL */}
+      {/* QUICK SETTINGS MODAL */}
       <AnimatePresence>
         {showSettings && (
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-4 sm:p-0">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
-            <motion.div initial={{ y: "100%", scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: "100%", scale: 0.95 }} className="relative z-10 w-full max-w-md bg-[#12121a] rounded-3xl md:rounded-[36px] p-8 space-y-6 border border-white/10 shadow-2xl">
+          <div className="fixed inset-0 z-250 flex items-end md:items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowSettings(false)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ y: "100%", scale: 0.95 }} animate={{ y: 0, scale: 1 }} exit={{ y: "100%", scale: 0.95 }} className="relative z-10 w-full max-w-md bg-white rounded-3xl p-8 space-y-6 border border-slate-200 shadow-2xl">
               <div className="flex justify-between items-center">
-                <h3 className="font-display font-black text-xl flex items-center gap-2">
-                  <Trophy size={18} className="text-amber-400" /> Cài đặt tài khoản
+                <h3 className="font-display font-black text-xl text-slate-800 flex items-center gap-2">
+                  <Award size={18} className="text-orange-500" /> Cài đặt tài khoản
                 </h3>
-                <button onClick={() => setShowSettings(false)} className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors"><X size={16} /></button>
+                <button onClick={() => setShowSettings(false)} className="p-2 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors border border-slate-200"><X size={16} className="text-slate-500" /></button>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Tên hiển thị</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tên hiển thị của bạn</label>
                 <input 
                   type="text" 
                   value={editName} 
                   onChange={(e) => setEditName(e.target.value)} 
-                  className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-violet-500 transition-colors font-medium" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500 transition-colors font-bold" 
                 />
               </div>
               <button 
@@ -458,7 +474,7 @@ export default function DashboardPage() {
                   }
                   setShowSettings(false);
                 }} 
-                className="w-full py-4 bg-white hover:bg-neutral-100 text-black font-display font-black uppercase tracking-widest text-xs rounded-2xl transition-colors shadow-lg"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-display font-black uppercase tracking-widest text-xs rounded-2xl transition-all shadow-md shadow-blue-500/10"
               >
                 Lưu thay đổi
               </button>
@@ -469,4 +485,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
