@@ -37,7 +37,7 @@ export default function HomePage() {
       <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-44 pb-20 md:pt-52 md:pb-28 overflow-hidden w-full flex flex-col items-center justify-center text-center">
+      <section className="relative pt-6 pb-20 md:pt-6 md:pb-28 overflow-hidden w-full flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 60%)' }}>
         <div className="container-custom max-w-4xl w-full flex flex-col items-center justify-center text-center space-y-10 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -105,9 +105,9 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center">
             {[
-              { icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50", title: "Làm chủ từ vựng cốt lõi", desc: "Không học vẹt từ đơn lẻ. Học sinh ghi nhớ từ vựng qua ngữ cảnh giao tiếp minh họa chân thực từ sách giáo khoa Global Success." },
-              { icon: Mic, color: "text-orange-600", bg: "bg-orange-50", title: "Phát âm chuẩn IPA bản xứ", desc: "Công nghệ chấm điểm AI thông minh chỉnh sửa từng lỗi phát âm nhỏ nhất, giúp học sinh nói tiếng Anh tự nhiên đầy tự tin." },
-              { icon: Trophy, color: "text-emerald-600", bg: "bg-emerald-50", title: "Bứt phá điểm thi học kỳ", desc: "Kho đề thi trắc nghiệm phong phú, sát thực tế bài học giúp củng cố ngữ pháp và đạt điểm số tối đa trong các kỳ kiểm tra." }
+              { icon: BookOpen, title: "Làm chủ từ vựng cốt lõi", desc: "Không học vẹt từ đơn lẻ. Học sinh ghi nhớ từ vựng qua ngữ cảnh giao tiếp minh họa chân thực từ sách giáo khoa Global Success." },
+              { icon: Mic, title: "Phát âm chuẩn IPA bản xứ", desc: "Công nghệ chấm điểm AI thông minh chỉnh sửa từng lỗi phát âm nhỏ nhất, giúp học sinh nói tiếng Anh tự nhiên đầy tự tin." },
+              { icon: Trophy, title: "Bứt phá điểm thi học kỳ", desc: "Kho đề thi trắc nghiệm phong phú, sát thực tế bài học giúp củng cố ngữ pháp và đạt điểm số tối đa trong các kỳ kiểm tra." }
             ].map((b, i) => (
               <motion.div 
                 key={b.title}
@@ -116,11 +116,11 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
                 whileHover={{ y: -2 }}
-                className="bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] hover:border-[#BFDBFE] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-300 flex flex-col justify-between w-full max-w-sm"
+                className="bg-[#FFFFFF] p-6 rounded-[14px] border border-[#E5E7EB] shadow-[0_1px_4px_rgba(0,0,0,0.05)] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(37,99,235,0.08)] transition-all duration-300 flex flex-col justify-between w-full max-w-sm"
               >
                 <div className="space-y-5">
-                  <div className={`w-12 h-12 rounded-xl ${b.bg} ${b.color} flex items-center justify-center shadow-sm`}>
-                    <b.icon size={20} />
+                  <div className="w-10 h-10 bg-[#EFF6FF] rounded-[10px] flex items-center justify-center shadow-sm">
+                    <b.icon size={20} className="text-[#2563EB]" />
                   </div>
                   <h3 className="text-[18px] font-semibold text-[#1A1A18]">{b.title}</h3>
                   <p className="text-[#6B6B68] text-[13px] leading-relaxed font-medium">{b.desc}</p>
@@ -301,12 +301,12 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl items-stretch justify-items-center">
             {/* Free Plan */}
-            <div className="bg-white border border-slate-200/80 rounded-[32px] p-8 flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_45px_rgba(0,0,0,0.05)] transition-all w-full max-w-md">
+            <div className="bg-[#FFFFFF] border border-[#E5E7EB] rounded-[16px] p-[1.75rem] flex flex-col justify-between shadow-[0_1px_4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all w-full max-w-md">
               <div className="space-y-6">
-                <h3 className="text-base md:text-lg font-black text-slate-800">Tài Khoản Học Thử</h3>
-                <div className="text-3xl font-display font-black text-slate-900">
+                <h3 className="text-base md:text-lg font-black text-[#1A1A18]">Tài Khoản Học Thử</h3>
+                <div className="text-3xl font-display font-black text-[#1A1A18]">
                   0đ <span className="text-xs text-slate-400 font-sans font-normal">/ mãi mãi</span>
                 </div>
                 <ul className="space-y-4">
@@ -325,12 +325,12 @@ export default function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-white border-2 border-blue-500 rounded-[32px] p-8 flex flex-col justify-between shadow-[0_20px_50px_rgba(37,99,235,0.08)] hover:shadow-[0_25px_60px_rgba(37,99,235,0.14)] hover:scale-[1.01] relative overflow-hidden transition-all w-full max-w-md">
-              <div className="absolute top-0 right-6 -translate-y-1/2 bg-orange-500 text-white px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md">
-                Khuyên Dùng
+            <div className="bg-[#FFFFFF] border-2 border-[#2563EB] rounded-[16px] p-[1.75rem] flex flex-col justify-between shadow-[0_4px_12px_rgba(37,99,235,0.08)] hover:scale-[1.01] relative overflow-hidden transition-all w-full max-w-md">
+              <div className="absolute top-0 right-6 -translate-y-1/2 bg-[#DCFCE7] text-[#166534] px-[10px] py-[3px] rounded-[20px] text-[11px] font-semibold tracking-wide shadow-sm border border-[#BBF7D0]">
+                Khuyến nghị
               </div>
               <div className="space-y-6">
-                <h3 className="text-base md:text-lg font-black text-blue-600 flex items-center gap-1.5">
+                <h3 className="text-base md:text-lg font-black text-[#2563EB] flex items-center gap-1.5">
                   <Sparkles size={16} fill="currentColor" />
                   Tài Khoản Pro Lớp Học
                 </h3>
@@ -340,13 +340,13 @@ export default function HomePage() {
                 <ul className="space-y-4">
                   {['Mở khóa 100% lộ trình bám sát SGK', 'AI phân tích & chấm phát âm không giới hạn', 'Luyện nghe chép chính tả Dictation không giới hạn', 'Lưu từ vựng & cấu trúc ngữ pháp ôn thi', 'Nhận hỗ trợ ưu tiên từ giáo viên phụ trách'].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-xs text-slate-600 font-bold">
-                      <CheckCircle2 size={16} className="text-blue-500 shrink-0 mt-0.5" /> {f}
+                      <CheckCircle2 size={16} className="text-[#2563EB] shrink-0 mt-0.5" /> {f}
                     </li>
                   ))}
                 </ul>
               </div>
               <Link href="/signup" className="mt-8 flex justify-center w-full">
-                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest transition-all shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
+                <button className="w-full py-4 rounded-2xl bg-[#2563EB] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest transition-all shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
                   Nâng cấp tài khoản Pro
                 </button>
               </Link>

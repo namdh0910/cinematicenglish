@@ -15,7 +15,9 @@ import {
   TrendingUp,
   Brain,
   Search,
-  BookOpen
+  BookOpen,
+  School,
+  Play
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -96,24 +98,27 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
     <div className="bg-[#F7F7F5] min-h-screen pb-20 text-[#3D3D3B]">
       <Navbar />
 
-      <main className="page-top container-custom flex flex-col gap-12 w-full" style={{ paddingTop: '120px' }}>
-        {/* Sleek Header: Welcome Student + Search Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] mt-6">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#1A1A18]">
-              Chào mừng, <span className="text-[#2563EB]">{profile?.full_name || 'Học viên'}</span>! 👋
-            </h1>
-            <p className="text-[15px] leading-[1.7] text-[#6B6B68] font-medium">
-              Hôm nay em muốn chinh phục bài học nào? Giáo trình chuẩn Global Success.
-            </p>
-          </div>
-          <div className="w-full md:max-w-md relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder="Tìm kiếm lớp học, chủ đề hoặc bài học..."
-              className="w-full bg-[#F7F7F5] border border-[#EBEBEA] rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B6B68] focus:outline-none focus:border-blue-500 transition-all shadow-inner"
-            />
+      <main className="page-top container-custom flex flex-col gap-12 w-full" style={{ paddingTop: '24px' }}>
+        {/* Hero Area Wrapper */}
+        <div className="w-full rounded-2xl overflow-hidden mt-6" style={{ backgroundColor: '#F0F7FF', padding: '1.5rem 1.5rem 1rem', marginBottom: '1.5rem' }}>
+          {/* Sleek Header: Welcome Student + Search Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight text-[#1A1A18]">
+                Chào mừng, <span className="text-[#2563EB]">{profile?.full_name || 'Học viên'}</span>! 👋
+              </h1>
+              <p className="text-[15px] leading-[1.7] text-[#6B6B68] font-medium">
+                Hôm nay em muốn chinh phục bài học nào? Giáo trình chuẩn Global Success.
+              </p>
+            </div>
+            <div className="w-full md:max-w-md relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="Tìm kiếm lớp học, chủ đề hoặc bài học..."
+                className="w-full bg-[#F7F7F5] border border-[#EBEBEA] rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B6B68] focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+              />
+            </div>
           </div>
         </div>
 
@@ -226,6 +231,21 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               const isCinematic = titleLower.includes("cinematic") || titleLower.includes("phim");
               const isHigh = titleLower.includes("10") || titleLower.includes("11") || titleLower.includes("12");
               const barColor = isCinematic ? "#534AB7" : isHigh ? "#185FA5" : "#0F6E56";
+
+              // Thumbnail configuration
+              let thumbBg = "#E1F5EE";
+              let thumbIconColor = "#0F6E56";
+              let ThumbIcon = School;
+              
+              if (isCinematic) {
+                thumbBg = "#EEEDFE";
+                thumbIconColor = "#534AB7";
+                ThumbIcon = Play;
+              } else if (isHigh) {
+                thumbBg = "#E6F1FB";
+                thumbIconColor = "#185FA5";
+                ThumbIcon = BookOpen;
+              }
               
               const statusText = "Đang học";
               const statusBg = "bg-[#DCFCE7] text-[#166534]";
@@ -238,11 +258,11 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 >
                   {/* Thumbnail Swatch */}
                   <div 
-                    className="w-full h-[80px] rounded-t-xl" 
-                    style={{
-                      background: `linear-gradient(135deg, ${barColor}26 0%, ${barColor}0D 50%, ${barColor}1F 100%)`
-                    }}
-                  />
+                    className="w-full h-[100px] rounded-t-[10px] flex items-center justify-center shrink-0" 
+                    style={{ backgroundColor: thumbBg }}
+                  >
+                    <ThumbIcon size={32} style={{ color: thumbIconColor }} />
+                  </div>
 
                   {/* Card Body */}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">

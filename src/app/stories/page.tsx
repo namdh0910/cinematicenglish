@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, Search, Filter, Sparkles } from "lucide-react";
+import { ArrowLeft, Search, Filter, Sparkles, Users } from "lucide-react";
 import { STORIES } from "@/lib/data";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/ui/Button";
@@ -94,49 +94,63 @@ export default function StoriesPage() {
   }, []);
 
   return (
-    <div className="bg-primary min-h-screen">
+    <div className="bg-[#F7F7F5] min-h-screen text-[#3D3D3B]">
       <Navbar />
 
-      <main className="pt-24 pb-12">
+      <main className="pt-6 pb-12">
         <Section>
           {/* Header & Search */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 mt-6">
             <div>
               <Badge variant="violet" className="mb-2">Thư viện</Badge>
-              <h1 className="text-display mb-2 gradient-text-silver">Kho Câu Chuyện Điện Ảnh</h1>
-              <p className="text-secondary">Học tiếng Anh qua những câu chuyện sâu sắc và lôi cuốn nhất.</p>
+              <h1 className="text-display mb-2 text-[#1A1A18]">Kho Câu Chuyện Điện Ảnh</h1>
+              <p className="text-[#6B6B68] font-medium text-sm">Học tiếng Anh qua những câu chuyện sâu sắc và lôi cuốn nhất.</p>
             </div>
             
             <div className="relative group max-w-md w-full">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-muted group-focus-within:text-accent-violet-bright transition-colors">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                 <Search size={18} />
               </div>
               <input 
                 type="text" 
                 placeholder="Tìm câu chuyện, chủ đề..." 
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-accent-violet/50 focus:bg-white/[0.08] transition-all"
+                className="w-full bg-[#FFFFFF] border border-[#EBEBEA] rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:border-blue-500 text-[#3D3D3B] placeholder:text-[#6B6B68] transition-all shadow-sm"
               />
             </div>
           </div>
 
           {/* Category Filters */}
           <div className="flex items-center gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
-            <div className="flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-xl mr-2 shrink-0">
-              <Filter size={14} className="text-muted" />
-              <span className="text-xs font-bold uppercase tracking-wider text-muted">Lọc theo</span>
+            <div className="flex items-center gap-2 px-3 py-2 bg-[#F3F4F6] border border-[#E5E7EB] rounded-xl mr-2 shrink-0">
+              <Filter size={14} className="text-[#4B5563]" />
+              <span className="text-xs font-bold uppercase tracking-wider text-[#4B5563]">Lọc theo</span>
             </div>
-            {categories.map((cat, i) => (
-              <button 
-                key={cat}
-                className={`px-6 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${
-                  i === 0 
-                    ? "bg-accent-violet/20 border-accent-violet/40 text-accent-violet-bright" 
-                    : "bg-white/5 border-white/10 text-secondary hover:border-white/20 hover:bg-white/[0.08]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat, i) => {
+              const isActive = i === 0;
+              return (
+                <button 
+                  key={cat}
+                  className="whitespace-nowrap transition-all border cursor-pointer"
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    backgroundColor: isActive ? '#EFF6FF' : '#F3F4F6',
+                    color: isActive ? '#1D4ED8' : '#4B5563',
+                    borderColor: isActive ? '#BFDBFE' : '#E5E7EB'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = '#E9EAEC';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.backgroundColor = '#F3F4F6';
+                  }}
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
 
           {/* Stories Grid */}
@@ -145,12 +159,12 @@ export default function StoriesPage() {
               <Card 
                 key={story.id} 
                 padding="none" 
-                className="overflow-hidden group flex flex-col h-full rounded-[32px] drop-shadow-lg border border-white/5 hover:border-white/20 transition-all duration-500 hover:shadow-glow-purple" 
+                className="overflow-hidden group flex flex-col h-full rounded-[24px] border border-[#EBEBEA] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] bg-[#FFFFFF] shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-500" 
                 transition={{ delay: i * 0.05 }}
               >
                 {/* 40%+ Image Area */}
                 <div className="h-64 relative overflow-hidden bg-black shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/20 to-transparent z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                   
                   {/* Grain Overlay */}
                   <div className="absolute inset-0 z-20 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")' }}></div>
@@ -166,42 +180,41 @@ export default function StoriesPage() {
                     className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
                   />
                   
-                  <Badge variant="violet" className="absolute top-4 right-4 z-30 backdrop-blur-md bg-black/40">{story.category}</Badge>
+                  <Badge variant="violet" className="absolute top-4 right-4 z-30 backdrop-blur-md bg-black/40 border-none">{story.category}</Badge>
                   <div className="absolute bottom-4 left-6 flex gap-2 z-30">
-                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold">{story.level}</Badge>
-                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold">▶ {story.duration}</Badge>
+                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold text-white border-white/20">{story.level}</Badge>
+                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold text-white border-white/20">▶ {story.duration}</Badge>
                   </div>
                 </div>
                 
                 {/* Content Area */}
-                <div className="p-6 flex flex-col flex-1 bg-bg-primary z-30 relative -mt-4 rounded-t-[32px]">
+                <div className="p-6 flex flex-col flex-1 bg-[#FFFFFF] z-30 relative -mt-4 rounded-t-[24px]">
                   <div className="flex items-start justify-between gap-4 mb-4">
-                    <h3 className="font-display font-black text-2xl leading-tight text-white group-hover:text-accent-gold transition-colors line-clamp-2 drop-shadow-md">
+                    <h3 className="font-display font-black text-2xl leading-tight text-[#1A1A18] group-hover:text-[#2563EB] transition-colors line-clamp-2">
                       {story.title}
                     </h3>
                   </div>
                   
-                  <p className="text-sm text-secondary/80 leading-relaxed mb-6 line-clamp-3 flex-1 font-medium">
+                  <p className="text-sm text-[#3D3D3B] leading-relaxed mb-6 line-clamp-3 flex-1 font-medium">
                     {story.description}
                   </p>
                   
-                  <div className="pt-6 border-t border-white/5 flex items-center justify-between mt-auto">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-widest text-muted mb-1 font-bold">Lượt học</span>
-                      <span className="text-xs font-black text-white/80 flex items-center gap-1.5">
-                        <Sparkles size={12} className="text-accent-gold" />
-                        {story.plays.toLocaleString()}
-                      </span>
+                  {story.plays ? (
+                    <div className="pt-6 border-t border-[#EBEBEA] flex items-center justify-between mt-auto w-full">
+                      <div className="flex items-center gap-1" style={{ fontSize: '12px', color: '#6B7280', display: 'flex', alignItems: 'center' }}>
+                        <Users size={14} className="text-[#6B7280]" />
+                        <span>{story.plays.toLocaleString()} lượt học</span>
+                      </div>
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        onClick={() => window.location.href=`/stories/${story.id}`}
+                        className="font-semibold tracking-wide bg-[#2563EB] hover:bg-[#1D4ED8]"
+                      >
+                        Học ngay
+                      </Button>
                     </div>
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
-                      onClick={() => window.location.href=`/stories/${story.id}`}
-                      className="font-black tracking-wide"
-                    >
-                      Học ngay
-                    </Button>
-                  </div>
+                  ) : null}
                 </div>
               </Card>
             ))}

@@ -170,8 +170,14 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 left-0 right-0 z-50 bg-[#FFFFFF] border-b border-[#EBEBEA] shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all duration-300"
-        style={{ height: `${NAV_HEIGHT}px` }}
+        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300"
+        style={{ 
+          height: `${NAV_HEIGHT}px`,
+          background: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          borderBottom: '1px solid #E5E7EB'
+        }}
       >
         <div className="container-custom h-full flex items-center justify-between">
           
