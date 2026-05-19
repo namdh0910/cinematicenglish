@@ -64,6 +64,15 @@ CREATE TABLE IF NOT EXISTS public.units (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all pivot columns exist on units table in case it was created previously
+ALTER TABLE public.units ADD COLUMN IF NOT EXISTS grade_id UUID REFERENCES public.grades(id) ON DELETE CASCADE;
+ALTER TABLE public.units ADD COLUMN IF NOT EXISTS unit_no TEXT;
+ALTER TABLE public.units ADD COLUMN IF NOT EXISTS cover_image TEXT;
+
+-- Drop NOT NULL constraints if table already exists to prevent insert conflicts with old records
+ALTER TABLE public.units ALTER COLUMN grade_id DROP NOT NULL;
+ALTER TABLE public.units ALTER COLUMN unit_no DROP NOT NULL;
+
 -- Indexes for optimized querying
 CREATE INDEX IF NOT EXISTS units_grade_id_idx ON public.units (grade_id);
 CREATE INDEX IF NOT EXISTS units_unit_no_idx ON public.units (unit_no);
@@ -79,6 +88,7 @@ DROP TRIGGER IF EXISTS update_units_updated_at ON public.units;
 CREATE TRIGGER update_units_updated_at
     BEFORE UPDATE ON public.units
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 
 
 -- ─── 3. LESSONS TABLE ────────────────────────────────────────────────────
