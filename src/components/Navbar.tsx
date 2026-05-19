@@ -2,11 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, Play, LogOut, Flame, Compass, LayoutDashboard, Sparkles, User } from "lucide-react";
+import { Menu, X, Play, LogOut, Flame, Compass, LayoutDashboard, Sparkles, User, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const simplifiedLinks = [
+  { label: "Học SGK", href: "/learn", icon: BookOpen },
   { label: "Khám phá", href: "/stories", icon: Compass },
   { label: "Lịch sử học", href: "/dashboard", icon: LayoutDashboard }
 ];
@@ -293,6 +294,13 @@ export default function Navbar() {
                         </div>
 
                         {/* Dropdown Options */}
+                        <Link href="/learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
+                          <BookOpen size={14} />
+                          Học SGK
+                        </Link>
+
                         <Link href="/stories" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
                           isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
                         }`}>
@@ -394,6 +402,15 @@ export default function Navbar() {
               <nav className="flex flex-col gap-4">
                 {role !== 'guest' ? (
                   <>
+                    <Link
+                      href="/learn"
+                      onClick={closeMenu}
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                    >
+                      <BookOpen size={18} />
+                      Học SGK
+                    </Link>
+
                     <Link
                       href="/stories"
                       onClick={closeMenu}
