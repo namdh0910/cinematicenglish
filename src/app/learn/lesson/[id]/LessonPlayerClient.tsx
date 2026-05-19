@@ -443,73 +443,387 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
       </div>
 
       {/* ─── MAIN WORKSPACE (Split Screen Layout) ─────────────────────── */}
-      <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-8 p-6 max-w-7xl mx-auto w-full items-stretch">
-        
-        {/* LEFT COLUMN: AUDIO / TEXTBOOK ILLUSTRATION */}
-        <div className="lg:col-span-6 flex flex-col space-y-6 justify-between">
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col h-full space-y-4">
+      {/* ─── MAIN WORKSPACE ────────────────────────────────────────── */}
+      {!hasVideo ? (
+        /* CENTERED STUDY CARD LAYOUT (QUIZLET/DUOLINGO STYLE) FOR NON-VIDEO LESSONS */
+        <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-3xl mx-auto mt-6">
+          <div className="w-full flex flex-col items-center space-y-8">
             
-            {/* Textbook Page Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <BookOpen className="text-blue-600" size={18} />
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
-                  {hasVideo ? "Cinematic Learning" : (lesson.unit?.title || "Tiếng Anh - Global Success")}
-                </span>
-              </div>
-              <span className="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase tracking-wider">
-                {hasVideo ? "Phim Điện Ảnh" : "Hội Thoại SGK"}
-              </span>
-            </div>
-
-            {/* Illustration / Player Frame */}
-            <div className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center group">
-              {hasVideo ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
-                    onTimeUpdate={handleTimeUpdate}
-                    playsInline
-                    className="w-full h-full object-cover z-10"
-                  />
-                  <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-black/60 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
-                    <ImageIcon size={10} /> Phim Minh Họa
+            {/* A. THE STUDY CARD */}
+            <AnimatePresence mode="wait">
+              {showAICoach && aiFeedback ? (
+                /* AI COACH REPORT CARD (Centered) */
+                <motion.div
+                  key="scorecard-report-centered"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-[#FFFDF9] border-2 border-dashed border-slate-300 p-8 rounded-3xl shadow-lg w-full relative overflow-hidden space-y-6 text-left"
+                >
+                  <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 via-orange-500 to-emerald-500" />
+                  
+                  {/* Star Rating Display */}
+                  <div className="flex justify-center items-center gap-2 pt-2">
+                    {[1, 2, 3].map((sIndex) => {
+                      const isActive = sIndex <= starsCount;
+                      return (
+                        <Star 
+                          key={sIndex} 
+                          size={28} 
+                          className={isActive ? "text-amber-400 fill-amber-400 filter drop-shadow-sm" : "text-slate-200 fill-slate-100"} 
+                        />
+                      );
+                    })}
                   </div>
-                </>
-              ) : (
-                <>
-                  {activeActivity?.content?.thumbnailUrl ? (
-                    <img
-                      src={activeActivity.content.thumbnailUrl}
-                      alt="Textbook Illustration"
-                      className="w-full h-full object-cover z-10 transition-transform duration-500 hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 z-10 select-none">
-                      <div className="w-16 h-16 rounded-full bg-blue-50/80 flex items-center justify-center text-blue-500 border border-blue-100 shadow-inner">
-                        <BookOpen className="w-8 h-8 animate-bounce-slow" />
+
+                  <div className="text-center">
+                    <h3 className="text-lg font-display font-black text-slate-800 uppercase tracking-widest">PHIẾU ĐIỂM AI COACH</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Học chuẩn bám sát Global Success</p>
+                  </div>
+
+                  {/* Main Score Metrics */}
+                  <div className="grid grid-cols-3 gap-3 text-center border-y border-dashed border-slate-200 py-4">
+                    <div className="border-r border-slate-100">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Phát âm</span>
+                      <h4 className={`text-xl font-black mt-0.5 ${aiFeedback.accuracy >= PASSING_SCORE ? "text-emerald-600" : "text-red-500"}`}>
+                        {aiFeedback.accuracy}%
+                      </h4>
+                    </div>
+                    <div className="border-r border-slate-100">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Lưu loát</span>
+                      <h4 className="text-xl font-black mt-0.5 text-blue-600">
+                        {aiFeedback.fluency}%
+                      </h4>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Xếp loại</span>
+                      <h4 className={`text-xs font-black mt-1.5 uppercase ${aiFeedback.overall >= PASSING_SCORE ? "text-emerald-600" : "text-red-500"}`}>
+                        {aiFeedback.overall >= PASSING_SCORE ? "Đạt yêu cầu" : "Cần cố gắng"}
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* Commentary */}
+                  <p className="text-xs text-slate-600 text-center leading-relaxed font-semibold italic bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    "{aiFeedback.coachFeedback}"
+                  </p>
+
+                  {/* Word-by-word accuracy checklist */}
+                  {learningMode === "speaking" && aiFeedback.wordEvaluations && (
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {aiFeedback.wordEvaluations.map((w: any, idx: number) => {
+                        const isCorrect = w.status === 'correct';
+                        return (
+                          <span 
+                            key={idx}
+                            className={`px-3 py-1 rounded-xl text-[10px] font-black ${
+                              isCorrect 
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                : 'bg-red-50 text-red-600 border border-red-100 line-through'
+                            }`}
+                          >
+                            {w.word}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Gamification Action buttons */}
+                  <div className="pt-2">
+                    {aiFeedback.overall < PASSING_SCORE ? (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={resetStateForNewScene}
+                          className="flex-1 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                        >
+                          <RefreshCw size={13} className="animate-spin-slow" /> Thử lại ngay
+                        </button>
+                        <button
+                          disabled
+                          className="py-3 px-4 bg-slate-100 text-slate-300 border border-slate-200 font-bold uppercase text-xs tracking-widest rounded-xl cursor-not-allowed flex items-center justify-center"
+                        >
+                          Khóa 🔒
+                        </button>
                       </div>
-                      <div>
-                        <span className="text-[10px] font-black uppercase text-blue-600 block tracking-widest">Global Success Curriculum</span>
-                        <p className="text-sm font-black text-slate-700 max-w-sm mt-1">{lesson.title}</p>
+                    ) : (
+                      <button
+                        onClick={handleNextScene}
+                        className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-widest rounded-xl transition-all shadow-md shadow-blue-500/10 flex items-center justify-center gap-1.5 hover:scale-[1.01]"
+                      >
+                        {currentIdx < activities.length - 1 ? (
+                          <>Câu tiếp theo <ChevronRight size={14} /></>
+                        ) : (
+                          <>Hoàn thành bài học <Check size={14} /></>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ) : (
+                /* STUDY CARD (Non-video format) */
+                <motion.div
+                  key="study-card-centered"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="bg-white rounded-3xl shadow-lg p-10 text-center border border-gray-100 w-full relative overflow-hidden space-y-6"
+                >
+                  {/* Textbook Page Header */}
+                  <div className="flex items-center justify-center gap-2 pb-4 border-b border-slate-100">
+                    <BookOpen className="text-blue-600" size={16} />
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                      {lesson.unit?.title || "Tiếng Anh - Global Success"}
+                    </span>
+                  </div>
+
+                  {learningMode === "speaking" ? (
+                    /* SPEAKING MODE INTERACTIVE CARD */
+                    <div className="py-6 space-y-4">
+                      <h2 className="text-4xl font-bold text-slate-800 leading-normal tracking-tight font-display">
+                        {transcript}
+                      </h2>
+                      <p className="text-lg text-slate-500 italic mt-4 block">
+                        {translation}
+                      </p>
+                      
+                      <div className="pt-6">
+                        <button
+                          onClick={handlePlayScene}
+                          className="mx-auto px-5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 text-blue-600 text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                        >
+                          <Volume2 size={14} /> Nghe phát âm mẫu
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* LISTENING DICTATION MODE INTERACTIVE CARD */
+                    <div className="py-6 space-y-6">
+                      <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-wrap gap-x-2.5 gap-y-3.5 items-center justify-center">
+                        {dictationWords.map((dw, idx) => {
+                          if (!dw.isBlank) {
+                            return (
+                              <span key={idx} className="text-xl font-bold text-slate-800">
+                                {dw.original}
+                              </span>
+                            );
+                          }
+
+                          const isCorrect = dictationResults[idx] === true;
+                          const isIncorrect = dictationResults[idx] === false;
+
+                          return (
+                            <input
+                              key={idx}
+                              type="text"
+                              disabled={dictationChecked}
+                              value={dictationAnswers[idx] || ""}
+                              onChange={(e) => {
+                                const newAns = [...dictationAnswers];
+                                newAns[idx] = e.target.value;
+                                setDictationAnswers(newAns);
+                              }}
+                              placeholder="..."
+                              className={`w-28 text-center border-b-2 font-black py-1 text-base focus:outline-none transition-all ${
+                                isCorrect ? "border-emerald-500 text-emerald-600 bg-emerald-50 rounded" :
+                                isIncorrect ? "border-red-500 text-red-600 bg-red-50 rounded" :
+                                "border-blue-400 text-blue-600 focus:border-blue-600 bg-blue-50/30"
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex justify-center gap-4">
+                        <button
+                          onClick={handlePlayScene}
+                          className="px-5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 text-blue-600 text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                        >
+                          <Volume2 size={14} /> Nghe Audio mẫu
+                        </button>
+                        
+                        {!dictationChecked ? (
+                          <button 
+                            onClick={handleCheckDictation}
+                            className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-sm"
+                          >
+                            Kiểm tra kết quả
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={resetStateForNewScene}
+                            className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-xl transition-all"
+                          >
+                            Làm lại câu này
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
-                  <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-blue-600 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
-                    <BookOpen size={10} /> Hình Minh Họa SGK
-                  </div>
-                </>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
-            {/* Textbook Audio Visualizer & Player console */}
-            <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {isVideoPlaying ? (
-                  <button 
-                    onClick={handlePauseScene} 
-                    className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
+            {/* B. RECORDER CONTROL HUB (Tách biệt hẳn xuống bên dưới Card) */}
+            {learningMode === "speaking" && !showAICoach && (
+              <div className="w-full flex flex-col items-center justify-center space-y-4 mt-6">
+                <div className="relative flex flex-col items-center">
+                  
+                  {isAnalyzing && (
+                    <div className="absolute -top-16 px-4 py-2 bg-white border border-slate-200 rounded-full shadow-md flex items-center gap-2 text-xs font-black text-blue-600">
+                      <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"
+                      />
+                      AI đang chấm điểm...
+                    </div>
+                  )}
+
+                  {!audioUrl ? (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)" }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={isRecording ? stopRecording : startRecording}
+                        className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${
+                          isRecording 
+                            ? "bg-red-500 text-white shadow-red-500/20 animate-pulse" 
+                            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/30"
+                        }`}
+                      >
+                        {isRecording ? <Square size={24} fill="currentColor" /> : <Mic size={32} />}
+                      </motion.button>
+                      
+                      <AnimatePresence>
+                        {isRecording && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="absolute -top-10 px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm animate-pulse"
+                          >
+                            ĐANG THU
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-5 justify-center">
+                      {/* Retry Button */}
+                      <button
+                        onClick={resetRecorder}
+                        className="w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all"
+                        title="Nói lại"
+                      >
+                        <RefreshCw size={18} />
+                      </button>
+                      
+                      {/* Listen Playback Button */}
+                      <button
+                        onClick={() => audioUrl && new Audio(audioUrl).play()}
+                        className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-all shadow-sm"
+                        title="Nghe lại bài nói"
+                      >
+                        <Play size={26} fill="currentColor" className="ml-1" />
+                      </button>
+
+                      {/* Confirm and Proceed Button */}
+                      <button
+                        onClick={handleNextScene}
+                        disabled={currentIdx === activities.length - 1}
+                        className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Lưu & Sang câu tiếp"
+                      >
+                        <CheckCircle size={18} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {micError && (
+                  <div className="text-red-600 text-xs font-bold px-4 py-2 bg-red-50 rounded-xl border border-red-100 max-w-sm text-center">
+                    {micError}
+                  </div>
+                )}
+
+                <p className="text-[10px] font-black tracking-widest uppercase text-slate-400 mt-2 text-center">
+                  {isRecording ? "Bấm nút vuông đỏ để dừng & chấm điểm" : audioUrl ? "Lắng nghe hoặc thử lại câu thoại" : "Chạm Micro để bắt đầu phát âm"}
+                </p>
+              </div>
+            )}
+            
+          </div>
+        </main>
+      ) : (
+        /* ORIGINAL MOVIE/VIDEO SPLIT SCREEN LAYOUT IF VIDEO EXISTS */
+        <main className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-8 p-6 max-w-7xl mx-auto w-full items-stretch">
+          
+          {/* LEFT COLUMN: AUDIO / TEXTBOOK ILLUSTRATION */}
+          <div className="lg:col-span-6 flex flex-col space-y-6 justify-between">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col h-full space-y-4">
+              
+              {/* Textbook Page Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="text-blue-600" size={18} />
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                    {hasVideo ? "Cinematic Learning" : (lesson.unit?.title || "Tiếng Anh - Global Success")}
+                  </span>
+                </div>
+                <span className="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase tracking-wider">
+                  {hasVideo ? "Phim Điện Ảnh" : "Hội Thoại SGK"}
+                </span>
+              </div>
+
+              {/* Illustration / Player Frame */}
+              <div className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center group">
+                {hasVideo ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                      onTimeUpdate={handleTimeUpdate}
+                      playsInline
+                      className="w-full h-full object-cover z-10"
+                    />
+                    <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-black/60 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
+                      <ImageIcon size={10} /> Phim Minh Họa
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {activeActivity?.content?.thumbnailUrl ? (
+                      <img
+                        src={activeActivity.content.thumbnailUrl}
+                        alt="Textbook Illustration"
+                        className="w-full h-full object-cover z-10 transition-transform duration-500 hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 z-10 select-none">
+                        <div className="w-16 h-16 rounded-full bg-blue-50/80 flex items-center justify-center text-blue-500 border border-blue-100 shadow-inner">
+                          <BookOpen className="w-8 h-8 animate-bounce-slow" />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-black uppercase text-blue-600 block tracking-widest">Global Success Curriculum</span>
+                          <p className="text-sm font-black text-slate-700 max-w-sm mt-1">{lesson.title}</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-blue-600 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
+                      <BookOpen size={10} /> Hình Minh Họa SGK
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Textbook Audio Visualizer & Player console */}
+              <div className="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {isVideoPlaying ? (
+                    <button 
+                      onClick={handlePauseScene} 
+                      className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-sm"
                   >
                     <Pause size={16} fill="white" />
                   </button>
@@ -521,6 +835,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                     <Play size={16} fill="white" className="ml-0.5" />
                   </button>
                 )}
+              </div>
 
                 <div>
                   <span className="text-[9px] font-black uppercase text-blue-600 block tracking-widest">Hội thoại Audio</span>
@@ -562,7 +877,6 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
               <span>Bấm phát Audio để nghe phát âm mẫu chuẩn, sau đó tiến hành tập luyện bên phải.</span>
             </div>
           </div>
-        </div>
 
         {/* RIGHT COLUMN: TEXT CONTEXT & SCORECARD */}
         <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
@@ -833,6 +1147,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
         </div>
 
       </main>
+      )}
 
       {/* ─── SUCCESS ARENA PANEL ────────────────────────────────────────── */}
       <AnimatePresence>

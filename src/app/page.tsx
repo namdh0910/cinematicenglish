@@ -68,14 +68,14 @@ export default function HomePage() {
                 Bắt đầu nâng cao kết quả học tập tiếng Anh ngay hôm nay
               </h3>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full">
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-64 px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-orange-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center">
+                  <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-lg transition-all shadow-lg shadow-orange-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
                     🎒 Dành cho Học Sinh
                   </button>
                 </Link>
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-64 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center">
+                  <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
                     👨‍🏫 Dành cho Giáo Viên
                   </button>
                 </Link>
@@ -90,7 +90,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. CORE OUTCOMES (MỤC TIÊU HỌC TẬP) */}
-      <section className="py-20 bg-white border-y border-slate-200/85 relative w-full flex flex-col items-center justify-center">
+      <section className="py-24 md:py-32 bg-white border-y border-slate-200/85 relative w-full flex flex-col items-center justify-center">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <h2 className="text-2xl md:text-4xl font-display font-black tracking-tight text-slate-900 text-center">
@@ -130,7 +130,7 @@ export default function HomePage() {
       </section>
 
       {/* 3. THE 4-STEP REFLEX LOOP */}
-      <section className="py-20 relative w-full flex flex-col items-center justify-center overflow-hidden">
+      <section className="py-24 md:py-32 relative w-full flex flex-col items-center justify-center overflow-hidden">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <span className="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-center mx-auto inline-block">
@@ -144,74 +144,59 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="relative w-full max-w-4xl flex justify-center">
-            {/* Connecting line */}
-            <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-200 -translate-x-1/2 z-0 opacity-80" />
-            
-            <div className="space-y-10 relative z-10 w-full">
-              {[
-                { 
-                  step: "01", 
-                  name: "NGHE MẪU 🎧", 
-                  desc: "Nghe phát âm và nhấn trọng âm chuẩn xác từ giáo viên bản xứ, kèm theo các hình ảnh hội thoại minh họa sinh động bám sát bài học.", 
-                  dotColor: "bg-blue-600"
-                },
-                { 
-                  step: "02", 
-                  name: "LUYỆN PHÁT ÂM 🗣️", 
-                  desc: "Bấm Micro thu âm và đọc nhại lại theo âm điệu mẫu. Trực tiếp thực hành nói tự tin ngay tại nhà không sợ ngượng ngùng.", 
-                  dotColor: "bg-orange-500"
-                },
-                { 
-                  step: "03", 
-                  name: "AI ĐÁNH GIÁ CHẤM ĐIỂM 🤖", 
-                  desc: "Cô giáo AI phân tích giọng nói chi tiết, chỉ rõ từ nào em phát âm đúng màu xanh, từ nào chưa chuẩn màu đỏ để chỉnh sửa nhanh.", 
-                  dotColor: "bg-emerald-500"
-                },
-                { 
-                  step: "04", 
-                  name: "LUYỆN NGHE CHÉP CHÍNH TẢ 📝", 
-                  desc: "Thực hành điền từ còn thiếu vào ô trống để khắc sâu vốn từ vựng và củng cố toàn diện kỹ năng nghe hiểu ngữ pháp.", 
-                  dotColor: "bg-indigo-600"
-                }
-              ].map((s, i) => (
-                <motion.div 
-                  key={s.step}
-                  initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className={`flex flex-col md:flex-row items-start md:items-center gap-8 w-full ${i % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
-                >
-                  {/* Card content */}
-                  <div className="w-full md:w-1/2 pl-12 md:pl-0">
-                    <motion.div 
-                      whileHover={{ scale: 1.02 }}
-                      className="bg-white p-6 rounded-[24px] border border-slate-200/60 shadow-[0_8px_25px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgba(37,99,235,0.06)] hover:border-blue-300 transition-all duration-300 space-y-3"
-                    >
-                      <span className="inline-block px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200 text-[9px] font-black text-slate-500 tracking-wider">
-                        BƯỚC {s.step}
-                      </span>
-                      <h3 className="text-base md:text-lg font-black text-slate-800 leading-tight">
-                        {s.name}
-                      </h3>
-                      <p className="text-slate-500 text-xs leading-relaxed font-bold">
-                        {s.desc}
-                      </p>
-                    </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl justify-items-center">
+            {[
+              { 
+                step: "01", 
+                name: "NGHE MẪU 🎧", 
+                desc: "Nghe phát âm và nhấn trọng âm chuẩn xác từ giáo viên bản xứ, kèm theo các hình ảnh hội thoại minh họa sinh động bám sát bài học.", 
+                dotColor: "text-blue-600",
+                bg: "bg-blue-50"
+              },
+              { 
+                step: "02", 
+                name: "LUYỆN PHÁT ÂM 🗣️", 
+                desc: "Bấm Micro thu âm và đọc nhại lại theo âm điệu mẫu. Trực tiếp thực hành nói tự tin ngay tại nhà không sợ ngượng ngùng.", 
+                dotColor: "text-orange-500",
+                bg: "bg-orange-50"
+              },
+              { 
+                step: "03", 
+                name: "AI ĐÁNH GIÁ CHẤM ĐIỂM 🤖", 
+                desc: "Cô giáo AI phân tích giọng nói chi tiết, chỉ rõ từ nào em phát âm đúng màu xanh, từ nào chưa chuẩn màu đỏ để chỉnh sửa nhanh.", 
+                dotColor: "text-emerald-500",
+                bg: "bg-emerald-50"
+              },
+              { 
+                step: "04", 
+                name: "LUYỆN NGHE CHÉP CHÍNH TẢ 📝", 
+                desc: "Thực hành điền từ còn thiếu vào ô trống để khắc sâu vốn từ vựng và củng cố toàn diện kỹ năng nghe hiểu ngữ pháp.", 
+                dotColor: "text-indigo-600",
+                bg: "bg-indigo-50"
+              }
+            ].map((s, i) => (
+              <motion.div 
+                key={s.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full flex flex-col space-y-4"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${s.bg} ${s.dotColor}`}>
+                    {s.step}
                   </div>
-
-                  {/* Connect dot */}
-                  <div className="absolute left-6 md:left-1/2 -translate-x-1/2 flex items-center justify-center z-20">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border-4 border-slate-200 shadow-md">
-                      <span className={`w-2.5 h-2.5 rounded-full ${s.dotColor}`} />
-                    </div>
-                  </div>
-
-                  <div className="hidden md:block w-1/2" />
-                </motion.div>
-              ))}
-            </div>
+                  <h3 className="text-lg md:text-xl font-black text-slate-800 leading-tight flex-1">
+                    {s.name}
+                  </h3>
+                </div>
+                <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                  {s.desc}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

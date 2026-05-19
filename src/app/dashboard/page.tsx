@@ -238,7 +238,7 @@ export default function DashboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-[#f8f9fa] min-h-screen text-slate-800 pb-24 relative overflow-hidden">
+    <div className="bg-slate-50 min-h-screen text-slate-800 pb-24 relative overflow-y-auto overflow-x-hidden">
       <Navbar />
 
       {/* Custom Premium Toast Notification */}
@@ -283,13 +283,13 @@ export default function DashboardPage() {
       <div className="absolute -left-40 top-20 w-96 h-96 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
       <div className="absolute -right-40 top-80 w-96 h-96 rounded-full bg-orange-500/5 blur-[100px] pointer-events-none" />
       
-      <div className="w-full flex justify-center px-4 pt-28">
-        <main className="w-full max-w-4xl space-y-8 relative z-10">
+      <div className="w-full flex justify-center px-4" style={{ paddingTop: '120px' }}>
+        <main className="w-full max-w-4xl flex flex-col gap-8 relative z-10">
           
           {/* 1. PROFILE HEADER CARD */}
-          <div className="flex flex-col md:flex-row gap-6 items-stretch">
+          <div className="flex flex-col md:flex-row gap-6 items-stretch w-full">
             {/* User Profile Card */}
-            <div className="flex-1 flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 flex items-center justify-center text-xl font-black text-white shadow-md">
                   {profile?.full_name ? profile.full_name[0].toUpperCase() : 'H'}
@@ -342,28 +342,28 @@ export default function DashboardPage() {
           </div>
 
           {/* 2. HERO SEARCH & HOMEWORK CODE SECTION (YourHomework Style) */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-5 text-center">
+          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6 text-center w-full">
             <h3 className="text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 tracking-tight">
               <BookOpen className="text-blue-500" size={22} /> Vào lớp học hôm nay
             </h3>
-            <div className="flex flex-col md:flex-row gap-3 max-w-2xl mx-auto">
-              <div className="flex-1 relative">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 max-w-2xl mx-auto w-full">
+              <div className="md:col-span-3 relative w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Nhập mã bài tập lớp học hoặc tìm kiếm bài học..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
                 />
               </div>
-              <button className="px-8 py-3.5 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-500/10">
+              <button className="md:col-span-1 w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-500/10 whitespace-nowrap">
                 Vào học ngay
               </button>
             </div>
 
             {/* Temporary Premium Seed Data Pill */}
-            <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <div className="flex flex-wrap justify-center gap-3 mt-6 pt-4 border-t border-slate-100">
               <button 
                 onClick={handleSeed}
                 disabled={seeding}
@@ -413,13 +413,13 @@ export default function DashboardPage() {
           </div>
 
           {/* 4. SCHOOL & GRADE CATEGORY TABS */}
-          <div className="space-y-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col gap-6 w-full">
             <div className="text-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Chọn Cấp Học & Lớp của em</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Chọn Cấp Học & Lớp của em</span>
             </div>
 
             {/* School levels selector pills */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-3 justify-center w-full">
               {[
                 { id: "primary", label: "Tiểu học" },
                 { id: "secondary", label: "Trung học cơ sở (THCS)" },
@@ -433,10 +433,10 @@ export default function DashboardPage() {
                       setSelectedSchool(lvl.id as any);
                       setSelectedGrade(lvl.id === "primary" ? "Lớp 3" : lvl.id === "secondary" ? "Lớp 6" : "Lớp 10");
                     }}
-                    className={`text-xs transition-all ${
+                    className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
-                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {lvl.label}
@@ -446,17 +446,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Dynamic Grades selector pills */}
-            <div className="flex flex-wrap gap-2 justify-center pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-slate-100 w-full">
               {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => {
                 const isActive = selectedGrade === gr;
                 return (
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`text-xs transition-all ${
+                    className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
-                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {gr}
@@ -469,10 +469,10 @@ export default function DashboardPage() {
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`text-xs transition-all ${
+                    className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
-                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {gr}
@@ -485,10 +485,10 @@ export default function DashboardPage() {
                   <button
                     key={gr}
                     onClick={() => setSelectedGrade(gr)}
-                    className={`text-xs transition-all ${
+                    className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white rounded-full px-4 py-2 font-bold shadow-sm" 
-                        : "bg-gray-100 text-gray-600 rounded-full px-4 py-2 hover:bg-gray-200"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {gr}

@@ -127,6 +127,12 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 /* ═══════════════════════════════════════════════
    UTILITIES & COMPONENTS
    ═══════════════════════════════════════════════ */
+  /* Centering */
+  .mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
   /* Backgrounds */
   .bg-primary     { background-color: var(--bg-primary); }
   .bg-secondary   { background-color: var(--bg-secondary); }

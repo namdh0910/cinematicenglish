@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, X, Play, LogOut, Flame, Compass, LayoutDashboard, Sparkles, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -24,6 +24,8 @@ interface UserProfile {
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname() || "";
+  const isLightMode = pathname.startsWith("/learn") || pathname.startsWith("/dashboard") || pathname.startsWith("/journal") || pathname.startsWith("/feed");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false); // Mobile menu state
   const [dropdownOpen, setDropdownOpen] = useState(false); // Desktop profile dropdown state
@@ -169,7 +171,11 @@ export default function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? "bg-black/85 backdrop-blur-md border-b border-white/10" : "bg-transparent py-2"
+          scrolled
+            ? isLightMode
+              ? "bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm"
+              : "bg-black/85 backdrop-blur-md border-b border-white/10"
+            : "bg-transparent py-2"
         }`}
         style={{ height: `${NAV_HEIGHT}px` }}
       >
@@ -177,10 +183,10 @@ export default function Navbar() {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-              <Play size={14} fill="black" className="ml-0.5 text-black" />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-md ${isLightMode ? "bg-blue-600" : "bg-white"}`}>
+              <Play size={14} fill={isLightMode ? "white" : "black"} className={`ml-0.5 ${isLightMode ? "text-white" : "text-black"}`} />
             </div>
-            <span className="font-display font-black text-lg tracking-tight text-white">Cinematic</span>
+            <span className={`font-display font-black text-lg tracking-tight ${isLightMode ? "text-slate-800" : "text-white"}`}>Cinematic</span>
           </Link>
 
           {/* Desktop Nav Links (Only if logged in) */}
@@ -190,7 +196,9 @@ export default function Navbar() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="text-sm font-bold text-white/60 hover:text-white transition-colors flex items-center gap-1.5"
+                  className={`text-sm font-bold transition-colors flex items-center gap-1.5 ${
+                    isLightMode ? "text-slate-500 hover:text-slate-800" : "text-white/60 hover:text-white"
+                  }`}
                 >
                   <l.icon size={15} />
                   {l.label}
@@ -203,10 +211,12 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-5">
             {role === 'guest' ? (
               <>
-                <Link href="/login" className="text-sm font-bold text-white/70 hover:text-white transition-colors">
+                <Link href="/login" className={`text-sm font-bold transition-colors ${isLightMode ? "text-slate-600 hover:text-slate-800" : "text-white/70 hover:text-white"}`}>
                   Đăng nhập
                 </Link>
-                <Link href="/signup" className="px-5 py-2.5 rounded-full bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-[0_4px_12px_rgba(255,255,255,0.15)]">
+                <Link href="/signup" className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md ${
+                  isLightMode ? "bg-blue-600 text-white hover:bg-blue-750" : "bg-white text-black"
+                }`}>
                   Bắt đầu
                 </Link>
               </>
@@ -214,8 +224,12 @@ export default function Navbar() {
               <div className="flex items-center gap-4" ref={dropdownRef}>
                 
                 {/* Streak flame indicator */}
-                <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full text-amber-500 text-xs font-black select-none">
-                  <Flame size={14} className="fill-amber-500 animate-pulse" />
+                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black select-none border ${
+                  isLightMode 
+                    ? "bg-orange-50 border-orange-100 text-orange-600" 
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                }`}>
+                  <Flame size={14} className="fill-orange-500 animate-pulse" />
                   <span>{streakCount} NGÀY</span>
                 </div>
 
@@ -233,7 +247,11 @@ export default function Navbar() {
                         className="w-8 h-8 rounded-full border border-white/20 hover:border-violet-500 transition-colors object-cover" 
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-violet-600 border border-white/20 hover:border-violet-500 transition-colors flex items-center justify-center text-xs font-black uppercase text-white shadow-glow-violet">
+                      <div className={`w-8 h-8 rounded-full border transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm ${
+                        isLightMode
+                          ? "bg-blue-50 border-blue-200 text-blue-600"
+                          : "bg-violet-600 border-white/20 text-white shadow-glow-violet"
+                      }`}>
                         {profile?.fullName ? profile.fullName.charAt(0) : <User size={14} />}
                       </div>
                     )}
@@ -247,17 +265,21 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-3 w-56 bg-black/90 backdrop-blur-lg border border-white/10 rounded-2xl p-3 shadow-2xl flex flex-col gap-1.5"
+                        className={`absolute right-0 mt-3 w-56 border rounded-2xl p-3 shadow-2xl flex flex-col gap-1.5 ${
+                          isLightMode
+                            ? "bg-white/95 border-slate-200/80 text-slate-800"
+                            : "bg-black/90 border-white/10 text-white"
+                        }`}
                       >
                         {/* User Profile header */}
-                        <div className="p-2 border-b border-white/5 mb-1.5 flex flex-col gap-0.5">
-                          <p className="text-xs font-black text-white truncate max-w-full">{profile?.fullName}</p>
-                          <p className="text-[10px] text-white/40 truncate max-w-full">{profile?.email}</p>
+                        <div className={`p-2 border-b mb-1.5 flex flex-col gap-0.5 ${isLightMode ? "border-slate-100" : "border-white/5"}`}>
+                          <p className={`text-xs font-black truncate max-w-full ${isLightMode ? "text-slate-800" : "text-white"}`}>{profile?.fullName}</p>
+                          <p className={`text-[10px] truncate max-w-full ${isLightMode ? "text-slate-400" : "text-white/40"}`}>{profile?.email}</p>
                           
                           {/* Plan Badge */}
                           <div className="mt-1.5 self-start">
                             {profile?.subscriptionPlan === 'free' ? (
-                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-white/10 text-white/70">
+                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isLightMode ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white/70"}`}>
                                 Free Plan
                               </span>
                             ) : (
@@ -270,24 +292,30 @@ export default function Navbar() {
                         </div>
 
                         {/* Dropdown Options */}
-                        <Link href="/stories" onClick={closeMenu} className="flex items-center gap-2 p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 text-xs font-bold transition-colors">
+                        <Link href="/stories" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
                           <Compass size={14} />
                           Khám phá
                         </Link>
 
-                        <Link href="/dashboard" onClick={closeMenu} className="flex items-center gap-2 p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/5 text-xs font-bold transition-colors">
+                        <Link href="/dashboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
                           <LayoutDashboard size={14} />
                           Lịch sử học
                         </Link>
 
                         {profile?.subscriptionPlan === 'free' && (
-                          <Link href="/#pricing" onClick={closeMenu} className="flex items-center gap-2 p-2 rounded-xl text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 text-xs font-black transition-colors">
+                          <Link href="/#pricing" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-black transition-colors ${
+                            isLightMode ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
+                          }`}>
                             <Sparkles size={14} fill="currentColor" />
                             Nâng cấp PRO
                           </Link>
                         )}
 
-                        <div className="h-px bg-white/5 my-1" />
+                        <div className={`h-px my-1 ${isLightMode ? "bg-slate-100" : "bg-white/5"}`} />
 
                         <button 
                           onClick={handleLogout}
@@ -307,7 +335,7 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 rounded-lg text-white"
+            className={`md:hidden p-2 rounded-lg ${isLightMode ? "text-slate-800" : "text-white"}`}
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
