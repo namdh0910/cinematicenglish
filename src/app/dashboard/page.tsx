@@ -79,6 +79,7 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dbGrades, setDbGrades] = useState<{ id: string; title: string }[]>([]);
   
   // States for Seeding Data & Toast
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
@@ -99,6 +100,13 @@ export default function DashboardPage() {
         if (userProfile) {
           setProfile(userProfile);
           setEditName(userProfile.full_name || "");
+        }
+
+        const { data: gradesList } = await supabase
+          .from("grades")
+          .select("id, title");
+        if (gradesList) {
+          setDbGrades(gradesList);
         }
 
         const { data: streakData } = await supabase
@@ -547,6 +555,9 @@ export default function DashboardPage() {
                 const statusText = isStudying ? "Đang học" : "Chưa bắt đầu";
                 const statusBg = isStudying ? "bg-[#DCFCE7] text-[#166534]" : "bg-slate-100 text-slate-500";
 
+                const matchingGrade = dbGrades.find((g) => g.title === (unit.grade || selectedGrade));
+                const gradeHref = matchingGrade ? `/learn/grade/${matchingGrade.id}` : "/learn";
+
                 return (
                   <motion.div
                     key={unit.id}
@@ -597,7 +608,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-gray-100">
-                      <Link href={`/learn`}>
+                      <Link href={gradeHref}>
                         <button className="w-full py-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-xs font-black uppercase tracking-wider text-blue-600 transition-all flex items-center justify-center gap-2 cursor-pointer">
                           <Play size={12} fill="currentColor" /> Vào bài học
                         </button>
