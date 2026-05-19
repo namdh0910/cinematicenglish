@@ -588,38 +588,88 @@ export async function getLessonWithDetails(lessonId: string) {
       return mockLesson;
     }
 
-    // 2. Fetch lesson sentences (which represent activities in the frontend model)
-    const { data: sentences, error: sentencesError } = await supabase
-      .from('lesson_sentences')
-      .select('*')
-      .eq('lesson_id', lessonId)
-      .order('order_index', { ascending: true });
-
-    if (sentencesError) {
-      console.error("Error fetching lesson sentences:", sentencesError);
-      return {
-        ...lesson,
-        activities: []
+    interface MappedActivity {
+      id: string;
+      title: string;
+      type: string;
+      instructions: string;
+      order_index: number;
+      content: {
+        transcript: string;
+        translation: string;
+        thumbnailUrl: string;
+        audioUrl: string;
+        start_time?: number;
+        end_time?: number;
       };
     }
 
-    // 3. Map sentences to frontend activities structure
-    const activities = (sentences || []).map((sentence) => ({
-      id: sentence.id,
-      title: "Luyện nói",
-      type: "shadowing",
-      instructions: "Nhấn nút ghi âm và bắt chước phát âm cụm từ dưới đây với ngữ điệu tự nhiên nhất.",
-      order_index: sentence.order_index,
-      content: {
-        transcript: sentence.transcript,
-        translation: sentence.translation,
-        thumbnailUrl: sentence.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
-        audioUrl: sentence.audio_url || '',
+    let activities: MappedActivity[] = [];
+    let video_url = lesson.video_url || null;
+
+    // Check if the lesson has data in its new JSON content column
+    if (lesson.content) {
+      const contentObj = (typeof lesson.content === 'string' 
+        ? JSON.parse(lesson.content) 
+        : lesson.content) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+      if (contentObj) {
+        if (contentObj.video_url) {
+          video_url = contentObj.video_url;
+        }
+
+        const contentSentences = (contentObj.sentences || contentObj.dialogs || (Array.isArray(contentObj) ? contentObj : [])) as Array<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+        
+        if (contentSentences.length > 0) {
+          activities = contentSentences.map((item, idx: number) => ({
+            id: String(item.id || `${lessonId}-act-${idx}`),
+            title: "Luyện nói",
+            type: "shadowing",
+            instructions: "Nhấn nút ghi âm và bắt chước phát âm cụm từ dưới đây với ngữ điệu tự nhiên nhất.",
+            order_index: Number(item.order_index || (idx + 1)),
+            content: {
+              transcript: String(item.transcript || item.text || ""),
+              translation: String(item.translation || item.explanation || ""),
+              thumbnailUrl: String(item.thumbnail_url || item.thumbnailUrl || contentObj.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800'),
+              audioUrl: String(item.audio_url || item.audioUrl || ""),
+              start_time: typeof item.start_time === 'number' ? item.start_time : (idx * 5),
+              end_time: typeof item.end_time === 'number' ? item.end_time : ((idx + 1) * 5),
+            }
+          }));
+        }
       }
-    }));
+    }
+
+    // If no activities were mapped from content JSON, fall back to the legacy lesson_sentences table
+    if (activities.length === 0) {
+      const { data: sentences, error: sentencesError } = await supabase
+        .from('lesson_sentences')
+        .select('*')
+        .eq('lesson_id', lessonId)
+        .order('order_index', { ascending: true });
+
+      if (!sentencesError && sentences && sentences.length > 0) {
+        activities = sentences.map((sentence) => ({
+          id: sentence.id,
+          title: "Luyện nói",
+          type: "shadowing",
+          instructions: "Nhấn nút ghi âm và bắt chước phát âm cụm từ dưới đây với ngữ điệu tự nhiên nhất.",
+          order_index: sentence.order_index,
+          content: {
+            transcript: sentence.transcript,
+            translation: sentence.translation,
+            thumbnailUrl: sentence.thumbnail_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800',
+            audioUrl: sentence.audio_url || '',
+            start_time: sentence.start_time || 0,
+            end_time: sentence.end_time || 10,
+          }
+        }));
+      }
+    }
 
     return {
       ...lesson,
+      video_url,
       activities
     };
   } catch (err) {

@@ -16,10 +16,13 @@ import {
   GraduationCap, 
   BookOpen, 
   ChevronRight, 
-  Award 
+  Award,
+  Check
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { seedGlobalSuccessData } from "@/app/actions/seed";
+import { migrateLegacyMovies } from "@/app/actions/migrateLegacyMovies";
 
 const GLOBAL_SUCCESS_UNITS = [
   {
@@ -76,13 +79,13 @@ export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [editName, setEditName] = useState("");
   const [loading, setLoading] = useState(true);
+  
+  // States for Seeding Data & Toast
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({ show: false, message: '', type: 'success' });
+  const [seeding, setSeeding] = useState(false);
+  const [migrating, setMigrating] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  async function fetchProfile() {
     try {
       const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -158,6 +161,78 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    setTimeout(() => {
+      setMounted(true);
+      fetchProfile();
+    }, 0);
+  }, []);
+
+  const handleMigrate = async () => {
+    setMigrating(true);
+    try {
+      const result = await migrateLegacyMovies();
+      if (result.success) {
+        setToast({
+          show: true,
+          message: result.message || "Đồng nhất hóa dữ liệu thành công!",
+          type: "success"
+        });
+      } else {
+        setToast({
+          show: true,
+          message: result.error || result.message || "Đồng nhất hóa thất bại!",
+          type: "error"
+        });
+      }
+    } catch (err) {
+      setToast({
+        show: true,
+        message: err instanceof Error ? err.message : "Lỗi kết nối máy chủ!",
+        type: "error"
+      });
+    } finally {
+      setMigrating(false);
+      setTimeout(() => {
+        setToast(prev => ({ ...prev, show: false }));
+      }, 5000);
+    }
+  };
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      const result = await seedGlobalSuccessData();
+      if (result.success) {
+        setToast({
+          show: true,
+          message: result.message || "Mồi dữ liệu thành công!",
+          type: "success"
+        });
+        // Sync layout with seeded state
+        fetchProfile();
+      } else {
+        setToast({
+          show: true,
+          message: result.error || "Mồi dữ liệu thất bại!",
+          type: "error"
+        });
+      }
+    } catch (err) {
+      setToast({
+        show: true,
+        message: err instanceof Error ? err.message : "Lỗi kết nối máy chủ!",
+        type: "error"
+      });
+    } finally {
+      setSeeding(false);
+      // Auto dismiss
+      setTimeout(() => {
+        setToast(prev => ({ ...prev, show: false }));
+      }, 4000);
+    }
   };
 
   if (!mounted) return null;
@@ -165,6 +240,44 @@ export default function DashboardPage() {
   return (
     <div className="bg-[#f8f9fa] min-h-screen text-slate-800 pb-24 relative overflow-hidden">
       <Navbar />
+
+      {/* Custom Premium Toast Notification */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[300] w-[90%] max-w-md px-6 py-4 rounded-3xl backdrop-blur-xl border flex items-center gap-3 shadow-2xl"
+            style={{
+              backgroundColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)',
+              borderColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
+              color: '#ffffff'
+            }}
+          >
+            {toast.type === 'success' ? (
+              <Check size={20} className="shrink-0 text-white" />
+            ) : (
+              <X size={20} className="shrink-0 text-white" />
+            )}
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-wider mb-0.5 text-white/80">
+                {toast.type === 'success' ? 'Thành công' : 'Gặp lỗi'}
+              </p>
+              <p className="text-xs font-bold text-white leading-tight">
+                {toast.message}
+              </p>
+            </div>
+            <button 
+              onClick={() => setToast(prev => ({ ...prev, show: false }))} 
+              className="p-1 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X size={14} className="text-white" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Decorative Warm Shapes */}
       <div className="absolute -left-40 top-20 w-96 h-96 rounded-full bg-blue-500/5 blur-[100px] pointer-events-none" />
@@ -246,6 +359,24 @@ export default function DashboardPage() {
               </div>
               <button className="px-8 py-3.5 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-500/10">
                 Vào học ngay
+              </button>
+            </div>
+
+            {/* Temporary Premium Seed Data Pill */}
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
+              <button 
+                onClick={handleSeed}
+                disabled={seeding}
+                className="px-5 py-2.5 rounded-2xl bg-orange-50 hover:bg-orange-100 border border-orange-100 text-[10px] font-black uppercase tracking-widest text-orange-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm"
+              >
+                {seeding ? "⏳ Đang mồi..." : "🎒 Tạo Dữ Liệu Mẫu (Global Success)"}
+              </button>
+              <button 
+                onClick={handleMigrate}
+                disabled={migrating}
+                className="px-5 py-2.5 rounded-2xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm"
+              >
+                {migrating ? "⏳ Đang di trú..." : "🎬 Đồng Nhất Dữ Liệu Phim Cũ"}
               </button>
             </div>
           </div>

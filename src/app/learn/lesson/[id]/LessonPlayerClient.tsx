@@ -148,16 +148,20 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
   const dictationWords = getDictationWords(transcript);
 
+  const hasVideo = !!(lesson.video_url || lesson.videoUrl);
+
   // Sync video/state on Scene/Activity change
   useEffect(() => {
     resetStateForNewScene();
     if (shouldAutoPlay) {
       setShouldAutoPlay(false);
       setTimeout(() => {
-        if (videoRef.current) {
+        if (hasVideo && videoRef.current) {
           videoRef.current.play().catch(console.error);
           setIsVideoPaused(false);
           setIsVideoPlaying(true);
+        } else {
+          handlePlayScene();
         }
       }, 150);
     }
@@ -173,19 +177,20 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
     setDictationChecked(false);
     setDictationResults([]);
 
-    if (videoRef.current) {
+    if (hasVideo && videoRef.current) {
       videoRef.current.currentTime = startSceneTime;
       videoRef.current.playbackRate = playbackSpeed;
     }
   };
 
   useEffect(() => {
-    if (videoRef.current) {
+    if (hasVideo && videoRef.current) {
       videoRef.current.playbackRate = playbackSpeed;
     }
-  }, [playbackSpeed]);
+  }, [playbackSpeed, hasVideo]);
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (!hasVideo) return;
     const video = e.currentTarget;
     if (video.currentTime >= endSceneTime) {
       video.pause();
@@ -196,19 +201,52 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
   };
 
   const handlePlayScene = () => {
-    if (videoRef.current) {
+    if (hasVideo && videoRef.current) {
       if (videoRef.current.currentTime >= endSceneTime || videoRef.current.currentTime < startSceneTime) {
         videoRef.current.currentTime = startSceneTime;
       }
       videoRef.current.play().catch(console.error);
       setIsVideoPaused(false);
       setIsVideoPlaying(true);
+    } else {
+      // Play sentence audio or fallback to SpeechSynthesis TTS
+      const audioUrl = activeActivity?.content?.audioUrl;
+      if (audioUrl) {
+        const audio = new Audio(audioUrl);
+        audio.play().catch(console.error);
+        setIsVideoPlaying(true);
+        setIsVideoPaused(false);
+        audio.onended = () => {
+          setIsVideoPlaying(false);
+          setIsVideoPaused(true);
+        };
+      } else {
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          setIsVideoPlaying(true);
+          setIsVideoPaused(false);
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(transcript);
+          utterance.lang = "en-US";
+          utterance.rate = 0.85;
+          utterance.onend = () => {
+            setIsVideoPlaying(false);
+            setIsVideoPaused(true);
+          };
+          window.speechSynthesis.speak(utterance);
+        }
+      }
     }
   };
 
   const handlePauseScene = () => {
-    if (videoRef.current) {
+    if (hasVideo && videoRef.current) {
       videoRef.current.pause();
+      setIsVideoPaused(true);
+      setIsVideoPlaying(false);
+    } else {
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       setIsVideoPaused(true);
       setIsVideoPlaying(false);
     }
@@ -415,26 +453,54 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <BookOpen className="text-blue-600" size={18} />
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Tiếng Anh 6 - Global Success</span>
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                  {hasVideo ? "Cinematic Learning" : (lesson.unit?.title || "Tiếng Anh - Global Success")}
+                </span>
               </div>
               <span className="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-100 text-[10px] font-black uppercase tracking-wider">
-                Unit 1
+                {hasVideo ? "Phim Điện Ảnh" : "Hội Thoại SGK"}
               </span>
             </div>
 
-            {/* Illustration Frame */}
+            {/* Illustration / Player Frame */}
             <div className="relative rounded-2xl overflow-hidden aspect-video border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center group">
-              {/* Textbook video placeholder or direct illustration */}
-              <video
-                ref={videoRef}
-                src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
-                onTimeUpdate={handleTimeUpdate}
-                playsInline
-                className="w-full h-full object-cover z-10"
-              />
-              <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-black/60 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
-                <ImageIcon size={10} /> Minh họa hội thoại
-              </div>
+              {hasVideo ? (
+                <>
+                  <video
+                    ref={videoRef}
+                    src={lesson.video_url || lesson.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+                    onTimeUpdate={handleTimeUpdate}
+                    playsInline
+                    className="w-full h-full object-cover z-10"
+                  />
+                  <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-black/60 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
+                    <ImageIcon size={10} /> Phim Minh Họa
+                  </div>
+                </>
+              ) : (
+                <>
+                  {activeActivity?.content?.thumbnailUrl ? (
+                    <img
+                      src={activeActivity.content.thumbnailUrl}
+                      alt="Textbook Illustration"
+                      className="w-full h-full object-cover z-10 transition-transform duration-500 hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 z-10 select-none">
+                      <div className="w-16 h-16 rounded-full bg-blue-50/80 flex items-center justify-center text-blue-500 border border-blue-100 shadow-inner">
+                        <BookOpen className="w-8 h-8 animate-bounce-slow" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-blue-600 block tracking-widest">Global Success Curriculum</span>
+                        <p className="text-sm font-black text-slate-700 max-w-sm mt-1">{lesson.title}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3 z-20 px-3 py-1 rounded-xl bg-blue-600 text-[9px] font-black uppercase tracking-wider text-white flex items-center gap-1 shadow-lg">
+                    <BookOpen size={10} /> Hình Minh Họa SGK
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Textbook Audio Visualizer & Player console */}
@@ -458,28 +524,36 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
 
                 <div>
                   <span className="text-[9px] font-black uppercase text-blue-600 block tracking-widest">Hội thoại Audio</span>
-                  <span className="text-xs font-mono font-bold text-slate-500">
-                    Phân cảnh: {startSceneTime.toFixed(1)}s - {endSceneTime.toFixed(1)}s
-                  </span>
+                  {hasVideo ? (
+                    <span className="text-xs font-mono font-bold text-slate-500">
+                      Phân cảnh: {startSceneTime.toFixed(1)}s - {endSceneTime.toFixed(1)}s
+                    </span>
+                  ) : (
+                    <span className="text-xs font-bold text-slate-500">
+                      Giọng Đọc Bản Xứ Chuẩn
+                    </span>
+                  )}
                 </div>
               </div>
 
               {/* Speed Controller */}
-              <div className="flex items-center gap-1">
-                {[0.8, 1.0, 1.2].map(speed => (
-                  <button
-                    key={speed}
-                    onClick={() => setPlaybackSpeed(speed)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all border ${
-                      playbackSpeed === speed
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'
-                    }`}
-                  >
-                    {speed}x
-                  </button>
-                ))}
-              </div>
+              {hasVideo && (
+                <div className="flex items-center gap-1">
+                  {[0.8, 1.0, 1.2].map(speed => (
+                    <button
+                      key={speed}
+                      onClick={() => setPlaybackSpeed(speed)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all border ${
+                        playbackSpeed === speed
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100'
+                      }`}
+                    >
+                      {speed}x
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Helper tips */}
