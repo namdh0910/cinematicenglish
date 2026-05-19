@@ -119,9 +119,46 @@ export async function seedGlobalSuccessData() {
       }
     }
 
+    // 4. Seed or fetch a Dictation Lesson inside Unit 1
+    const { data: existingDictation, error: dictationFetchError } = await supabase
+      .from("lessons")
+      .select("id")
+      .eq("unit_id", unitId)
+      .eq("type", "dictation")
+      .maybeSingle();
+
+    if (dictationFetchError) {
+      console.error("Fetch dictation lesson error:", dictationFetchError);
+      return { success: false, error: `Lỗi truy vấn Dictation Lesson: ${dictationFetchError.message}` };
+    }
+
+    if (!existingDictation) {
+      const { error: dictationInsertError } = await supabase
+        .from("lessons")
+        .insert([
+          {
+            unit_id: unitId,
+            title: "Dictation Practice: Schoolyard activities",
+            description: "Luyện nghe điền từ: Các hoạt động diễn ra trong sân trường.",
+            type: "dictation",
+            content: { 
+              audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", 
+              text: "The students are playing [football] in the schoolyard.", 
+              blanks: ["football"] 
+            },
+            is_published: true,
+          },
+        ]);
+
+      if (dictationInsertError) {
+        console.error("Insert dictation lesson error:", dictationInsertError);
+        return { success: false, error: `Lỗi tạo Dictation Lesson: ${dictationInsertError.message}` };
+      }
+    }
+
     return { 
       success: true, 
-      message: "Mồi dữ liệu Global Success (Lớp 6 -> Unit 1 -> Lesson Speaking) thành công!" 
+      message: "Mồi dữ liệu Global Success (Lớp 6 -> Unit 1 -> Lesson Speaking & Dictation) thành công!" 
     };
   } catch (err: any) {
     console.error("Unhandled seed error:", err);

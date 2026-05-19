@@ -1,5 +1,6 @@
 import { getLessonWithDetails } from "@/app/admin/actions";
 import LessonPlayerClient from "./LessonPlayerClient";
+import DictationRoom from "./DictationRoom";
 import { notFound } from "next/navigation";
 
 export const metadata = {
@@ -13,6 +14,10 @@ export default async function LessonPlayerPage({ params }: { params: Promise<{ i
 
   if (!lesson) {
     notFound();
+  }
+
+  if (lesson.type === "dictation") {
+    return <DictationRoom lesson={lesson} />;
   }
 
   return (
