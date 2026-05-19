@@ -37,7 +37,7 @@ export default function HomePage() {
       <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-6 pb-20 md:pt-6 md:pb-28 overflow-hidden w-full flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 60%)' }}>
+      <section className="relative pt-16 pb-24 md:pt-20 md:pb-32 overflow-hidden w-full flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 60%)' }}>
         <div className="container-custom max-w-4xl w-full flex flex-col items-center justify-center text-center space-y-10 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -70,14 +70,14 @@ export default function HomePage() {
                 Bắt đầu nâng cao kết quả học tập tiếng Anh ngay hôm nay
               </h3>
               
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-8 w-full">
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-[28px] py-[12px] rounded-[10px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[16px] transition-all shadow-[0_2px_8px_rgba(37,99,235,0.20)] hover:-translate-y-[1px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap border-none">
+                  <button className="w-full sm:w-auto px-10 py-5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-lg transition-all shadow-[0_4px_14px_rgba(37,99,235,0.30)] hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap border-none">
                     🎒 Dành cho Học Sinh
                   </button>
                 </Link>
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-[28px] py-[12px] rounded-[10px] bg-[#FFFFFF] hover:bg-[#EFF6FF] text-[#2563EB] border-2 border-[#2563EB] font-semibold text-[16px] transition-all hover:-translate-y-[1px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-10 py-5 rounded-full bg-[#FFFFFF] hover:bg-[#EFF6FF] text-[#2563EB] border-2 border-[#2563EB] font-bold text-lg transition-all hover:-translate-y-[2px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
                     👨‍🏫 Dành cho Giáo Viên
                   </button>
                 </Link>
@@ -92,7 +92,7 @@ export default function HomePage() {
       </section>
 
       {/* 2. CORE OUTCOMES (MỤC TIÊU HỌC TẬP) */}
-      <section className="py-20 bg-[#FFFFFF] border-y border-[#EBEBEA] relative w-full flex flex-col items-center justify-center">
+      <section className="py-24 md:py-32 bg-[#FFFFFF] border-y border-[#EBEBEA] relative w-full flex flex-col items-center justify-center">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-[#1A1A18] text-center">
@@ -132,7 +132,7 @@ export default function HomePage() {
       </section>
 
       {/* 3. THE 4-STEP REFLEX LOOP */}
-      <section className="py-20 relative w-full flex flex-col items-center justify-center overflow-hidden">
+      <section className="py-24 md:py-32 relative w-full flex flex-col items-center justify-center overflow-hidden">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <span className="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-center mx-auto inline-block">
@@ -146,7 +146,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl justify-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-5xl justify-items-center">
             {[
               { 
                 step: "01", 
@@ -180,7 +180,7 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 whileHover={{ y: -2 }}
-                className="bg-white p-6 rounded-2xl border border-[#E5E7EB] transition-all w-full flex flex-col justify-between"
+                className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm transition-all w-full flex flex-col justify-between"
               >
                 <div>
                   <div className="inline-block bg-[#EFF6FF] text-[#2563EB] text-[12px] font-bold px-[8px] py-[3px] rounded-[6px] mb-[10px]">
@@ -203,7 +203,7 @@ export default function HomePage() {
       </section>
 
       {/* 4. TEXTBOOK LIBRARIES ROADMAP */}
-      <section className="py-20 bg-[#FFFFFF] border-y border-[#EBEBEA] w-full flex flex-col items-center justify-center">
+      <section className="py-24 md:py-32 bg-[#FFFFFF] border-y border-[#EBEBEA] w-full flex flex-col items-center justify-center">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-[#1A1A18] text-center">
@@ -290,7 +290,7 @@ export default function HomePage() {
       </section>
 
       {/* 5. PRICING PLANS */}
-      <section className="py-20 relative w-full flex flex-col items-center justify-center overflow-hidden">
+      <section className="py-24 md:py-32 relative w-full flex flex-col items-center justify-center overflow-hidden">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <h2 className="text-2xl md:text-4xl font-display font-black tracking-tight text-slate-900 text-center">
@@ -356,7 +356,7 @@ export default function HomePage() {
       </section>
 
       {/* 6. FINAL CALL TO ACTION */}
-      <section className="py-20 relative w-full flex flex-col items-center justify-center overflow-hidden">
+      <section className="py-24 md:py-32 relative w-full flex flex-col items-center justify-center overflow-hidden">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="bg-white border border-slate-200/80 rounded-[36px] p-10 md:p-16 text-center relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_25px_60px_rgba(37,99,235,0.08)] transition-all duration-300 w-full max-w-4xl flex flex-col items-center justify-center">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
