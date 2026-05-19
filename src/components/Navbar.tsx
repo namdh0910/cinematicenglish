@@ -170,40 +170,39 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? isLightMode
-              ? "bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm"
-              : "bg-black/85 backdrop-blur-md border-b border-white/10"
-            : "bg-transparent py-2"
-        }`}
+        className="sticky top-0 left-0 right-0 z-50 bg-[#FFFFFF] border-b border-[#EBEBEA] shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-all duration-300"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-md ${isLightMode ? "bg-blue-600" : "bg-white"}`}>
-              <Play size={14} fill={isLightMode ? "white" : "black"} className={`ml-0.5 ${isLightMode ? "text-white" : "text-black"}`} />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-blue-600">
+              <Play size={14} fill="white" className="ml-0.5 text-white" />
             </div>
-            <span className={`font-display font-black text-lg tracking-tight ${isLightMode ? "text-slate-800" : "text-white"}`}>Cinematic</span>
+            <span className="font-display font-black text-lg tracking-tight text-[#1A1A18]">Cinematic</span>
           </Link>
 
           {/* Desktop Nav Links (Only if logged in) */}
           {role !== 'guest' && (
             <nav className="hidden md:flex items-center gap-8">
-              {simplifiedLinks.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={`text-sm font-bold transition-colors flex items-center gap-1.5 ${
-                    isLightMode ? "text-slate-500 hover:text-slate-800" : "text-white/60 hover:text-white"
-                  }`}
-                >
-                  <l.icon size={15} />
-                  {l.label}
-                </Link>
-              ))}
+              {simplifiedLinks.map((l) => {
+                const isActive = pathname === l.href;
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className={`text-[14px] font-medium tracking-[-0.01em] transition-colors flex items-center gap-1.5 pb-[2px] ${
+                      isActive 
+                        ? "text-[#2563EB] border-b-2 border-[#2563EB]" 
+                        : "text-[#3D3D3B] hover:text-[#2563EB] hover:border-b-2 hover:border-[#2563EB]"
+                    }`}
+                  >
+                    <l.icon size={15} />
+                    {l.label}
+                  </Link>
+                );
+              })}
             </nav>
           )}
 
@@ -211,12 +210,16 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-5">
             {role === 'guest' ? (
               <>
-                <Link href="/login" className={`text-sm font-bold transition-colors ${isLightMode ? "text-slate-600 hover:text-slate-800" : "text-white/70 hover:text-white"}`}>
+                <Link 
+                  href="/login" 
+                  className="text-[14px] font-medium tracking-[-0.01em] text-[#3D3D3B] hover:text-[#2563EB] transition-colors"
+                >
                   Đăng nhập
                 </Link>
-                <Link href="/signup" className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md ${
-                  isLightMode ? "bg-blue-600 text-white hover:bg-blue-750" : "bg-white text-black"
-                }`}>
+                <Link 
+                  href="/signup" 
+                  className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md bg-blue-600 text-white"
+                >
                   Bắt đầu
                 </Link>
               </>
@@ -224,12 +227,8 @@ export default function Navbar() {
               <div className="flex items-center gap-4" ref={dropdownRef}>
                 
                 {/* Streak flame indicator */}
-                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black select-none border ${
-                  isLightMode 
-                    ? "bg-orange-50 border-orange-100 text-orange-600" 
-                    : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                }`}>
-                  <Flame size={14} className="fill-orange-500 animate-pulse" />
+                <div className="flex items-center gap-1 px-[10px] py-[4px] bg-[#FFF3E0] text-[#B45309] rounded-[20px] font-semibold text-[13px] select-none border border-[#FFE0B2]">
+                  <Flame size={14} className="fill-[#B45309] text-[#B45309]" />
                   <span>{streakCount} NGÀY</span>
                 </div>
 
@@ -247,11 +246,7 @@ export default function Navbar() {
                         className="w-8 h-8 rounded-full border border-white/20 hover:border-violet-500 transition-colors object-cover" 
                       />
                     ) : (
-                      <div className={`w-8 h-8 rounded-full border transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm ${
-                        isLightMode
-                          ? "bg-blue-50 border-blue-200 text-blue-600"
-                          : "bg-violet-600 border-white/20 text-white shadow-glow-violet"
-                      }`}>
+                      <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm">
                         {profile?.fullName ? profile.fullName.charAt(0) : <User size={14} />}
                       </div>
                     )}
@@ -351,35 +346,35 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed inset-0 z-40 bg-black pt-[80px] px-6 md:hidden flex flex-col justify-between pb-8"
+            className="fixed inset-0 z-40 bg-[#F7F7F5] pt-[80px] px-6 md:hidden flex flex-col justify-between pb-8"
           >
             <div className="flex flex-col gap-6 mt-4">
               
               {/* Profile Card if Logged in */}
               {role !== 'guest' && profile && (
-                <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl">
+                <div className="flex items-center gap-3 p-4 bg-[#FFFFFF] border border-[#EBEBEA] rounded-2xl shadow-sm">
                   {profile.avatarUrl ? (
                     <img 
                       src={profile.avatarUrl} 
                       alt={profile.fullName} 
-                      className="w-12 h-12 rounded-full border border-white/20 object-cover" 
+                      className="w-12 h-12 rounded-full border border-blue-200 object-cover" 
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-violet-600 border border-white/20 flex items-center justify-center text-sm font-black uppercase text-white shadow-glow-violet">
+                    <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-sm font-black uppercase text-blue-600 shadow-sm">
                       {profile.fullName.charAt(0)}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-white truncate">{profile.fullName}</p>
-                    <p className="text-xs text-white/40 truncate">{profile.email}</p>
+                    <p className="text-sm font-black text-[#1A1A18] truncate">{profile.fullName}</p>
+                    <p className="text-xs text-[#6B6B68] truncate">{profile.email}</p>
                     <div className="mt-1 flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full text-amber-500 text-[10px] font-black">
-                        <Flame size={10} className="fill-amber-500" />
+                      <div className="flex items-center gap-1 bg-[#FFF3E0] border border-[#FFE0B2] px-2 py-0.5 rounded-full text-[#B45309] text-[10px] font-black">
+                        <Flame size={10} className="fill-[#B45309]" />
                         <span>{streakCount} NGÀY</span>
                       </div>
                       
                       {profile.subscriptionPlan === 'pro' && (
-                        <div className="flex items-center gap-0.5 bg-violet-600 text-white px-2 py-0.5 rounded text-[10px] font-black">
+                        <div className="flex items-center gap-0.5 bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] font-black">
                           <Sparkles size={8} fill="white" />
                           <span>PRO</span>
                         </div>
@@ -396,7 +391,7 @@ export default function Navbar() {
                     <Link
                       href="/stories"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-white/80 hover:text-white flex items-center gap-3 py-3 border-b border-white/5"
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
                       <Compass size={18} />
                       Khám phá
@@ -405,7 +400,7 @@ export default function Navbar() {
                     <Link
                       href="/dashboard"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-white/80 hover:text-white flex items-center gap-3 py-3 border-b border-white/5"
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
                       <LayoutDashboard size={18} />
                       Lịch sử học
@@ -415,7 +410,7 @@ export default function Navbar() {
                       <Link
                         href="/#pricing"
                         onClick={closeMenu}
-                        className="text-lg font-black text-violet-400 flex items-center gap-3 py-3 border-b border-white/5 animate-pulse"
+                        className="text-lg font-black text-[#2563EB] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                       >
                         <Sparkles size={18} fill="currentColor" />
                         Nâng cấp PRO
@@ -427,14 +422,14 @@ export default function Navbar() {
                     <Link 
                       href="/login" 
                       onClick={closeMenu} 
-                      className="py-4 text-center rounded-2xl bg-white/5 border border-white/10 font-bold text-white"
+                      className="py-4 text-center rounded-2xl bg-[#FFFFFF] border border-[#EBEBEA] font-bold text-[#3D3D3B] shadow-sm hover:bg-[#EFF6FF]"
                     >
                       Đăng nhập
                     </Link>
                     <Link 
                       href="/signup" 
                       onClick={closeMenu} 
-                      className="py-4 text-center rounded-2xl bg-white text-black font-black uppercase tracking-wider"
+                      className="py-4 text-center rounded-2xl bg-blue-600 text-white font-black uppercase tracking-wider shadow-md hover:bg-blue-750"
                     >
                       Bắt đầu miễn phí
                     </Link>
@@ -447,7 +442,7 @@ export default function Navbar() {
             {role !== 'guest' && (
               <button
                 onClick={handleLogout}
-                className="w-full py-4 text-center rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-bold flex items-center justify-center gap-2"
+                className="w-full py-4 text-center rounded-2xl bg-red-50 border border-red-200 text-red-600 font-bold flex items-center justify-center gap-2 hover:bg-red-100"
               >
                 <LogOut size={16} />
                 Đăng xuất tài khoản

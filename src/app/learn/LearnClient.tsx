@@ -14,7 +14,8 @@ import {
   ArrowRight,
   TrendingUp,
   Brain,
-  Search
+  Search,
+  BookOpen
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -92,17 +93,17 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
+    <div className="bg-[#F7F7F5] min-h-screen pb-20 text-[#3D3D3B]">
       <Navbar />
 
       <main className="page-top container-custom flex flex-col gap-12 w-full" style={{ paddingTop: '120px' }}>
         {/* Sleek Header: Welcome Student + Search Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm mt-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] mt-6">
           <div className="space-y-1">
-            <h1 className="text-3xl font-display font-black text-slate-800">
-              Chào mừng, <span className="text-blue-600">{profile?.full_name || 'Học viên'}</span>! 👋
+            <h1 className="text-2xl font-bold tracking-tight text-[#1A1A18]">
+              Chào mừng, <span className="text-[#2563EB]">{profile?.full_name || 'Học viên'}</span>! 👋
             </h1>
-            <p className="text-sm text-slate-400 font-medium">
+            <p className="text-[15px] leading-[1.7] text-[#6B6B68] font-medium">
               Hôm nay em muốn chinh phục bài học nào? Giáo trình chuẩn Global Success.
             </p>
           </div>
@@ -111,44 +112,52 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
             <input
               type="text"
               placeholder="Tìm kiếm lớp học, chủ đề hoặc bài học..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+              className="w-full bg-[#F7F7F5] border border-[#EBEBEA] rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B6B68] focus:outline-none focus:border-blue-500 transition-all shadow-inner"
             />
           </div>
         </div>
 
         {/* Student Stats Matrix */}
         <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-            <TrendingUp size={14} className="text-blue-500" /> Ma trận chỉ số năng lực
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
+            <TrendingUp size={14} className="text-[#2563EB]" /> Ma trận chỉ số năng lực
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="rounded-3xl border border-slate-100 bg-white p-6 space-y-4 hover:border-slate-200 hover:shadow-md transition-all relative overflow-hidden shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</span>
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
-                    <stat.icon size={18} />
+            {stats.map((stat, i) => {
+              const isFirstOrSecond = i < 2;
+              const trendColor = isFirstOrSecond ? "text-[#16A34A]" : "text-[#6B6B68]";
+              const trendIcon = isFirstOrSecond ? "▲ " : "";
+              
+              return (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="rounded-[12px] border border-[#EBEBEA] bg-[#FFFFFF] p-[1rem_1.25rem] space-y-4 hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all relative overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-[#6B6B68] uppercase tracking-[0.07em]">{stat.label}</span>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-[#EFF6FF] text-[#2563EB]`}>
+                      <stat.icon size={16} />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-3xl font-display font-black text-slate-800">{stat.value}</h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{stat.trend}</p>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="space-y-1">
+                    <h4 className="text-[28px] font-bold text-[#1A1A18] font-mono">{stat.value}</h4>
+                    <p className={`text-[10px] font-bold uppercase tracking-wider ${trendColor}`}>
+                      {trendIcon}{stat.trend}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 
         {/* Adaptive Intelligence Recommendations */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
               <Brain size={14} className="text-violet-500" /> Nhiệm vụ phục hồi khuyết điểm AI đề xuất
             </h3>
 
@@ -156,20 +165,20 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               {recoveryMissions.map((rec) => (
                 <div 
                   key={rec.id}
-                  className="rounded-3xl border border-slate-100 bg-white hover:border-violet-100 hover:shadow-md p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-sm"
+                  className="rounded-xl border border-[#EBEBEA] bg-[#FFFFFF] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] font-black uppercase tracking-widest bg-violet-50 text-violet-600 border border-violet-100 px-2 py-0.5 rounded-full">{rec.skill}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">• {rec.difficulty}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#6B6B68]">• {rec.difficulty}</span>
                     </div>
-                    <h4 className="text-base font-bold text-slate-800">{rec.title}</h4>
+                    <h4 className="text-base font-bold text-[#1A1A18]">{rec.title}</h4>
                     <p className="text-xs text-amber-600 font-medium italic">{rec.reason}</p>
                   </div>
 
                   <button 
                     onClick={() => window.location.href = `/learn/lesson/${rec.lessonId}`}
-                    className="px-5 py-2.5 rounded-2xl bg-violet-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-violet-700 hover:scale-105 transition-all flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer shadow-sm shadow-violet-500/10"
+                    className="px-5 py-2.5 rounded-[10px] bg-[#2563EB] text-white text-xs font-semibold uppercase tracking-wider hover:bg-blue-750 transition-all flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer border-none shadow-[0_2px_8px_rgba(37,99,235,0.20)]"
                   >
                     Nhận nhiệm vụ <ArrowRight size={14} />
                   </button>
@@ -179,26 +188,26 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           </div>
 
           {/* Side quick statistics */}
-          <div className="lg:col-span-4 rounded-[32px] border border-slate-100 bg-white p-8 space-y-6 flex flex-col justify-between shadow-sm">
+          <div className="lg:col-span-4 rounded-xl border border-[#EBEBEA] bg-[#FFFFFF] p-8 space-y-6 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 shadow-sm">
                 <Zap size={22} fill="currentColor" />
               </div>
               <div className="space-y-2">
-                <h4 className="text-xl font-display font-black text-slate-800">Động lực học tập ngày</h4>
-                <p className="text-slate-500 text-xs leading-relaxed font-medium">
+                <h4 className="text-xl font-bold text-[#1A1A18]">Động lực học tập ngày</h4>
+                <p className="text-[#6B6B68] text-xs leading-relaxed font-medium">
                   Duy trì việc ôn tập 15 phút mỗi ngày để nhân 3 số điểm kinh nghiệm (XP) và mở khóa các danh hiệu Học viên Tiêu biểu.
                 </p>
               </div>
             </div>
 
-            <div className="w-full bg-slate-100 rounded-full h-2">
-              <div className="bg-amber-500 h-2 rounded-full" style={{ width: "70%" }} />
+            <div className="w-full bg-[#EFF6FF] rounded-full h-2">
+              <div className="bg-[#2563EB] h-2 rounded-full" style={{ width: "70%" }} />
             </div>
             
-            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-[#6B6B68]">
               <span>Mục tiêu: 15 phút/ngày</span>
-              <span className="text-amber-600">Hoàn thành 70%</span>
+              <span className="text-[#B45309]">Hoàn thành 70%</span>
             </div>
           </div>
         </div>
@@ -206,43 +215,76 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
         {/* Netflix Grade Streaming Library */}
         <div className="space-y-6 pt-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-              <GraduationCap size={14} className="text-blue-500" /> Chọn lớp học của bạn
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] flex items-center gap-2">
+              <GraduationCap size={14} className="text-[#2563EB]" /> Chọn lớp học của bạn
             </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {grades.map((grade) => (
-              <motion.div
-                key={grade.id}
-                whileHover={{ y: -6 }}
-                className="group relative rounded-xl bg-white border border-slate-100 overflow-hidden flex flex-col justify-between min-h-[14rem] h-auto p-8 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-300"
-              >
-                {/* Background decorative icon */}
-                <div className="absolute top-0 right-0 p-6 text-slate-100 group-hover:text-blue-500/5 group-hover:scale-110 transition-all z-0">
-                  <GraduationCap size={120} />
-                </div>
+            {grades.map((grade) => {
+              const titleLower = grade.title.toLowerCase();
+              const isCinematic = titleLower.includes("cinematic") || titleLower.includes("phim");
+              const isHigh = titleLower.includes("10") || titleLower.includes("11") || titleLower.includes("12");
+              const barColor = isCinematic ? "#534AB7" : isHigh ? "#185FA5" : "#0F6E56";
+              
+              const statusText = "Đang học";
+              const statusBg = "bg-[#DCFCE7] text-[#166534]";
 
-                <div className="space-y-2 relative z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider">Lớp học</span>
-                    <span className="text-slate-400 font-mono text-[10px]">#{grade.order_index}</span>
+              return (
+                <motion.div
+                  key={grade.id}
+                  whileHover={{ y: -2 }}
+                  className="group relative rounded-xl bg-white border border-[#EBEBEA] overflow-hidden flex flex-col justify-between min-h-[14rem] h-auto shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:border-[#BFDBFE] transition-all duration-300 pb-[4px]"
+                >
+                  {/* Thumbnail Swatch */}
+                  <div 
+                    className="w-full h-[80px] rounded-t-xl" 
+                    style={{
+                      background: `linear-gradient(135deg, ${barColor}26 0%, ${barColor}0D 50%, ${barColor}1F 100%)`
+                    }}
+                  />
+
+                  {/* Card Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3 relative z-10">
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}`}>
+                          {statusText}
+                        </span>
+                        <span className="text-[#6B6B68] font-mono text-[10px]">#{grade.order_index}</span>
+                      </div>
+                      <h3 className="text-[20px] font-bold text-[#1A1A18] group-hover:text-[#2563EB] transition-colors">{grade.title}</h3>
+                      <p className="text-xs text-[#6B6B68] leading-relaxed font-medium line-clamp-2">{grade.description}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between relative z-10 pt-3 border-t border-[#EBEBEA]">
+                      {/* Unit count row with icon */}
+                      <span className="text-[13px] text-[#6B6B68] font-medium flex items-center gap-1">
+                        <BookOpen size={13} className="text-[#6B6B68]" />
+                        12 Unit • Đang học
+                      </span>
+                      <Link 
+                        href={`/learn/grade/${grade.id}`}
+                        className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-100 text-[11px] font-semibold text-[#2563EB] hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        Vào học <ArrowRight size={12} />
+                      </Link>
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-display font-black text-slate-800">{grade.title}</h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 italic font-medium">{grade.description}</p>
-                </div>
 
-                <div className="flex items-center justify-between relative z-10 pt-4 border-t border-slate-100">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">12 Unit • Đang chạy</span>
-                  <Link 
-                    href={`/learn/grade/${grade.id}`}
-                    className="px-5 py-2.5 rounded-xl bg-blue-50 border border-blue-100 text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    Vào học ngay <ArrowRight size={12} />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                  {/* 4px Progress Bar at card bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#EFF6FF]">
+                    <div 
+                      className="h-full rounded-r-full"
+                      style={{ 
+                        backgroundColor: barColor, 
+                        width: "50%" // progress indicator
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </main>

@@ -238,7 +238,7 @@ export default function DashboardPage() {
   if (!mounted) return null;
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 pb-24 relative overflow-y-auto overflow-x-hidden">
+    <div className="bg-[#F7F7F5] min-h-screen text-[#3D3D3B] pb-24 relative overflow-y-auto overflow-x-hidden">
       <Navbar />
 
       {/* Custom Premium Toast Notification */}
@@ -249,7 +249,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-24 left-1/2 -translate-x-1/2 z-[300] w-[90%] max-w-md px-6 py-4 rounded-3xl backdrop-blur-xl border flex items-center gap-3 shadow-2xl"
+            className="fixed top-24 left-1/2 -translate-x-1/2 z-[300] w-[90%] max-w-md px-6 py-4 rounded-xl backdrop-blur-xl border flex items-center gap-3 shadow-2xl"
             style={{
               backgroundColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)',
               borderColor: toast.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)',
@@ -289,19 +289,19 @@ export default function DashboardPage() {
           {/* 1. PROFILE HEADER CARD */}
           <div className="flex flex-col md:flex-row gap-6 items-stretch w-full">
             {/* User Profile Card */}
-            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+            <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 flex items-center justify-center text-xl font-black text-white shadow-md">
                   {profile?.full_name ? profile.full_name[0].toUpperCase() : 'H'}
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-display font-black leading-tight text-slate-800">
-                    Chào, <span className="text-blue-600">{profile?.full_name || 'Học viên'}</span>! 👋
+                  <h1 className="text-2xl font-bold tracking-tight text-[#1A1A18]">
+                    Chào, <span className="text-[#2563EB]">{profile?.full_name || 'Học viên'}</span>! 👋
                   </h1>
                   
                   <div className="flex flex-wrap gap-2 mt-3">
-                    <span className="flex items-center gap-1.5 text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100 text-xs font-bold">
-                      <Flame size={14} className="fill-orange-500 animate-pulse" /> {streak} Ngày liên tiếp
+                    <span className="flex items-center gap-1.5 text-[#B45309] bg-[#FFF3E0] px-3 py-1 rounded-full border border-[#FFE0B2] text-xs font-semibold">
+                      <Flame size={14} className="fill-[#B45309] text-[#B45309]" /> {streak} Ngày liên tiếp
                     </span>
                     <span className="flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 text-xs font-bold">
                       <GraduationCap size={14} /> Trình độ: {selectedGrade}
@@ -313,26 +313,35 @@ export default function DashboardPage() {
                 onClick={() => setShowSettings(true)}
                 className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200"
               >
-                <Settings size={18} className="text-slate-500" />
+                <Settings size={18} className="text-[#6B6B68]" />
               </button>
             </div>
 
             {/* Speaking Proficiency Stats */}
-            <div className="md:w-[280px] bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                <span className="flex items-center gap-1.5"><Mic size={14} className="text-blue-500" /> Phát âm AI</span>
-                <span className="text-blue-600 font-mono text-2xl font-black">{avgFluency}%</span>
+            <div className="md:w-[280px] bg-[#FFFFFF] p-[1rem_1.25rem] rounded-[12px] border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col justify-between">
+              <div>
+                <span className="block text-[11px] font-bold uppercase tracking-[0.07em] text-[#6B6B68] mb-[6px] flex items-center gap-1">
+                  <Mic size={14} className="text-blue-500" /> Phát âm AI
+                </span>
+                <span className="text-[28px] font-bold text-[#1A1A18] flex items-center gap-1 font-mono">
+                  {avgFluency >= 80 ? (
+                    <span className="text-[#16A34A] text-lg font-bold">▲</span>
+                  ) : (
+                    <span className="text-[#DC2626] text-lg font-bold">▼</span>
+                  )}
+                  {avgFluency}%
+                </span>
               </div>
-              <div className="space-y-2">
-                <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="space-y-2 mt-4">
+                <div className="h-[8px] bg-[#EFF6FF] rounded-[99px] overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${avgFluency}%` }}
                     transition={{ duration: 1.2 }}
-                    className="h-full bg-blue-500 rounded-full"
+                    className="h-full bg-[#2563EB] rounded-[99px]"
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 italic">
+                <p className="text-[10px] text-[#6B6B68] italic">
                   {avgFluency >= 80 
                     ? "Giọng nói rõ ràng! Hãy tiếp tục rèn luyện kỹ năng nối từ nhé."
                     : "Luyện nói nhiều hơn để nâng cao điểm phát âm chuẩn của mình nha."}
@@ -342,8 +351,8 @@ export default function DashboardPage() {
           </div>
 
           {/* 2. HERO SEARCH & HOMEWORK CODE SECTION (YourHomework Style) */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm space-y-6 text-center w-full">
-            <h3 className="text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 tracking-tight">
+          <div className="bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6 text-center w-full">
+            <h3 className="text-[18px] font-bold text-[#1A1A18] flex items-center justify-center gap-2 tracking-tight">
               <BookOpen className="text-blue-500" size={22} /> Vào lớp học hôm nay
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 max-w-2xl mx-auto w-full">
@@ -354,27 +363,27 @@ export default function DashboardPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Nhập mã bài tập lớp học hoặc tìm kiếm bài học..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+                  className="w-full bg-[#F7F7F5] border border-[#EBEBEA] rounded-xl py-3.5 pl-12 pr-6 text-sm font-bold text-[#3D3D3B] placeholder:text-[#6B6B68] focus:outline-none focus:border-blue-500 transition-all shadow-inner"
                 />
               </div>
-              <button className="md:col-span-1 w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all shadow-md hover:shadow-blue-500/10 whitespace-nowrap">
+              <button className="md:col-span-1 w-full py-3.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-750 transition-all shadow-md hover:shadow-blue-500/10 whitespace-nowrap border-none cursor-pointer">
                 Vào học ngay
               </button>
             </div>
 
             {/* Temporary Premium Seed Data Pill */}
-            <div className="flex flex-wrap justify-center gap-3 mt-6 pt-4 border-t border-slate-100">
+            <div className="flex flex-wrap justify-center gap-3 mt-6 pt-4 border-t border-[#EBEBEA]">
               <button 
                 onClick={handleSeed}
                 disabled={seeding}
-                className="px-5 py-2.5 rounded-2xl bg-orange-50 hover:bg-orange-100 border border-orange-100 text-[10px] font-black uppercase tracking-widest text-orange-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm"
+                className="px-5 py-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-100 text-[10px] font-black uppercase tracking-widest text-orange-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm cursor-pointer"
               >
                 {seeding ? "⏳ Đang mồi..." : "🎒 Tạo Dữ Liệu Mẫu (Global Success)"}
               </button>
               <button 
                 onClick={handleMigrate}
                 disabled={migrating}
-                className="px-5 py-2.5 rounded-2xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm"
+                className="px-5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all hover:scale-102 active:scale-98 flex items-center gap-2 disabled:opacity-60 shadow-sm cursor-pointer"
               >
                 {migrating ? "⏳ Đang di trú..." : "🎬 Đồng Nhất Dữ Liệu Phim Cũ"}
               </button>
@@ -383,39 +392,39 @@ export default function DashboardPage() {
 
           {/* 3. QUICK GRID TOOLS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
-              <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+            <div className="bg-[#F0F4FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] p-[10px_16px] rounded-[8px] flex items-center gap-4 transition-all cursor-pointer group">
+              <div className="w-10 h-10 rounded-lg bg-[#FFFFFF] flex items-center justify-center text-lg shrink-0 shadow-sm">
                 🎤
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-800">Chấm Phát Âm</h4>
-                <p className="text-[10px] text-gray-500 font-medium">Luyện phát âm AI chuẩn</p>
+                <h4 className="font-medium text-[14px] text-[#1D4ED8]">Chấm Phát Âm</h4>
+                <p className="text-[11px] text-[#6B6B68]">Luyện phát âm AI chuẩn</p>
               </div>
             </div>
-            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
-              <div className="w-14 h-14 rounded-xl bg-orange-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+            <div className="bg-[#F0F4FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] p-[10px_16px] rounded-[8px] flex items-center gap-4 transition-all cursor-pointer group">
+              <div className="w-10 h-10 rounded-lg bg-[#FFFFFF] flex items-center justify-center text-lg shrink-0 shadow-sm">
                 🎧
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-800">Luyện Nghe (Dictation)</h4>
-                <p className="text-[10px] text-gray-500 font-medium">Nghe điền chỗ trống phản xạ</p>
+                <h4 className="font-medium text-[14px] text-[#1D4ED8]">Luyện Nghe (Dictation)</h4>
+                <p className="text-[11px] text-[#6B6B68]">Nghe điền chỗ trống phản xạ</p>
               </div>
             </div>
-            <div className="bg-white hover:bg-slate-50 border border-gray-200 p-5 rounded-xl flex items-center gap-4 transition-all shadow-sm cursor-pointer group">
-              <div className="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
+            <div className="bg-[#F0F4FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] p-[10px_16px] rounded-[8px] flex items-center gap-4 transition-all cursor-pointer group">
+              <div className="w-10 h-10 rounded-lg bg-[#FFFFFF] flex items-center justify-center text-lg shrink-0 shadow-sm">
                 📝
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-800">Bài Thi Trắc Nghiệm</h4>
-                <p className="text-[10px] text-gray-500 font-medium">Đề kiểm tra thi học kì</p>
+                <h4 className="font-medium text-[14px] text-[#1D4ED8]">Bài Thi Trắc Nghiệm</h4>
+                <p className="text-[11px] text-[#6B6B68]">Đề kiểm tra thi học kì</p>
               </div>
             </div>
           </div>
 
           {/* 4. SCHOOL & GRADE CATEGORY TABS */}
-          <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col gap-6 w-full">
+          <div className="bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-6 w-full">
             <div className="text-center">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Chọn Cấp Học & Lớp của em</span>
+              <span className="text-[11px] font-bold text-[#6B6B68] uppercase tracking-[0.07em] block mb-2">Chọn Cấp Học & Lớp của em</span>
             </div>
 
             {/* School levels selector pills */}
@@ -435,8 +444,8 @@ export default function DashboardPage() {
                     }}
                     className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-[#2563EB] text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-[#3D3D3B] hover:bg-slate-200 border-none"
                     }`}
                   >
                     {lvl.label}
@@ -446,7 +455,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Dynamic Grades selector pills */}
-            <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-slate-100 w-full">
+            <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-[#EBEBEA] w-full">
               {selectedSchool === "primary" && ["Lớp 3", "Lớp 4", "Lớp 5"].map((gr) => {
                 const isActive = selectedGrade === gr;
                 return (
@@ -455,8 +464,8 @@ export default function DashboardPage() {
                     onClick={() => setSelectedGrade(gr)}
                     className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-[#2563EB] text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-[#3D3D3B] hover:bg-slate-200 border-none"
                     }`}
                   >
                     {gr}
@@ -471,8 +480,8 @@ export default function DashboardPage() {
                     onClick={() => setSelectedGrade(gr)}
                     className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-[#2563EB] text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-[#3D3D3B] hover:bg-slate-200 border-none"
                     }`}
                   >
                     {gr}
@@ -487,8 +496,8 @@ export default function DashboardPage() {
                     onClick={() => setSelectedGrade(gr)}
                     className={`text-xs transition-all cursor-pointer rounded-full px-5 py-2.5 font-bold ${
                       isActive 
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/10" 
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-[#2563EB] text-white shadow-md shadow-blue-500/10" 
+                        : "bg-slate-100 text-[#3D3D3B] hover:bg-slate-200 border-none"
                     }`}
                   >
                     {gr}
@@ -501,86 +510,116 @@ export default function DashboardPage() {
           {/* 5. SGK ROADMAP SECTION - Unit cards Global Success */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-black text-slate-800">Lộ Trình Sách Giáo Khoa: Global Success ({selectedGrade})</h2>
-              <span className="text-xs text-blue-600 font-bold uppercase tracking-wider">Học chuẩn bám sát SGK</span>
+              <h2 className="text-[18px] font-semibold text-[#1A1A18]">Lộ Trình Sách Giáo Khoa: Global Success ({selectedGrade})</h2>
+              <span className="text-[11px] text-[#2563EB] font-bold uppercase tracking-[0.07em]">Học chuẩn bám sát SGK</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {GLOBAL_SUCCESS_UNITS.map((unit) => (
-                <motion.div
-                  key={unit.id}
-                  whileHover={{ y: -4 }}
-                  className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between group transition-all duration-300 shadow-sm hover:shadow-md"
-                >
-                  {/* Card Image */}
-                  <div className="h-40 w-full relative overflow-hidden">
-                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-102" 
-                         style={{ backgroundImage: `url('${unit.coverImage}')` }} 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    
-                    <div className="absolute top-3 left-3 px-3 py-1 rounded-xl bg-blue-600/90 text-[10px] font-black uppercase tracking-wider text-white shadow-md">
-                      {unit.unitNo}
-                    </div>
-                    {unit.progress > 0 && (
-                      <div className="absolute bottom-3 left-3 right-3 space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold text-white">
-                          <span>Đã học {unit.progress}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                          <div className="h-full bg-orange-500" style={{ width: `${unit.progress}%` }} />
-                        </div>
-                      </div>
+              {GLOBAL_SUCCESS_UNITS.map((unit) => {
+                const isCinematic = !unit.grade || unit.grade.includes("Cinematic");
+                const isHigh = unit.grade?.includes("10") || unit.grade?.includes("11") || unit.grade?.includes("12");
+                const barColor = isCinematic ? "#534AB7" : isHigh ? "#185FA5" : "#0F6E56";
+                
+                const isStudying = unit.badge === "Đang học" || unit.progress > 0;
+                const statusText = isStudying ? "Đang học" : "Chưa bắt đầu";
+                const statusBg = isStudying ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#F1EFE8] text-[#5F5E5A]";
+
+                return (
+                  <motion.div
+                    key={unit.id}
+                    whileHover={{ y: -2 }}
+                    className="bg-white border border-[#EBEBEA] rounded-xl overflow-hidden flex flex-col justify-between group transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:border-[#BFDBFE] relative pb-[4px]"
+                  >
+                    {/* Thumbnail swatch: height 80px */}
+                    {unit.coverImage ? (
+                      <div 
+                        className="h-[80px] w-full bg-cover bg-center" 
+                        style={{ backgroundImage: `url('${unit.coverImage}')` }}
+                      />
+                    ) : (
+                      <div 
+                        className="h-[80px] w-full" 
+                        style={{
+                          background: `linear-gradient(135deg, ${barColor}26 0%, ${barColor}0D 50%, ${barColor}1F 100%)`
+                        }}
+                      />
                     )}
-                  </div>
 
-                  {/* Details & Actions */}
-                  <div className="p-6 flex-1 flex flex-col justify-between gap-4">
-                    <div className="space-y-1">
-                      <h4 className="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-                        {unit.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                        {unit.desc}
-                      </p>
+                    {/* Details & Actions */}
+                    <div className="p-5 flex-1 flex flex-col justify-between gap-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}`}>
+                            {statusText}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] text-[9px] font-bold uppercase tracking-wider">
+                            {unit.unitNo} • {unit.grade}
+                          </span>
+                        </div>
+
+                        <h4 className="text-[16px] font-bold text-[#1A1A18] group-hover:text-[#2563EB] transition-colors">
+                          {unit.title}
+                        </h4>
+
+                        {/* Unit count row with icon */}
+                        <div className="text-[13px] text-[#6B6B68] font-medium flex items-center gap-1">
+                          <BookOpen size={13} className="text-[#6B6B68]" />
+                          <span>12 bài học luyện phản xạ</span>
+                        </div>
+
+                        <p className="text-xs text-[#6B6B68] leading-relaxed font-medium">
+                          {unit.desc}
+                        </p>
+                      </div>
+
+                      <Link href={`/learn`}>
+                        <button className="w-full py-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-xs font-black uppercase tracking-wider text-[#2563EB] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                          <Play size={12} fill="currentColor" /> Vào bài học
+                        </button>
+                      </Link>
                     </div>
 
-                    <Link href={`/learn`}>
-                      <button className="w-full py-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 text-xs font-black uppercase tracking-wider text-blue-600 transition-all flex items-center justify-center gap-2">
-                        <Play size={12} fill="currentColor" /> Vào bài học
-                      </button>
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
+                    {/* 4px Progress Bar at card bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#EFF6FF]">
+                      <div 
+                        className="h-full rounded-r-full"
+                        style={{ 
+                          backgroundColor: barColor, 
+                          width: `${unit.progress}%` 
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
           {/* 6. RECENT ACTIVITY HISTORY */}
           <div className="space-y-4">
-            <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.25em]">Lịch Sử Luyện Tập Gần Đây</h2>
+            <h2 className="text-[11px] font-bold text-[#6B6B68] uppercase tracking-[0.07em]">Lịch Sử Luyện Tập Gần Đây</h2>
             <div className="space-y-3">
               {recentLessons.length > 0 ? (
                 recentLessons.map((lesson) => (
-                  <div key={lesson.id} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-200 transition-all">
+                  <div key={lesson.id} className="flex items-center justify-between p-4 bg-[#FFFFFF] border border-[#EBEBEA] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:border-[#BFDBFE] transition-all">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
+                      <div className="w-10 h-10 rounded-lg bg-[#F7F7F5] flex items-center justify-center text-[#6B6B68] border border-[#EBEBEA]">
                         <Clock size={16} />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-slate-800">{lesson.title}</h4>
-                        <span className="text-xs text-slate-400">{lesson.date}</span>
+                        <h4 className="font-semibold text-[14px] text-[#1A1A18]">{lesson.title}</h4>
+                        <span className="text-xs text-[#6B6B68]">{lesson.date}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="inline-block px-2.5 py-1 text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100">
+                      <span className="inline-block px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider bg-[#DCFCE7] text-[#166534] rounded-lg border border-[#BBF7D0]">
                         {lesson.isCompleted ? "HOÀN THÀNH" : "ĐANG HỌC DỞ"}
                       </span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-xs text-slate-400 italic font-medium">
+                <div className="text-center p-8 bg-[#FFFFFF] border border-dashed border-[#EBEBEA] rounded-xl text-xs text-[#6B6B68] italic font-medium">
                   Chưa có lịch sử học gần đây. Bấm vào bài học ở trên để tích lũy phản xạ!
                 </div>
               )}

@@ -10,7 +10,9 @@ import {
   Trophy, 
   ArrowRight, 
   GraduationCap, 
-  BookOpen
+  BookOpen,
+  Volume2,
+  Edit3
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -23,11 +25,11 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="bg-[#F8F9FA] min-h-screen text-slate-800 selection:bg-blue-100 overflow-x-hidden relative w-full flex flex-col items-center">
+    <div className="bg-[#F7F7F5] min-h-screen text-[#3D3D3B] selection:bg-blue-100 overflow-x-hidden relative w-full flex flex-col items-center">
       <Navbar />
 
       {/* Soft Dark Top Bar Gradient to make transparent navbar text extremely readable */}
-      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/45 via-black/15 to-transparent pointer-events-none z-40" />
+      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#1A1A18]/5 via-[#1A1A18]/2 to-transparent pointer-events-none z-40" />
 
       {/* Decorative Soft Ambient Glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-500/5 via-orange-500/5 to-transparent blur-[120px] pointer-events-none" />
@@ -48,41 +50,41 @@ export default function HomePage() {
               BÁM SÁT CHƯƠNG TRÌNH SÁCH GIÁO KHOA GLOBAL SUCCESS
             </span>
             
-            <h1 className="text-4xl md:text-6xl font-display font-black tracking-tight leading-[1.15] text-slate-900 w-full text-center">
+            <h1 className="text-[28px] md:text-[48px] font-bold tracking-[-0.02em] leading-[1.15] text-[#1A1A18] w-full text-center">
               Nền tảng Luyện thi & Phát âm <br className="hidden md:block" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-violet-600 to-orange-500">
                 bám sát SGK Global Success
               </span>
             </h1>
             
-            <p className="text-sm md:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed font-bold text-center">
+            <p className="text-[15px] leading-[1.7] text-[#3D3D3B] max-w-2xl mx-auto font-medium text-center">
               Giúp học sinh từ cấp 1 đến cấp 3 tự tin làm chủ từ vựng, ngữ pháp và phát âm chuẩn xác theo đúng chương trình học trên lớp với công nghệ AI phản xạ tự nhiên.
             </p>
             
             {/* Highly prominent, popped-out white CTA box */}
-            <div className="bg-white w-full max-w-2xl mx-auto p-8 md:p-10 rounded-[32px] border border-slate-200/80 shadow-[0_20px_50px_rgba(0,0,0,0.06)] hover:shadow-[0_25px_60px_rgba(0,0,0,0.09)] transition-all duration-300 space-y-6 relative overflow-hidden flex flex-col items-center justify-center">
+            <div className="bg-[#FFFFFF] w-full max-w-2xl mx-auto p-8 md:p-10 rounded-2xl border border-[#EBEBEA] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-300 space-y-6 relative overflow-hidden flex flex-col items-center justify-center">
               <div className="absolute top-0 right-0 w-36 h-36 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-36 h-36 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
               
-              <h3 className="text-sm md:text-base font-black text-slate-800 text-center">
+              <h3 className="text-[16px] font-semibold text-[#1A1A18] text-center">
                 Bắt đầu nâng cao kết quả học tập tiếng Anh ngay hôm nay
               </h3>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full">
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-lg transition-all shadow-lg shadow-orange-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-[28px] py-[12px] rounded-[10px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[16px] transition-all shadow-[0_2px_8px_rgba(37,99,235,0.20)] hover:-translate-y-[1px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap border-none">
                     🎒 Dành cho Học Sinh
                   </button>
                 </Link>
                 <Link href="/signup" className="w-full sm:w-auto flex justify-center">
-                  <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg transition-all shadow-lg shadow-blue-500/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
+                  <button className="w-full sm:w-auto px-[28px] py-[12px] rounded-[10px] bg-[#FFFFFF] hover:bg-[#EFF6FF] text-[#2563EB] border-2 border-[#2563EB] font-semibold text-[16px] transition-all hover:-translate-y-[1px] active:scale-[0.98] cursor-pointer text-center whitespace-nowrap">
                     👨‍🏫 Dành cho Giáo Viên
                   </button>
                 </Link>
               </div>
             </div>
             
-            <p className="mt-6 text-[10px] text-slate-400 flex items-center justify-center gap-2 font-black uppercase tracking-wider text-center">
+            <p className="mt-6 text-[10px] text-[#6B6B68] flex items-center justify-center gap-2 font-black uppercase tracking-wider text-center">
               <ShieldCheck size={14} className="text-emerald-500" /> Hệ thống bảo mật 100% học liệu trực quan
             </p>
           </motion.div>
@@ -90,22 +92,22 @@ export default function HomePage() {
       </section>
 
       {/* 2. CORE OUTCOMES (MỤC TIÊU HỌC TẬP) */}
-      <section className="py-24 md:py-32 bg-white border-y border-slate-200/85 relative w-full flex flex-col items-center justify-center">
+      <section className="py-20 bg-[#FFFFFF] border-y border-[#EBEBEA] relative w-full flex flex-col items-center justify-center">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
-            <h2 className="text-2xl md:text-4xl font-display font-black tracking-tight text-slate-900 text-center">
+            <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-[#1A1A18] text-center">
               Mục tiêu học tập thực tế
             </h2>
-            <p className="text-slate-500 text-xs md:text-sm max-w-2xl mx-auto font-bold text-center">
+            <p className="text-[#6B6B68] text-xs md:text-sm max-w-2xl mx-auto font-medium text-center">
               Phương pháp thông minh giúp học sinh học sâu, nhớ lâu và làm chủ kỹ năng nói tiếng Anh hoàn toàn tự tin:
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full justify-items-center">
             {[
-              { icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50", border: "hover:border-blue-300", shadow: "hover:shadow-blue-500/10", title: "Làm chủ từ vựng cốt lõi", desc: "Không học vẹt từ đơn lẻ. Học sinh ghi nhớ từ vựng qua ngữ cảnh giao tiếp minh họa chân thực từ sách giáo khoa Global Success." },
-              { icon: Mic, color: "text-orange-600", bg: "bg-orange-50", border: "hover:border-orange-300", shadow: "hover:shadow-orange-500/10", title: "Phát âm chuẩn IPA bản xứ", desc: "Công nghệ chấm điểm AI thông minh chỉnh sửa từng lỗi phát âm nhỏ nhất, giúp học sinh nói tiếng Anh tự nhiên đầy tự tin." },
-              { icon: Trophy, color: "text-emerald-600", bg: "bg-emerald-50", border: "hover:border-emerald-300", shadow: "hover:shadow-emerald-500/10", title: "Bứt phá điểm thi học kỳ", desc: "Kho đề thi trắc nghiệm phong phú, sát thực tế bài học giúp củng cố ngữ pháp và đạt điểm số tối đa trong các kỳ kiểm tra." }
+              { icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50", title: "Làm chủ từ vựng cốt lõi", desc: "Không học vẹt từ đơn lẻ. Học sinh ghi nhớ từ vựng qua ngữ cảnh giao tiếp minh họa chân thực từ sách giáo khoa Global Success." },
+              { icon: Mic, color: "text-orange-600", bg: "bg-orange-50", title: "Phát âm chuẩn IPA bản xứ", desc: "Công nghệ chấm điểm AI thông minh chỉnh sửa từng lỗi phát âm nhỏ nhất, giúp học sinh nói tiếng Anh tự nhiên đầy tự tin." },
+              { icon: Trophy, color: "text-emerald-600", bg: "bg-emerald-50", title: "Bứt phá điểm thi học kỳ", desc: "Kho đề thi trắc nghiệm phong phú, sát thực tế bài học giúp củng cố ngữ pháp và đạt điểm số tối đa trong các kỳ kiểm tra." }
             ].map((b, i) => (
               <motion.div 
                 key={b.title}
@@ -113,15 +115,15 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
-                whileHover={{ y: -5 }}
-                className={`bg-white p-8 rounded-[28px] border border-slate-200/60 ${b.border} shadow-[0_10px_30px_rgba(0,0,0,0.03)] ${b.shadow} transition-all duration-300 flex flex-col justify-between w-full max-w-sm`}
+                whileHover={{ y: -2 }}
+                className="bg-[#FFFFFF] p-8 rounded-xl border border-[#EBEBEA] hover:border-[#BFDBFE] shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-300 flex flex-col justify-between w-full max-w-sm"
               >
                 <div className="space-y-5">
-                  <div className={`w-12 h-12 rounded-2xl ${b.bg} ${b.color} flex items-center justify-center shadow-sm`}>
+                  <div className={`w-12 h-12 rounded-xl ${b.bg} ${b.color} flex items-center justify-center shadow-sm`}>
                     <b.icon size={20} />
                   </div>
-                  <h3 className="text-base md:text-lg font-black text-slate-800">{b.title}</h3>
-                  <p className="text-slate-500 text-xs leading-relaxed font-bold">{b.desc}</p>
+                  <h3 className="text-[18px] font-semibold text-[#1A1A18]">{b.title}</h3>
+                  <p className="text-[#6B6B68] text-[13px] leading-relaxed font-medium">{b.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -130,16 +132,16 @@ export default function HomePage() {
       </section>
 
       {/* 3. THE 4-STEP REFLEX LOOP */}
-      <section className="py-24 md:py-32 relative w-full flex flex-col items-center justify-center overflow-hidden">
+      <section className="py-20 relative w-full flex flex-col items-center justify-center overflow-hidden">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
             <span className="px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-[10px] font-black uppercase tracking-widest text-center mx-auto inline-block">
               LỘ TRÌNH 4 BƯỚC HỌC TẬP
             </span>
-            <h2 className="text-2xl md:text-4xl font-display font-black tracking-tight text-slate-900 text-center">
+            <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-[#1A1A18] text-center">
               Quy trình học bám sát lớp học
             </h2>
-            <p className="text-slate-500 text-xs md:text-sm max-w-2xl mx-auto font-bold text-center">
+            <p className="text-[#6B6B68] text-xs md:text-sm max-w-2xl mx-auto font-medium text-center">
               Giúp học sinh tự học nhanh chóng và tiến bộ rõ rệt chỉ với 4 bước đơn giản:
             </p>
           </div>
@@ -148,31 +150,27 @@ export default function HomePage() {
             {[
               { 
                 step: "01", 
-                name: "NGHE MẪU 🎧", 
+                name: "NGHE MẪU", 
                 desc: "Nghe phát âm và nhấn trọng âm chuẩn xác từ giáo viên bản xứ, kèm theo các hình ảnh hội thoại minh họa sinh động bám sát bài học.", 
-                dotColor: "text-blue-600",
-                bg: "bg-blue-50"
+                icon: Volume2
               },
               { 
                 step: "02", 
-                name: "LUYỆN PHÁT ÂM 🗣️", 
+                name: "LUYỆN PHÁT ÂM", 
                 desc: "Bấm Micro thu âm và đọc nhại lại theo âm điệu mẫu. Trực tiếp thực hành nói tự tin ngay tại nhà không sợ ngượng ngùng.", 
-                dotColor: "text-orange-500",
-                bg: "bg-orange-50"
+                icon: Mic
               },
               { 
                 step: "03", 
-                name: "AI ĐÁNH GIÁ CHẤM ĐIỂM 🤖", 
+                name: "AI ĐÁNH GIÁ CHẤM ĐIỂM", 
                 desc: "Cô giáo AI phân tích giọng nói chi tiết, chỉ rõ từ nào em phát âm đúng màu xanh, từ nào chưa chuẩn màu đỏ để chỉnh sửa nhanh.", 
-                dotColor: "text-emerald-500",
-                bg: "bg-emerald-50"
+                icon: Sparkles
               },
               { 
                 step: "04", 
-                name: "LUYỆN NGHE CHÉP CHÍNH TẢ 📝", 
+                name: "LUYỆN NGHE CHÉP CHÍNH TẢ", 
                 desc: "Thực hành điền từ còn thiếu vào ô trống để khắc sâu vốn từ vựng và củng cố toàn diện kỹ năng nghe hiểu ngữ pháp.", 
-                dotColor: "text-indigo-600",
-                bg: "bg-indigo-50"
+                icon: Edit3
               }
             ].map((s, i) => (
               <motion.div 
@@ -181,20 +179,23 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all w-full flex flex-col space-y-4"
+                whileHover={{ y: -2 }}
+                className="bg-white p-6 rounded-2xl border border-[#E5E7EB] transition-all w-full flex flex-col justify-between"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg ${s.bg} ${s.dotColor}`}>
-                    {s.step}
+                <div>
+                  <div className="inline-block bg-[#EFF6FF] text-[#2563EB] text-[12px] font-bold px-[8px] py-[3px] rounded-[6px] mb-[10px]">
+                    BƯỚC {s.step}
                   </div>
-                  <h3 className="text-lg md:text-xl font-black text-slate-800 leading-tight flex-1">
-                    {s.name}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <s.icon size={20} className="text-[#2563EB] shrink-0" />
+                    <h3 className="text-[18px] font-semibold text-[#1A1A18] leading-tight">
+                      {s.name}
+                    </h3>
+                  </div>
+                  <p className="text-[#6B6B68] text-sm leading-relaxed font-medium">
+                    {s.desc}
+                  </p>
                 </div>
-                <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
-                  {s.desc}
-                </p>
               </motion.div>
             ))}
           </div>
@@ -202,54 +203,88 @@ export default function HomePage() {
       </section>
 
       {/* 4. TEXTBOOK LIBRARIES ROADMAP */}
-      <section className="py-20 bg-white border-y border-slate-200/85 w-full flex flex-col items-center justify-center">
+      <section className="py-20 bg-[#FFFFFF] border-y border-[#EBEBEA] w-full flex flex-col items-center justify-center">
         <div className="container-custom w-full flex flex-col items-center justify-center">
           <div className="text-center mb-16 space-y-3 w-full flex flex-col items-center">
-            <h2 className="text-2xl md:text-4xl font-display font-black tracking-tight text-slate-900 text-center">
+            <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-[#1A1A18] text-center">
               Phòng Học Lộ Trình Sách Giáo Khoa
             </h2>
-            <p className="text-slate-500 text-xs md:text-sm max-w-2xl mx-auto font-bold text-center">
+            <p className="text-[#6B6B68] text-xs md:text-sm max-w-2xl mx-auto font-medium text-center">
               Em hãy chọn bài học trong sách giáo khoa để ôn tập lý thuyết và bài tập ngay:
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full justify-items-center">
-            {currentUnits.map((m, i) => (
-              <motion.div 
-                key={m.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="bg-white p-6 rounded-[28px] border border-slate-200/60 hover:border-blue-400 hover:shadow-[0_15px_40px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between h-full shadow-[0_8px_25px_rgba(0,0,0,0.02)] group w-full max-w-xs"
-              >
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl">{m.emoji}</span>
-                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-black uppercase tracking-wider">
-                      {m.level}
-                    </span>
-                  </div>
-                  <h3 className="text-sm md:text-base font-black text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">
-                    {m.title}
-                  </h3>
-                  <p className="text-slate-500 text-xs leading-relaxed font-bold line-clamp-3">
-                    {m.desc}
-                  </p>
-                </div>
+            {currentUnits.map((m, i) => {
+              const barColor = "#0F6E56"; // Grade 6-9
+              const isFirstOrSecond = i < 2;
+              const statusText = isFirstOrSecond ? "Đang học" : "Chưa bắt đầu";
+              const statusBg = isFirstOrSecond ? "bg-[#DCFCE7] text-[#166534]" : "bg-[#F1EFE8] text-[#5F5E5A]";
+              
+              return (
+                <motion.div 
+                  key={m.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  className="bg-white rounded-xl border border-[#EBEBEA] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all duration-300 flex flex-col justify-between h-full shadow-[0_1px_3px_rgba(0,0,0,0.06)] group w-full max-w-xs relative overflow-hidden"
+                >
+                  {/* Thumbnail Swatch */}
+                  <div 
+                    className="w-full h-[80px] rounded-t-xl" 
+                    style={{
+                      background: `linear-gradient(135deg, ${barColor}26 0%, ${barColor}0D 50%, ${barColor}1F 100%)`
+                    }}
+                  />
+                  
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}`}>
+                          {statusText}
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-bold uppercase tracking-wider">
+                          {m.level}
+                        </span>
+                      </div>
+                      
+                      <h3 className="text-[15px] font-bold text-[#1A1A18] group-hover:text-[#2563EB] transition-colors line-clamp-1">
+                        {m.title}
+                      </h3>
+                      
+                      <p className="text-[#6B6B68] text-xs leading-relaxed font-medium line-clamp-2">
+                        {m.desc}
+                      </p>
+                    </div>
 
-                <div className="pt-4 mt-6 border-t border-slate-200 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-bold">
-                    🔥 {m.plays} bạn đang học
-                  </span>
-                  <Link href="/signup">
-                    <button className="p-2.5 rounded-xl bg-slate-50 hover:bg-blue-600 text-slate-500 hover:text-white border border-slate-200/80 transition-all cursor-pointer">
-                      <ArrowRight size={14} />
-                    </button>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
+                    <div className="pt-3 border-t border-[#EBEBEA] flex items-center justify-between">
+                      {/* Unit count / Plays row */}
+                      <span className="text-[13px] text-[#6B6B68] font-medium flex items-center gap-1">
+                        <Trophy size={13} className="text-[#6B6B68]" />
+                        {m.plays} bạn đang học
+                      </span>
+                      <Link href="/signup">
+                        <button className="p-2 rounded-lg bg-slate-50 hover:bg-[#2563EB] text-slate-500 hover:text-white border border-[#EBEBEA] transition-all cursor-pointer">
+                          <ArrowRight size={14} />
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                  
+                  {/* 4px Progress Bar at card bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#EFF6FF]">
+                    <div 
+                      className="h-full rounded-r-full"
+                      style={{ 
+                        backgroundColor: barColor, 
+                        width: isFirstOrSecond ? "65%" : "0%" 
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
