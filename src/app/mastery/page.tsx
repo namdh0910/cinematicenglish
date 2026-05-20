@@ -88,27 +88,27 @@ export default function EnglishMasteryDashboard() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: "Phát âm chuẩn", score: "87%", color: "bg-indigo-50", text: "text-indigo-600", icon: <Mic size={20}/>, trend: "+0.25 tuần" },
-              { title: "Tự tin nói", score: "78%", color: "bg-emerald-50", text: "text-emerald-600", icon: <MessageSquare size={20}/>, trend: "+1.2 tuần" },
-              { title: "Từ vựng làm chủ", score: "92%", color: "bg-amber-50", text: "text-amber-600", icon: <BookOpen size={20}/>, trend: "+0.5 tuần" },
-              { title: "Sẵn sàng thi", score: "84%", color: "bg-rose-50", text: "text-rose-600", icon: <Award size={20}/>, trend: "+2.0 tuần" },
+              { title: "Phát âm chuẩn", score: "87%", color: "bg-indigo-100", emoji: "🗣️", trend: "+0.25 tuần" },
+              { title: "Tự tin nói", score: "78%", color: "bg-emerald-100", emoji: "💬", trend: "+1.2 tuần" },
+              { title: "Từ vựng làm chủ", score: "92%", color: "bg-amber-100", emoji: "📚", trend: "+0.5 tuần" },
+              { title: "Sẵn sàng thi", score: "84%", color: "bg-rose-100", emoji: "🏆", trend: "+2.0 tuần" },
             ].map((skill, i) => (
               <motion.div 
                 key={i}
                 whileHover={{ y: -4 }}
-                className="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.03)] border-none flex flex-col justify-between"
+                className="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${skill.color} ${skill.text}`}>
-                    {skill.icon}
+                <div className="flex justify-between items-start mb-6">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${skill.color} text-4xl shadow-sm`}>
+                    {skill.emoji}
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">
-                    <TrendingUp size={12} /> {skill.trend}
+                  <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                    <TrendingUp size={14} /> {skill.trend}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-slate-500 font-bold text-sm mb-1">{skill.title}</h3>
-                  <div className="text-3xl font-black text-slate-900">{skill.score}</div>
+                  <h3 className="text-slate-500 font-bold text-base mb-2">{skill.title}</h3>
+                  <div className="text-5xl font-black text-slate-900 tracking-tight">{skill.score}</div>
                 </div>
               </motion.div>
             ))}
@@ -237,15 +237,17 @@ export default function EnglishMasteryDashboard() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
             {[
-              { grade: "Lớp 6", program: "Chương trình Global Success", bg: "bg-blue-50", iconCol: "text-blue-500" },
-              { grade: "Lớp 10", program: "Chương trình Global Success", bg: "bg-emerald-50", iconCol: "text-emerald-500" },
-              { grade: "Lớp 11", program: "Chương trình Global Success", bg: "bg-amber-50", iconCol: "text-amber-500" }
+              { grade: "Lớp 6", program: "Chương trình Global Success", color: "bg-green-100", emoji: "🏫" },
+              { grade: "Lớp 10", program: "Chương trình Global Success", color: "bg-blue-100", emoji: "🎒" },
+              { grade: "Lớp 11", program: "Chương trình Global Success", color: "bg-amber-100", emoji: "🎓" }
             ].map((cls, i) => (
-              <div key={i} className={`relative flex flex-col justify-start h-40 ${cls.bg} rounded-3xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer overflow-hidden border-none`}>
-                <h4 className="text-2xl font-bold text-slate-800 z-10">{cls.grade}</h4>
-                <p className="text-sm text-slate-500 font-medium mt-1 z-10">{cls.program}</p>
-                <div className={`absolute bottom-[-10px] right-[-10px] opacity-80 ${cls.iconCol}`}>
-                  <GraduationCap size={100} strokeWidth={1.5} />
+              <div key={i} className="relative flex flex-col justify-end h-48 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-8 hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer overflow-hidden">
+                <div className={`absolute top-6 left-6 w-20 h-20 rounded-full flex items-center justify-center ${cls.color} text-5xl shadow-inner`}>
+                  {cls.emoji}
+                </div>
+                <div className="mt-20">
+                  <h4 className="text-3xl font-extrabold text-slate-900">{cls.grade}</h4>
+                  <p className="text-base text-slate-500 font-medium mt-1">{cls.program}</p>
                 </div>
               </div>
             ))}
