@@ -75,7 +75,7 @@ export default function EnglishMasteryDashboard() {
               </p>
             </div>
           </div>
-          <button className="w-full lg:w-auto bg-indigo-600 text-white rounded-2xl px-8 py-4 font-bold shadow-[0_6px_0_rgb(79,70,229)] active:shadow-[0_0px_0_rgb(79,70,229)] active:translate-y-[6px] transition-all hover:brightness-105 border-none cursor-pointer text-base">
+          <button className="w-full lg:w-auto bg-indigo-600 text-white rounded-2xl px-8 py-4 font-bold shadow-[0_4px_0_rgb(67,56,202)] active:shadow-[0_0px_0_rgb(67,56,202)] active:translate-y-[4px] transition-all hover:brightness-105 border-none cursor-pointer text-base">
             Xem Demo Ngay
           </button>
         </section>
@@ -169,7 +169,7 @@ export default function EnglishMasteryDashboard() {
                 </div>
 
                 <div className="mt-6 flex items-center gap-3">
-                  <button className="flex-1 bg-indigo-600 text-white rounded-2xl py-4 font-bold shadow-[0_4px_0_rgb(79,70,229)] active:shadow-[0_0px_0_rgb(79,70,229)] active:translate-y-[4px] transition-all flex justify-center items-center gap-2 border-none cursor-pointer">
+                  <button className="flex-1 bg-indigo-600 text-white rounded-2xl py-4 font-bold shadow-[0_4px_0_rgb(67,56,202)] active:shadow-[0_0px_0_rgb(67,56,202)] active:translate-y-[4px] transition-all flex justify-center items-center gap-2 border-none cursor-pointer">
                     <Mic size={18} /> Ghi âm lại
                   </button>
                   <button className="w-14 h-[52px] bg-slate-100 text-slate-600 rounded-2xl flex justify-center items-center font-bold hover:bg-slate-200 transition-colors border-none cursor-pointer">
@@ -236,16 +236,17 @@ export default function EnglishMasteryDashboard() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
-            {["Lớp 6 Global Success", "Lớp 10 Global Success", "Lớp 11 Global Success"].map((cls, i) => (
-              <div key={i} className="border border-slate-100 rounded-3xl p-6 hover:shadow-lg hover:border-indigo-100 transition-all">
-                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4">
-                  <GraduationCap className="text-indigo-600" size={24}/>
+            {[
+              { grade: "Lớp 6", program: "Chương trình Global Success", bg: "bg-blue-50", iconCol: "text-blue-500" },
+              { grade: "Lớp 10", program: "Chương trình Global Success", bg: "bg-emerald-50", iconCol: "text-emerald-500" },
+              { grade: "Lớp 11", program: "Chương trình Global Success", bg: "bg-amber-50", iconCol: "text-amber-500" }
+            ].map((cls, i) => (
+              <div key={i} className={`relative flex flex-col justify-start h-40 ${cls.bg} rounded-3xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all cursor-pointer overflow-hidden border-none`}>
+                <h4 className="text-2xl font-bold text-slate-800 z-10">{cls.grade}</h4>
+                <p className="text-sm text-slate-500 font-medium mt-1 z-10">{cls.program}</p>
+                <div className={`absolute bottom-[-10px] right-[-10px] opacity-80 ${cls.iconCol}`}>
+                  <GraduationCap size={100} strokeWidth={1.5} />
                 </div>
-                <h4 className="font-extrabold text-slate-900 mb-2">{cls}</h4>
-                <p className="text-sm text-slate-500 font-medium mb-6">12 Unit • <span className="text-emerald-600 font-bold">Đang học</span></p>
-                <button className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold transition-colors border-none cursor-pointer">
-                  Vào học
-                </button>
               </div>
             ))}
           </div>
@@ -285,19 +286,19 @@ export default function EnglishMasteryDashboard() {
                 whileHover={{ scale: 1.05 }}
                 className="min-w-[200px] md:min-w-[240px] snap-center cursor-pointer group"
               >
-                <div className={`w-full aspect-[2/3] rounded-3xl bg-gradient-to-br ${movie.gradient} relative overflow-hidden shadow-lg mb-4 flex items-center justify-center p-6 text-center`}>
+                <div className="w-full aspect-[2/3] rounded-3xl bg-white border border-slate-100 relative overflow-hidden shadow-md mb-4 flex items-center justify-center p-6 text-center">
                   {/* Fake Poster Abstract */}
-                  <h3 className="text-white font-black text-2xl leading-tight drop-shadow-md">{movie.title.toUpperCase()}</h3>
+                  <h3 className="text-slate-900 font-black text-2xl leading-tight">{movie.title.toUpperCase()}</h3>
                   
                   {/* Luyện nói Badge */}
-                  <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black text-white border border-white/20 flex items-center gap-1.5">
+                  <div className="absolute top-4 left-4 bg-slate-100 px-3 py-1.5 rounded-xl text-[10px] font-black text-slate-600 border border-slate-200 flex items-center gap-1.5">
                     <Mic size={12}/> Luyện nói
                   </div>
                   
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                    <div className="w-14 h-14 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center border border-white/50 text-white">
-                      <Play size={24} className="fill-white" />
+                  <div className="absolute inset-0 bg-white/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                    <div className="w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-200 text-indigo-600">
+                      <Play size={24} className="fill-indigo-600" />
                     </div>
                   </div>
                 </div>
