@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { 
   Home, BookOpen, Layers, Library, Navigation, Trophy, Target, User, 
   Flame, Sparkles, Play, Headphones, Mic, Book, Zap, 
-  ChevronRight, ChevronDown, Shield, Moon, Sun, ArrowRight, CheckCircle2, Gem, Heart
+  ChevronRight, ChevronDown, Shield, Moon, Sun, ArrowRight, CheckCircle2, Gem, Heart, Search, Bell
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -68,19 +67,11 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
     { id: "home", label: "Trang chủ", icon: Home },
     { id: "sgk", label: "Học SGK", icon: BookOpen },
     { id: "topics", label: "Chủ đề", icon: Layers },
-    { id: "library", label: "Thư viện", icon: Library },
-    { id: "path", label: "Lộ trình cá nhân", icon: Navigation },
+    { id: "library", label: "Thư viện phim", icon: Library },
+    { id: "speaking", label: "Luyện Nói AI", icon: Mic },
     { id: "leaderboard", label: "Bảng xếp hạng", icon: Trophy },
     { id: "quests", label: "Nhiệm vụ", icon: Target },
     { id: "profile", label: "Hồ sơ", icon: User },
-  ];
-
-  const topNavLinks = [
-    { id: "sgk", label: "Học SGK" },
-    { id: "topics", label: "Chủ đề" },
-    { id: "leaderboard", label: "Bảng xếp hạng" },
-    { id: "quests", label: "Nhiệm vụ" },
-    { id: "profile", label: "Hồ sơ" },
   ];
 
   const sgkTabs = ["Tất cả", "Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9", "Lớp 10", "Lớp 11", "Lớp 12"];
@@ -94,10 +85,10 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] text-[#E2E8F0] font-sans flex overflow-hidden selection:bg-[#6366F1]/30">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans flex overflow-hidden selection:bg-[var(--accent-primary)]/30">
       
       {/* 1. LEFT SIDEBAR */}
-      <aside className="w-[240px] shrink-0 border-r border-white/5 flex flex-col justify-between bg-[#0B0C10] relative z-20 h-screen sticky top-0 overflow-y-auto hidden md:flex custom-scrollbar">
+      <aside className="w-[240px] shrink-0 border-r border-[var(--border-subtle)] flex flex-col justify-between bg-[var(--bg-primary)] relative z-20 h-screen sticky top-0 overflow-y-auto hidden md:flex custom-scrollbar">
         <div className="p-6">
           <Link href="/" className="flex items-center gap-3 mb-10 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.4)]">
@@ -116,13 +107,13 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 <button
                   key={link.id}
                   onClick={() => setActiveTab(link.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all duration-300 ${
                     isActive 
-                      ? "bg-[#312E81]/60 text-white shadow-inner" 
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-white/5 text-[var(--accent-primary)] shadow-[inset_0_0_20px_rgba(124,58,237,0.05)] border border-[var(--border-subtle)] font-bold drop-shadow-[0_0_8px_rgba(124,58,237,0.3)]" 
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 font-medium border border-transparent"
                   }`}
                 >
-                  <link.icon size={18} className={isActive ? "text-[#818CF8]" : "text-slate-500"} />
+                  <link.icon size={18} className={isActive ? "text-[var(--accent-primary)] drop-shadow-[0_0_12px_rgba(124,58,237,0.8)]" : "text-slate-500"} />
                   {link.label}
                 </button>
               );
@@ -130,33 +121,20 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           </nav>
         </div>
 
-        <div className="p-6 space-y-4">
-          {/* PRO Card */}
-          <div className="bg-gradient-to-b from-[#1E1B4B] to-[#111827] border border-[#312E81] rounded-3xl p-5 relative overflow-hidden group">
-            <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#6366F1] blur-3xl opacity-20 group-hover:opacity-40 transition-opacity" />
+        <div className="p-6">
+          {/* PRO Card - Slim & Refined */}
+          <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-4 relative overflow-hidden group">
+            <div className="absolute -top-10 -right-10 w-24 h-24 bg-[var(--accent-primary)] blur-3xl opacity-10 group-hover:opacity-20 transition-opacity" />
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-black text-white text-base">PRO</span>
-              <Sparkles size={14} className="text-[#818CF8]" fill="currentColor" />
+              <span className="font-bold text-[var(--text-primary)] text-sm">PRO</span>
+              <Sparkles size={12} className="text-[var(--accent-primary)]" fill="currentColor" />
             </div>
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-4">
-              Mở khóa toàn bộ nội dung<br/>Luyện nói không giới hạn
+            <p className="text-[10px] text-[var(--text-muted)] font-medium mb-3">
+              Mở khóa luyện nói AI không giới hạn
             </p>
-            <button className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white text-xs font-black py-2.5 rounded-xl shadow-[0_4px_15px_rgba(99,102,241,0.3)] transition-all active:scale-95">
-              Nâng cấp ngay
+            <button className="w-full bg-[var(--accent-primary)] hover:brightness-110 text-white text-[11px] font-bold py-2 rounded-lg transition-all active:scale-95">
+              Nâng cấp
             </button>
-          </div>
-
-          {/* Theme Toggle */}
-          <div className="flex items-center justify-between bg-[#16171E] rounded-2xl p-1 border border-white/5">
-            <span className="text-[11px] font-bold text-slate-400 pl-3">Chế độ</span>
-            <div className="flex items-center gap-1">
-              <button className="flex items-center gap-1.5 bg-[#2D2E3A] text-white px-3 py-1.5 rounded-xl text-[10px] font-bold shadow-sm">
-                <Moon size={12} fill="currentColor" /> Tối
-              </button>
-              <button className="flex items-center gap-1.5 text-slate-500 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition-colors">
-                <Sun size={12} /> Sáng
-              </button>
-            </div>
           </div>
         </div>
       </aside>
@@ -165,43 +143,44 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative">
         
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-[#0B0C10]/90 backdrop-blur-md border-b border-white/5 px-8 h-20 flex items-center shrink-0">
-          <nav className="hidden lg:flex items-center gap-10 mx-auto">
-            {topNavLinks.map(link => (
-              <button 
-                key={link.id}
-                onClick={() => setActiveTab(link.id)}
-                className={`text-sm font-bold transition-colors relative h-20 flex items-center ${
-                  activeTab === link.id ? "text-[#818CF8]" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                {link.label}
-                {activeTab === link.id && (
-                  <motion.div 
-                    layoutId="topNav"
-                    className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#6366F1] rounded-t-full"
-                  />
-                )}
-              </button>
-            ))}
-          </nav>
+        <header className="sticky top-0 z-30 bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-subtle)] px-8 h-[72px] flex items-center justify-between shrink-0">
+          
+          {/* Search Bar Cinematic */}
+          <div className="hidden lg:flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-full px-4 py-2 w-full max-w-sm transition-all focus-within:border-[var(--accent-primary)]/50 focus-within:shadow-[0_0_15px_rgba(124,58,237,0.1)]">
+            <Search size={16} className="text-[var(--text-muted)]" />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm bài học, thư viện phim..." 
+              className="bg-transparent border-none outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] w-full"
+            />
+          </div>
 
-          {/* Right Stats */}
-          <div className="flex items-center gap-5 absolute right-8">
-            <div className="flex items-center gap-1.5 bg-[#FF9600]/10 border border-[#FF9600]/20 px-3 py-1.5 rounded-full">
-              <Flame size={14} className="text-[#FF9600]" fill="currentColor" />
-              <span className="text-xs font-black text-[#FF9600]">{streakCount} NGÀY</span>
+          {/* Right Stats & Profile */}
+          <div className="flex items-center gap-6 ml-auto">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <Flame size={16} className="text-[var(--status-warning)] drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" fill="currentColor" />
+                <span className="text-sm font-bold text-[var(--text-primary)]">{streakCount}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Sparkles size={16} className="text-[var(--accent-primary)] drop-shadow-[0_0_8px_rgba(124,58,237,0.5)]" fill="currentColor" />
+                <span className="text-sm font-bold text-[var(--text-primary)]">{profile?.gems || 560}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 px-3 py-1.5 rounded-full">
-              <Gem size={14} className="text-[#8B5CF6]" fill="currentColor" />
-              <span className="text-xs font-black text-[#8B5CF6]">{profile?.gems || 500}</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-[#EF4444]/10 border border-[#EF4444]/20 px-3 py-1.5 rounded-full">
-              <Heart size={14} className="text-[#EF4444]" fill="currentColor" />
-              <span className="text-xs font-black text-[#EF4444]">{profile?.lives || 5}</span>
-            </div>
-            <button className="w-9 h-9 rounded-full bg-[#1E1B4B] border border-[#312E81] flex items-center justify-center text-sm font-black text-[#818CF8] ml-2">
-              {profile?.full_name ? profile.full_name.charAt(0) : "A"}
+            
+            <div className="w-px h-6 bg-[var(--border-subtle)]" />
+            
+            <button className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors relative">
+              <Bell size={20} />
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[var(--status-danger)] shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
+            </button>
+            
+            <button className="w-9 h-9 rounded-full bg-[var(--accent-primary)]/20 border border-[var(--accent-primary)]/50 flex items-center justify-center text-sm font-bold text-[var(--accent-primary)] overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                profile?.full_name ? profile.full_name.charAt(0) : "A"
+              )}
             </button>
           </div>
         </header>
