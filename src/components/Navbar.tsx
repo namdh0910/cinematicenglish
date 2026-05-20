@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Menu, X, Play, LogOut, Flame, LayoutDashboard, Sparkles, User, BookOpen, Trophy, Target, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -25,9 +25,10 @@ interface UserProfile {
   role: string;
 }
 
-export default function Navbar() {
+function NavbarContent() {
   const router = useRouter();
   const pathname = usePathname() || "";
+  const searchParams = useSearchParams();
   const isLightMode = pathname.startsWith("/learn") || pathname.startsWith("/dashboard") || pathname.startsWith("/journal") || pathname.startsWith("/feed");
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false); // Mobile menu state
@@ -40,23 +41,10 @@ export default function Navbar() {
   const [activeTab, setActiveTab] = useState("learn");
 
   useEffect(() => {
-    const handleUrlChange = () => {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        setActiveTab(params.get("tab") || "learn");
-      }
-    };
-    
-    handleUrlChange();
-    
-    window.addEventListener("popstate", handleUrlChange);
-    window.addEventListener("hashchange", handleUrlChange);
-    
-    return () => {
-      window.removeEventListener("popstate", handleUrlChange);
-      window.removeEventListener("hashchange", handleUrlChange);
-    };
-  }, [pathname]);
+    if (searchParams) {
+      setActiveTab(searchParams.get("tab") || "learn");
+    }
+  }, [searchParams, pathname]);
 
   // Load auth state and listen to changes
   useEffect(() => {
@@ -196,190 +184,197 @@ export default function Navbar() {
         className="sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
-        <div className="w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
+        <div className="w-full max-w-6xl mx-auto h-full flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-4 md:px-8">
           
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
-              <Play size={14} fill="white" className="ml-0.5 text-white" />
-            </div>
-            <span className="font-display font-black text-lg tracking-tight text-[#1A1A18]">Global Success</span>
-          </Link>
-
-          {/* Desktop Nav Links (Only if logged in) */}
-          {role !== 'guest' && (
-            <nav className="hidden md:flex items-center gap-8">
-               {simplifiedLinks.map((l) => {
-                const isActive = pathname === l.baseHref && activeTab === l.tab;
-                return (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className={`text-[14px] font-medium tracking-[-0.01em] transition-colors flex items-center gap-1.5 pb-[2px] ${
-                      isActive 
-                        ? "text-[#3B82F6] border-b-2 border-[#3B82F6]" 
-                        : "text-[#3D3D3B] hover:text-[#3B82F6] hover:border-b-2 hover:border-[#3B82F6]"
-                    }`}
-                  >
-                    <l.icon size={15} />
-                    {l.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
-
-          {/* Desktop Auth Section */}
-          <div className="hidden md:flex items-center gap-5">
-            {role === 'guest' ? (
-              <>
-                <Link 
-                  href="/login" 
-                  className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
-                >
-                  Đăng nhập
-                </Link>
-                <Link 
-                  href="/signup" 
-                  className="bg-blue-600 text-white rounded-2xl px-6 py-2 font-bold shadow-[0_6px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[6px] transition-all hover:brightness-105"
-                >
-                  Học miễn phí
-                </Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-4" ref={dropdownRef}>
-                
-                {/* Streak flame indicator */}
-                <div className="flex items-center gap-1 px-[10px] py-[4px] bg-[#FFF3E0] text-[#B45309] rounded-[20px] font-semibold text-[13px] select-none border border-[#FFE0B2]">
-                  <Flame size={14} className="fill-[#B45309] text-[#B45309]" />
-                  <span>{streakCount} NGÀY</span>
-                </div>
-
-                {/* Avatar drop target */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center gap-1 focus:outline-none"
-                    aria-label="User menu"
-                  >
-                    {profile?.avatarUrl ? (
-                      <img 
-                        src={profile.avatarUrl} 
-                        alt={profile.fullName} 
-                        className="w-8 h-8 rounded-full border border-white/20 hover:border-violet-500 transition-colors object-cover" 
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-[#3B82F6] transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm">
-                        {profile?.fullName ? profile.fullName.charAt(0) : <User size={14} />}
-                      </div>
-                    )}
-                  </button>
-
-                  {/* Desktop Dropdown card */}
-                  <AnimatePresence>
-                    {dropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className={`absolute right-0 mt-3 w-56 border rounded-2xl p-3 shadow-2xl flex flex-col gap-1.5 ${
-                          isLightMode
-                            ? "bg-white/95 border-slate-200/80 text-slate-800"
-                            : "bg-black/90 border-white/10 text-white"
-                        }`}
-                      >
-                        {/* User Profile header */}
-                        <div className={`p-2 border-b mb-1.5 flex flex-col gap-0.5 ${isLightMode ? "border-slate-100" : "border-white/5"}`}>
-                          <p className={`text-xs font-black truncate max-w-full ${isLightMode ? "text-slate-800" : "text-white"}`}>{profile?.fullName}</p>
-                          <p className={`text-[10px] truncate max-w-full ${isLightMode ? "text-slate-400" : "text-white/40"}`}>{profile?.email}</p>
-                          
-                          {/* Plan Badge */}
-                          <div className="mt-1.5 self-start">
-                            {profile?.subscriptionPlan === 'free' ? (
-                              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isLightMode ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white/70"}`}>
-                                Free Plan
-                              </span>
-                            ) : (
-                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-violet-600 text-white flex items-center gap-0.5 animate-pulse shadow-glow-violet">
-                                <Sparkles size={8} fill="white" />
-                                PRO Member
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Dropdown Options */}
-                        <Link href="/learn?tab=learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
-                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
-                        }`}>
-                          <BookOpen size={14} />
-                          Học SGK
-                        </Link>
-
-                        <Link href="/learn?tab=alphabet" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
-                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
-                        }`}>
-                          <Globe size={14} />
-                          Chữ cái
-                        </Link>
-
-                        <Link href="/learn?tab=leaderboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
-                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
-                        }`}>
-                          <Trophy size={14} />
-                          Bảng xếp hạng
-                        </Link>
-
-                        <Link href="/learn?tab=quests" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
-                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
-                        }`}>
-                          <Target size={14} />
-                          Nhiệm vụ
-                        </Link>
-
-                        <Link href="/learn?tab=profile" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
-                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
-                        }`}>
-                          <User size={14} />
-                          Hồ sơ
-                        </Link>
-
-                        {profile?.subscriptionPlan === 'free' && (
-                          <Link href="/#pricing" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-black transition-colors ${
-                            isLightMode ? "text-[#3B82F6] hover:text-blue-700 hover:bg-blue-50" : "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
-                          }`}>
-                            <Sparkles size={14} fill="currentColor" />
-                            Nâng cấp PRO
-                          </Link>
-                        )}
-
-                        <div className={`h-px my-1 ${isLightMode ? "bg-slate-100" : "bg-white/5"}`} />
-
-                        <button 
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 p-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs font-bold transition-colors text-left"
-                        >
-                          <LogOut size={14} />
-                          Đăng xuất
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
+          {/* Logo Column */}
+          <div className="flex justify-start items-center">
+            <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
+                <Play size={14} fill="white" className="ml-0.5 text-white" />
               </div>
+              <span className="font-display font-black text-lg tracking-tight text-[#1A1A18]">Global Success</span>
+            </Link>
+          </div>
+
+          {/* Navigation Links Column (Centered) */}
+          <div className="hidden md:flex justify-center items-center w-full">
+            {role !== 'guest' && (
+              <nav className="flex items-center gap-8">
+                {simplifiedLinks.map((l) => {
+                  const isActive = pathname === l.baseHref && activeTab === l.tab;
+                  return (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      className={`text-[14px] font-medium tracking-[-0.01em] transition-colors flex items-center gap-1.5 pb-[2px] ${
+                        isActive 
+                          ? "text-[#3B82F6] border-b-2 border-[#3B82F6]" 
+                          : "text-[#3D3D3B] hover:text-[#3B82F6] hover:border-b-2 hover:border-[#3B82F6]"
+                      }`}
+                    >
+                      <l.icon size={15} />
+                      {l.label}
+                    </Link>
+                  );
+                })}
+              </nav>
             )}
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            className={`md:hidden p-2 rounded-lg ${isLightMode ? "text-slate-800" : "text-white"}`}
-            onClick={() => setOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {/* Right Action Column */}
+          <div className="flex items-center justify-end gap-5">
+            {/* Desktop Auth Section */}
+            <div className="hidden md:flex items-center gap-5">
+              {role === 'guest' ? (
+                <>
+                  <Link 
+                    href="/login" 
+                    className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+                  >
+                    Đăng nhập
+                  </Link>
+                  <Link 
+                    href="/signup" 
+                    className="bg-blue-600 text-white rounded-2xl px-6 py-2 font-bold shadow-[0_6px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[6px] transition-all hover:brightness-105"
+                  >
+                    Học miễn phí
+                  </Link>
+                </>
+              ) : (
+                <div className="flex items-center gap-4" ref={dropdownRef}>
+                  
+                  {/* Streak flame indicator */}
+                  <div className="flex items-center gap-1 px-[10px] py-[4px] bg-[#FFF3E0] text-[#B45309] rounded-[20px] font-semibold text-[13px] select-none border border-[#FFE0B2]">
+                    <Flame size={14} className="fill-[#B45309] text-[#B45309]" />
+                    <span>{streakCount} NGÀY</span>
+                  </div>
+
+                  {/* Avatar drop target */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      className="flex items-center gap-1 focus:outline-none"
+                      aria-label="User menu"
+                    >
+                      {profile?.avatarUrl ? (
+                        <img 
+                          src={profile.avatarUrl} 
+                          alt={profile.fullName} 
+                          className="w-8 h-8 rounded-full border border-white/20 hover:border-violet-500 transition-colors object-cover" 
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-[#3B82F6] transition-colors flex items-center justify-center text-xs font-black uppercase shadow-sm">
+                          {profile?.fullName ? profile.fullName.charAt(0) : <User size={14} />}
+                        </div>
+                      )}
+                    </button>
+
+                    {/* Desktop Dropdown card */}
+                    <AnimatePresence>
+                      {dropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.15 }}
+                          className={`absolute right-0 mt-3 w-56 border rounded-2xl p-3 shadow-2xl flex flex-col gap-1.5 ${
+                            isLightMode
+                              ? "bg-white/95 border-slate-200/80 text-slate-800"
+                              : "bg-black/90 border-white/10 text-white"
+                          }`}
+                        >
+                          {/* User Profile header */}
+                          <div className={`p-2 border-b mb-1.5 flex flex-col gap-0.5 ${isLightMode ? "border-slate-100" : "border-white/5"}`}>
+                            <p className={`text-xs font-black truncate max-w-full ${isLightMode ? "text-slate-800" : "text-white"}`}>{profile?.fullName}</p>
+                            <p className={`text-[10px] truncate max-w-full ${isLightMode ? "text-slate-400" : "text-white/40"}`}>{profile?.email}</p>
+                            
+                            {/* Plan Badge */}
+                            <div className="mt-1.5 self-start">
+                              {profile?.subscriptionPlan === 'free' ? (
+                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isLightMode ? "bg-slate-100 text-slate-600" : "bg-white/10 text-white/70"}`}>
+                                  Free Plan
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-violet-600 text-white flex items-center gap-0.5 animate-pulse shadow-glow-violet">
+                                  <Sparkles size={8} fill="white" />
+                                  PRO Member
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Dropdown Options */}
+                          <Link href="/learn?tab=learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                            isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                          }`}>
+                            <BookOpen size={14} />
+                            Học SGK
+                          </Link>
+
+                          <Link href="/learn?tab=alphabet" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                            isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                          }`}>
+                            <Globe size={14} />
+                            Chữ cái
+                          </Link>
+
+                          <Link href="/learn?tab=leaderboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                            isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                          }`}>
+                            <Trophy size={14} />
+                            Bảng xếp hạng
+                          </Link>
+
+                          <Link href="/learn?tab=quests" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                            isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                          }`}>
+                            <Target size={14} />
+                            Nhiệm vụ
+                          </Link>
+
+                          <Link href="/learn?tab=profile" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                            isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                          }`}>
+                            <User size={14} />
+                            Hồ sơ
+                          </Link>
+
+                          {profile?.subscriptionPlan === 'free' && (
+                            <Link href="/#pricing" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-black transition-colors ${
+                              isLightMode ? "text-[#3B82F6] hover:text-blue-700 hover:bg-blue-50" : "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10"
+                            }`}>
+                              <Sparkles size={14} fill="currentColor" />
+                              Nâng cấp PRO
+                            </Link>
+                          )}
+
+                          <div className={`h-px my-1 ${isLightMode ? "bg-slate-100" : "bg-white/5"}`} />
+
+                          <button 
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 p-2 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 text-xs font-bold transition-colors text-left"
+                          >
+                            <LogOut size={14} />
+                            Đăng xuất
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                </div>
+              )}
+            </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className={`md:hidden p-2 rounded-lg ${isLightMode ? "text-slate-800" : "text-white"}`}
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Toggle menu"
+            >
+              {open ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
       </motion.nav>
 
@@ -524,5 +519,24 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={
+      <div className="sticky top-0 left-0 right-0 w-full z-50 bg-white border-b border-slate-100" style={{ height: "72px" }}>
+        <div className="w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
+              <Play size={14} fill="white" className="ml-0.5 text-white" />
+            </div>
+            <span className="font-display font-black text-lg tracking-tight text-[#1A1A18]">Global Success</span>
+          </div>
+        </div>
+      </div>
+    }>
+      <NavbarContent />
+    </Suspense>
   );
 }
