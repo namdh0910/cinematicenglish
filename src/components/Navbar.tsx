@@ -2,14 +2,16 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, Play, LogOut, Flame, LayoutDashboard, Sparkles, User, BookOpen, Trophy, Target } from "lucide-react";
+import { Menu, X, Play, LogOut, Flame, LayoutDashboard, Sparkles, User, BookOpen, Trophy, Target, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const simplifiedLinks = [
   { label: "Học SGK", href: "/learn?tab=learn", baseHref: "/learn", tab: "learn", icon: BookOpen },
+  { label: "Chữ cái", href: "/learn?tab=alphabet", baseHref: "/learn", tab: "alphabet", icon: Globe },
   { label: "Bảng xếp hạng", href: "/learn?tab=leaderboard", baseHref: "/learn", tab: "leaderboard", icon: Trophy },
-  { label: "Nhiệm vụ", href: "/learn?tab=quests", baseHref: "/learn", tab: "quests", icon: Target }
+  { label: "Nhiệm vụ", href: "/learn?tab=quests", baseHref: "/learn", tab: "quests", icon: Target },
+  { label: "Hồ sơ", href: "/learn?tab=profile", baseHref: "/learn", tab: "profile", icon: User }
 ];
 
 const NAV_HEIGHT = 72;
@@ -191,7 +193,7 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm ${pathname.startsWith("/learn") ? "hidden" : ""}`}
+        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
@@ -315,6 +317,13 @@ export default function Navbar() {
                           Học SGK
                         </Link>
 
+                        <Link href="/learn?tab=alphabet" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
+                          <Globe size={14} />
+                          Chữ cái
+                        </Link>
+
                         <Link href="/learn?tab=leaderboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
                           isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
                         }`}>
@@ -327,6 +336,13 @@ export default function Navbar() {
                         }`}>
                           <Target size={14} />
                           Nhiệm vụ
+                        </Link>
+
+                        <Link href="/learn?tab=profile" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
+                          <User size={14} />
+                          Hồ sơ
                         </Link>
 
                         {profile?.subscriptionPlan === 'free' && (
@@ -426,6 +442,15 @@ export default function Navbar() {
                     </Link>
 
                     <Link
+                      href="/learn?tab=alphabet"
+                      onClick={closeMenu}
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                    >
+                      <Globe size={18} />
+                      Chữ cái
+                    </Link>
+
+                    <Link
                       href="/learn?tab=leaderboard"
                       onClick={closeMenu}
                       className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
@@ -441,6 +466,15 @@ export default function Navbar() {
                     >
                       <Target size={18} />
                       Nhiệm vụ
+                    </Link>
+
+                    <Link
+                      href="/learn?tab=profile"
+                      onClick={closeMenu}
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                    >
+                      <User size={18} />
+                      Hồ sơ
                     </Link>
 
                     {profile?.subscriptionPlan === 'free' && (

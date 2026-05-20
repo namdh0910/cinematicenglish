@@ -137,145 +137,14 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="bg-[#FFFFFF] lg:bg-[#F8FAFC] min-h-screen text-[#3D3D3B] flex font-sans">
+    <div className="bg-[#FFFFFF] lg:bg-[#F8FAFC] min-h-screen text-[#3D3D3B] flex flex-col font-sans">
       {/* Dynamic Top Navbar for mobile (automatically responsive) */}
       <Navbar />
 
-      {/* 1. LEFT SIDEBAR NAVIGATION (Desktop) */}
-      <aside className="hidden lg:flex flex-col w-[256px] h-screen sticky top-0 bg-[#FFFFFF] border-r-2 border-[#E5E5E5] px-4 py-8 justify-between shrink-0 z-30">
-        <div className="space-y-10">
-          {/* Brand Logo with 3D button effect */}
-          <Link href="/" className="flex items-center gap-3 px-3 group">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#1899D6] shadow-[0_4px_0_#1482B5] active:translate-y-[4px] active:shadow-none transition-all">
-              <Play size={16} fill="white" className="ml-0.5 text-white" />
-            </div>
-            <span className="font-display font-black text-2xl tracking-tight text-[#1A1A18]">Global Success</span>
-          </Link>
-
-          {/* Navigation Links with Duolingo style active state */}
-          <nav className="flex flex-col gap-2.5">
-            {[
-              { label: "HỌC", tab: "learn", href: "/learn?tab=learn", icon: Home },
-              { label: "CHỮ CÁI", tab: "alphabet", href: "/learn?tab=alphabet", icon: Globe },
-              { label: "BẢNG XẾP HẠNG", tab: "leaderboard", href: "/learn?tab=leaderboard", icon: Trophy },
-              { label: "NHIỆM VỤ", tab: "quests", href: "/learn?tab=quests", icon: Target },
-              { label: "CỬA HÀNG", tab: "shop", href: "/#pricing", icon: ShoppingBag },
-              { label: "HỒ SƠ", tab: "profile", href: "/learn?tab=profile", icon: User },
-            ].map((link) => {
-              const isActive = link.tab === activeTab;
-              return (
-                <button
-                  key={link.label}
-                  onClick={() => {
-                    if (link.tab === "shop") {
-                      window.location.href = link.href;
-                    } else {
-                      handleTabChange(link.tab);
-                    }
-                  }}
-                  className={`flex items-center gap-4 px-4 py-3.5 w-full rounded-2xl text-xs font-black uppercase tracking-wider transition-all border-2 text-left ${
-                    isActive
-                      ? "border-[#84D8FF] bg-[#DDF4FF] text-[#1899D6] shadow-[0_2px_0_#84D8FF]"
-                      : "border-transparent text-[#777777] hover:bg-[#F7F7F7] hover:text-[#4B4B4B]"
-                  }`}
-                >
-                  <link.icon size={20} className={isActive ? "text-[#1899D6]" : "text-[#777777]"} />
-                  {link.label}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* User quick profile & logout */}
-        <div className="border-t-2 border-[#E5E5E5] pt-6 px-2 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            {profile?.avatar_url ? (
-              <img 
-                src={profile.avatar_url} 
-                alt={profile.full_name} 
-                className="w-10 h-10 rounded-full object-cover border-2 border-slate-100" 
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-50 border-2 border-blue-100 text-[#3B82F6] flex items-center justify-center text-sm font-black uppercase shadow-sm">
-                {profile?.full_name ? profile.full_name.charAt(0) : "H"}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-black text-[#1A1A18] truncate leading-none mb-1">
-                {profile?.full_name || "Học viên"}
-              </p>
-              <span className="text-[9px] font-black uppercase tracking-widest text-[#B45309] bg-[#FFF3E0] px-2 py-0.5 rounded-full border border-[#FFE0B2]">
-                {profile?.subscription_plan === "pro" ? "PRO MEMBER" : "FREE PLAN"}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleLogout}
-            className="w-full py-2.5 rounded-xl border-2 border-red-100 text-red-500 hover:bg-red-50 transition-colors text-xs font-black uppercase tracking-wider text-center"
-          >
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
-
       {/* 2. RESPONSIVE APP SHELL WRAPPER */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile top status bar header */}
-        <header className="lg:hidden flex items-center justify-between h-14 bg-white border-b-2 border-[#E5E5E5] px-4 sticky top-0 z-40">
-          <div className="flex items-center gap-2 relative" ref={dropdownRef}>
-            <button 
-              onClick={() => setGradeDropdownOpen(!gradeDropdownOpen)}
-              className="flex items-center gap-1 bg-[#F7F7F7] border-2 border-[#E5E5E5] px-2.5 py-1 rounded-xl text-xs font-black text-[#1A1A18]"
-            >
-              <span>🇺🇸</span>
-              <span className="uppercase font-extrabold text-[10px]">Lớp 6</span>
-              <ChevronDown size={12} className="text-[#777777]" />
-            </button>
-
-            {/* Mobile Grade Dropdown */}
-            <AnimatePresence>
-              {gradeDropdownOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  className="absolute left-0 mt-2 top-full w-48 bg-white border-2 border-[#E5E5E5] rounded-2xl p-2 shadow-xl z-50 flex flex-col gap-1"
-                >
-                  {grades.map((grade) => (
-                    <Link
-                      key={grade.id}
-                      href={`/learn/grade/${grade.id}`}
-                      className="px-3 py-2 rounded-xl text-xs font-extrabold text-[#3D3D3B] hover:bg-[#F7F7F7] flex items-center gap-2"
-                      onClick={() => setGradeDropdownOpen(false)}
-                    >
-                      <span>🏫</span>
-                      {grade.title}
-                    </Link>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Gamified quick stats */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 text-[#FF9600] font-black text-xs">
-              <Flame size={18} fill="#FF9600" className="text-[#FF9600]" /> 
-              {profile?.streak || 0}
-            </div>
-            <div className="flex items-center gap-1 text-[#1CB0F6] font-black text-xs">
-              💎 {profile?.gems || 500}
-            </div>
-            <div className="flex items-center gap-1 text-[#FF4B4B] font-black text-xs">
-              ❤️ {profile?.lives || 5}
-            </div>
-          </div>
-        </header>
-
         {/* 3-COLUMN MAIN LAYOUT GRID */}
-        <div className="flex-1 grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 p-4 md:p-8 max-w-6xl mx-auto w-full pb-24 lg:pb-8">
+        <div className="flex-1 grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 py-8 px-4 md:px-8 max-w-6xl mx-auto w-full">
           
           {/* CỘT GIỮA (Lộ trình lớp học, Ma trận năng lực) */}
           <main className="space-y-10 min-w-0">
@@ -925,31 +794,6 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
             </footer>
           </aside>
         </div>
-
-        {/* 4. MOBILE BOTTOM NAVIGATION BAR */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t-2 border-[#E5E5E5] flex items-center justify-around z-40 shadow-lg">
-          {[
-            { label: "HỌC", tab: "learn", icon: Home },
-            { label: "CHỮ CÁI", tab: "alphabet", icon: Globe },
-            { label: "XẾP HẠNG", tab: "leaderboard", icon: Trophy },
-            { label: "NHIỆM VỤ", tab: "quests", icon: Target },
-            { label: "HỒ SƠ", tab: "profile", icon: User },
-          ].map((link) => {
-            const isActive = link.tab === activeTab;
-            return (
-              <button
-                key={link.label}
-                onClick={() => handleTabChange(link.tab)}
-                className={`flex flex-col items-center gap-0.5 py-1 px-3 ${
-                  isActive ? "text-[#1899D6]" : "text-[#777777]"
-                }`}
-              >
-                <link.icon size={22} className={isActive ? "text-[#1899D6]" : "text-[#777777]"} />
-                <span className="text-[9px] font-black tracking-wider uppercase">{link.label}</span>
-              </button>
-            );
-          })}
-        </nav>
       </div>
     </div>
   );
