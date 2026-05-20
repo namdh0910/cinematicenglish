@@ -14,7 +14,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { evaluateSpeaking } from "@/app/actions/speaking";
+import { evaluateSpeaking, saveSceneProgress, saveLessonProgress } from "@/app/actions/speaking";
 
 interface DialogLine {
   speaker: string;
@@ -40,11 +40,20 @@ interface SpeakingRoomClientProps {
     title: string;
     description: string;
     content: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    units: {
+    units?: {
       id: string;
       title: string;
       unit_no: string;
-      grades: {
+      grades?: {
+        id: string;
+        title: string;
+      };
+    };
+    unit?: {
+      id: string;
+      title: string;
+      unit_no?: string;
+      grade?: {
         id: string;
         title: string;
       };
@@ -53,15 +62,34 @@ interface SpeakingRoomClientProps {
 }
 
 export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) {
-  // Parse dialogue data from database content
-  const dialogs: DialogLine[] = Array.isArray(lesson.content)
+  // Parse dialogue data from database content with robust fallback to lesson.activities
+  let initialDialogs: DialogLine[] = Array.isArray(lesson.content)
     ? lesson.content
-    : (typeof lesson.content === "string"
-        ? JSON.parse(lesson.content)
+    : (typeof lesson.content === "string" && lesson.content.trim() !== ""
+        ? (() => {
+            try {
+              return JSON.parse(lesson.content);
+            } catch (e) {
+              return [];
+            }
+          })()
         : (lesson.content?.dialogs || lesson.content?.sentences || []));
+
+  if (!initialDialogs || initialDialogs.length === 0) {
+    if (Array.isArray((lesson as any).activities) && (lesson as any).activities.length > 0) {
+      initialDialogs = (lesson as any).activities.map((a: any) => ({
+        speaker: "🤖",
+        text: a.content?.transcript || a.instructions || "",
+        translation: a.content?.translation || ""
+      }));
+    }
+  }
+
+  const dialogs = initialDialogs;
 
   const [activeTurn, setActiveTurn] = useState<number>(0);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isFinished, setIsFinished] = useState(false);
 
   // Recording and analysis states
   const [isRecording, setIsRecording] = useState(false);
@@ -249,6 +277,14 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
             return updated;
           });
 
+          // Save progress in Supabase database!
+          saveSceneProgress({
+            userId: userProfile?.id || "guest",
+            lessonId: lesson.id,
+            sceneIndex: activeTurn,
+            highestScore: result.accuracy
+          }).catch(err => console.error("Failed to save scene progress in database:", err));
+
           // Deduct life if score is less than 80% (SAI)
           if (result.accuracy < 80) {
             setLives((prev) => Math.max(0, prev - 1));
@@ -295,7 +331,34 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       setCurrentScore(null);
       setCurrentFeedback(null);
       setCurrentWordEvaluations(null);
+    } else {
+      // Save overall lesson progress to database
+      saveLessonProgress({
+        userId: userProfile?.id || "guest",
+        lessonId: lesson.id,
+        isCompleted: true,
+        lastActivityIndex: activeTurn
+      })
+      .then(() => {
+        setIsFinished(true);
+      })
+      .catch(err => {
+        console.error("Failed to save lesson progress:", err);
+        setIsFinished(true); // fallback to finish anyway
+      });
     }
+  };
+
+  // Reset progress to practice again
+  const handleRestart = () => {
+    setActiveTurn(0);
+    setAudioUrl(null);
+    setCurrentScore(null);
+    setCurrentFeedback(null);
+    setCurrentWordEvaluations(null);
+    setDialogueScores(Array(dialogs.length).fill(null));
+    setLives(5);
+    setIsFinished(false);
   };
 
   // Reset active turn to try again
@@ -359,6 +422,117 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       </h3>
     );
   };
+
+  if (isFinished) {
+    const scores = dialogueScores.filter((s) => s !== null);
+    const avgAccuracy = scores.length > 0
+      ? Math.round(scores.reduce((sum, curr) => sum + (curr?.score || 0), 0) / scores.length)
+      : 100;
+
+    return (
+      <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+        {/* Header - Simple Exit */}
+        <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between shrink-0 z-40">
+          <Link 
+            href="/learn"
+            className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"
+            title="Thoát"
+          >
+            <X size={28} className="stroke-[2.5]" />
+          </Link>
+          <div className="text-slate-400 font-bold uppercase tracking-wider text-sm">
+            Bài Học Đã Hoàn Thành
+          </div>
+          <div className="w-10 h-10" />
+        </header>
+
+        {/* Central Content */}
+        <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col items-center justify-center gap-10">
+          {/* Glowing Golden Trophy */}
+          <motion.div
+            initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
+            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+            transition={{ type: "spring", damping: 12, stiffness: 100, delay: 0.1 }}
+            className="relative w-40 h-40 flex items-center justify-center shrink-0"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl z-0"
+            />
+            <span className="text-8xl drop-shadow-[0_10px_15px_rgba(234,179,8,0.3)] z-10 select-none">🏆</span>
+          </motion.div>
+
+          {/* Heading */}
+          <div className="text-center space-y-4 max-w-lg">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight leading-tight">
+              Cực Kỳ Xuất Sắc!
+            </h2>
+            <p className="text-slate-400 text-lg font-bold">
+              Chúc mừng bạn đã hoàn thành xuất sắc thử thách nói tiếng Anh ngày hôm nay!
+            </p>
+          </div>
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-3 gap-4 w-full max-w-md mt-4">
+            {/* 1. Accuracy Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="border-2 border-b-4 border-green-200 bg-green-50/50 rounded-2xl p-4 text-center flex flex-col justify-center items-center shadow-sm select-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-default"
+            >
+              <span className="text-3xl mb-1.5" role="img" aria-label="accuracy">🎯</span>
+              <span className="text-[10px] font-black uppercase text-green-600 tracking-widest mb-0.5">Chính Xác</span>
+              <span className="text-2xl font-black text-green-700">{avgAccuracy}%</span>
+            </motion.div>
+
+            {/* 2. XP Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="border-2 border-b-4 border-amber-200 bg-amber-50/50 rounded-2xl p-4 text-center flex flex-col justify-center items-center shadow-sm select-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-default"
+            >
+              <span className="text-3xl mb-1.5" role="img" aria-label="xp">⚡</span>
+              <span className="text-[10px] font-black uppercase text-amber-600 tracking-widest mb-0.5">Điểm XP</span>
+              <span className="text-2xl font-black text-amber-700">+20 XP</span>
+            </motion.div>
+
+            {/* 3. Gems Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="border-2 border-b-4 border-cyan-200 bg-cyan-50/50 rounded-2xl p-4 text-center flex flex-col justify-center items-center shadow-sm select-none hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-default"
+            >
+              <span className="text-3xl mb-1.5" role="img" aria-label="gems">💎</span>
+              <span className="text-[10px] font-black uppercase text-cyan-600 tracking-widest mb-0.5">Đá Quý</span>
+              <span className="text-2xl font-black text-cyan-700">+10 Gems</span>
+            </motion.div>
+          </div>
+        </main>
+
+        {/* Footer actions */}
+        <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 p-6">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <button
+              onClick={handleRestart}
+              className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-slate-500 font-extrabold text-sm uppercase tracking-widest rounded-2xl border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-[2px] transition-all flex items-center justify-center gap-2 cursor-pointer outline-none"
+            >
+              <RefreshCw size={16} className="stroke-[2.5]" /> Luyện tập lại
+            </button>
+            <Link 
+              href="/learn"
+              className="w-full sm:w-auto px-12 py-4 bg-green-500 hover:bg-green-600 text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_6px_0_rgb(34,197,94)] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none text-center"
+            >
+              Tiếp tục
+            </Link>
+          </div>
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
