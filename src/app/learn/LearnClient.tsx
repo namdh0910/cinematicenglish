@@ -137,12 +137,12 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="bg-[#FFFFFF] lg:bg-[#F8FAFC] min-h-screen text-[#3D3D3B] flex flex-col font-sans">
+    <div className="bg-[#FFFFFF] lg:bg-[#F8FAFC] min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
       {/* Dynamic Top Navbar for mobile (automatically responsive) */}
       <Navbar />
 
       {/* 2. RESPONSIVE APP SHELL WRAPPER */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col w-full min-h-screen">
         {/* 3-COLUMN MAIN LAYOUT GRID */}
         <div className="flex-1 grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 py-8 px-4 md:px-8 max-w-6xl mx-auto w-full">
           

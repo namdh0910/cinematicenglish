@@ -16,7 +16,7 @@ export default async function GradeCurriculumPage({ params }: { params: Promise<
   }
 
   return (
-    <div className="bg-primary min-h-screen text-white">
+    <div className="bg-[#F8FAFC] min-h-screen text-[#3D3D3B] w-full flex flex-col">
       <GradeClient grade={grade} />
     </div>
   );

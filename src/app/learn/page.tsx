@@ -11,7 +11,7 @@ export default async function LearnPage() {
   const grades = await getGrades();
 
   return (
-    <div className="bg-primary min-h-screen text-white">
+    <div className="bg-[#F8FAFC] min-h-screen text-[#3D3D3B] w-full flex flex-col">
       <Suspense fallback={
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1899D6]"></div>
