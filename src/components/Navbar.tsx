@@ -171,7 +171,7 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-200"
+        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
@@ -219,7 +219,7 @@ export default function Navbar() {
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="px-6 py-2 rounded-full text-sm font-bold transition-transform transform shadow-md bg-indigo-600 text-white hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-200"
+                  className="bg-blue-600 text-white rounded-2xl px-6 py-2 font-bold shadow-[0_6px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[6px] transition-all hover:brightness-105"
                 >
                   Học miễn phí
                 </Link>
