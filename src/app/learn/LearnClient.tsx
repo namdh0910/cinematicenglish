@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { 
   Home, BookOpen, Layers, Library, Navigation, Trophy, Target, User, 
   Flame, Sparkles, Play, Headphones, Mic, Book, Zap, 
   ChevronRight, ChevronDown, Shield, Moon, Sun, ArrowRight, CheckCircle2, Gem, Heart, Search, Bell
@@ -21,6 +22,26 @@ interface LearnClientProps {
   initialGrades: Grade[];
 }
 
+const sidebarLinks = [
+  { id: "home", label: "Trang chủ", icon: Home },
+  { id: "sgk", label: "Học SGK", icon: BookOpen },
+  { id: "topics", label: "Chủ đề", icon: Layers },
+  { id: "library", label: "Thư viện phim", icon: Library },
+  { id: "speaking", label: "Luyện Nói AI", icon: Mic },
+  { id: "leaderboard", label: "Bảng xếp hạng", icon: Trophy },
+  { id: "quests", label: "Nhiệm vụ", icon: Target },
+  { id: "profile", label: "Hồ sơ", icon: User },
+];
+
+const sgkTabs = ["Tất cả", "Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9", "Lớp 10", "Lớp 11", "Lớp 12"];
+
+const mockSgkUnits = [
+  { title: "My New School", desc: "Giới thiệu trường học và bạn bè", img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600&auto=format&fit=crop", progress: 60, lessons: 12, difficulty: "Dễ", color: "#6366F1" },
+  { title: "My Home", desc: "Miêu tả ngôi nhà và đồ vật", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop", progress: 40, lessons: 10, difficulty: "Dễ", color: "#6366F1" },
+  { title: "My Friends", desc: "Bạn bè và các hoạt động", img: "https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?q=80&w=600&auto=format&fit=crop", progress: 20, lessons: 11, difficulty: "Trung bình", color: "#6366F1" },
+  { title: "Neighbourhood", desc: "Khu vực xung quanh", img: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=600&auto=format&fit=crop", progress: 0, lessons: 9, difficulty: "Trung bình", color: "#6366F1" },
+];
+
 export default function LearnClient({ initialGrades }: LearnClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,6 +50,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   const [profile, setProfile] = useState<any>(null);
   const [role, setRole] = useState<'guest' | 'student' | 'admin'>('guest');
   const [streakCount, setStreakCount] = useState<number>(0);
+  const [activeSgkTab, setActiveSgkTab] = useState("Tất cả");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -62,27 +84,6 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
     };
     fetchUserData();
   }, []);
-
-  const sidebarLinks = [
-    { id: "home", label: "Trang chủ", icon: Home },
-    { id: "sgk", label: "Học SGK", icon: BookOpen },
-    { id: "topics", label: "Chủ đề", icon: Layers },
-    { id: "library", label: "Thư viện phim", icon: Library },
-    { id: "speaking", label: "Luyện Nói AI", icon: Mic },
-    { id: "leaderboard", label: "Bảng xếp hạng", icon: Trophy },
-    { id: "quests", label: "Nhiệm vụ", icon: Target },
-    { id: "profile", label: "Hồ sơ", icon: User },
-  ];
-
-  const sgkTabs = ["Tất cả", "Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9", "Lớp 10", "Lớp 11", "Lớp 12"];
-  const [activeSgkTab, setActiveSgkTab] = useState("Tất cả");
-
-  const mockSgkUnits = [
-    { title: "My New School", desc: "Giới thiệu trường học và bạn bè", img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=600&auto=format&fit=crop", progress: 60, lessons: 12, difficulty: "Dễ", color: "#6366F1" },
-    { title: "My Home", desc: "Miêu tả ngôi nhà và đồ vật", img: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop", progress: 40, lessons: 10, difficulty: "Dễ", color: "#6366F1" },
-    { title: "My Friends", desc: "Bạn bè và các hoạt động", img: "https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?q=80&w=600&auto=format&fit=crop", progress: 20, lessons: 11, difficulty: "Trung bình", color: "#6366F1" },
-    { title: "Neighbourhood", desc: "Khu vực xung quanh", img: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=600&auto=format&fit=crop", progress: 0, lessons: 9, difficulty: "Trung bình", color: "#6366F1" },
-  ];
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans flex overflow-hidden selection:bg-[var(--accent-primary)]/30">
@@ -198,7 +199,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               <div className="flex-1 p-8 lg:p-12 z-10 flex flex-col justify-center">
                 <p className="text-[var(--accent-primary)] text-sm font-bold uppercase tracking-widest mb-2">Chào mừng trở lại</p>
                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-primary)] tracking-tight leading-tight mb-2">
-                  Chào, {profile?.full_name ? profile.full_name.split(' ')[0] : "Học viên"}!
+                  Chào, {profile?.full_name ? profile.full_name.split(' ')[0] : "Học viên"}! <span className="text-3xl">👋</span>
                 </h2>
                 <p className="text-sm text-[var(--text-muted)] font-medium mb-8 max-w-md">
                   Bạn đã sẵn sàng để tiếp tục hành trình chinh phục tiếng Anh hôm nay chưa?
@@ -248,6 +249,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 <img 
                   src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" 
                   alt="Students learning" 
+                  loading="lazy"
                   className="w-full h-full object-cover object-center opacity-60 mix-blend-luminosity"
                 />
                 
@@ -325,6 +327,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                       <img 
                         src={unit.img} 
                         alt={unit.title} 
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                       
