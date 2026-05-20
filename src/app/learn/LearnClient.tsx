@@ -261,35 +261,37 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               </div>
             </div>
 
-            {/* Quick Actions (4 Cards) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { icon: Headphones, title: "Luyện nghe", desc: "Nghe và nhại lại câu thoại", color: "#818CF8", bg: "from-[#312E81]/30 to-transparent" },
-                { icon: Mic, title: "Luyện nói", desc: "AI chấm phát âm ngay", color: "#EC4899", bg: "from-[#831843]/30 to-transparent" },
-                { icon: Book, title: "Từ vựng", desc: "Học từ vựng theo ngữ cảnh", color: "#6366F1", bg: "from-[#312E81]/30 to-transparent" },
-                { icon: Zap, title: "Ôn tập", desc: "Củng cố kiến thức", color: "#F59E0B", bg: "from-[#78350F]/30 to-transparent" },
-              ].map((action, idx) => (
-                <button key={idx} className={`bg-[#13141C] hover:bg-[#1A1D2D] border border-white/5 rounded-3xl p-5 text-left transition-all group relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
-                  <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-br ${action.bg} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                  <div className="flex items-start justify-between relative z-10">
-                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
-                      <action.icon size={20} color={action.color} />
+            {/* Section 2: Chọn cách học */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-[var(--text-primary)]">Chọn cách học</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { icon: BookOpen, title: "Học SGK", desc: "Bám sát chương trình chuẩn", color: "#2563EB", bg: "from-[var(--accent-secondary)]/20 to-transparent" },
+                  { icon: Play, title: "Học Phim", desc: "Học qua các trích đoạn điện ảnh", color: "#7C3AED", bg: "from-[var(--accent-primary)]/20 to-transparent" },
+                  { icon: Mic, title: "Luyện Nói AI", desc: "Giao tiếp với người bản xứ ảo", color: "#EC4899", bg: "from-pink-500/20 to-transparent" },
+                ].map((action, idx) => (
+                  <button key={idx} className={`bg-[var(--bg-card)] hover:bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-2xl p-6 text-left transition-all hover-lift group relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${action.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className="flex items-start justify-between relative z-10">
+                      <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/5">
+                        <action.icon size={24} color={action.color} />
+                      </div>
+                      <ArrowRight size={20} className="text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors" />
                     </div>
-                    <ArrowRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
-                  </div>
-                  <div className="relative z-10 mt-4">
-                    <h3 className="text-sm font-black text-white">{action.title}</h3>
-                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">{action.desc}</p>
-                  </div>
-                </button>
-              ))}
+                    <div className="relative z-10 mt-6">
+                      <h3 className="text-lg font-bold text-[var(--text-primary)]">{action.title}</h3>
+                      <p className="text-sm text-[var(--text-muted)] mt-1 font-medium">{action.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Curriculum Horizontal Slider */}
+            {/* Section 3: Popular Lessons / Curriculum */}
             <div className="space-y-6 pt-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 className="text-lg font-black text-white flex items-center gap-2">
-                  Lộ trình SGK Global Success <Sparkles size={16} className="text-[#818CF8]" fill="currentColor" />
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  Tiếp tục học: Lộ trình SGK
                 </h3>
                 
                 {/* Filters */}
@@ -299,77 +301,70 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                       <button 
                         key={tab}
                         onClick={() => setActiveSgkTab(tab)}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+                        className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${
                           activeSgkTab === tab 
-                            ? "bg-[#6366F1] text-white shadow-[0_2px_10px_rgba(99,102,241,0.3)]" 
-                            : "bg-[#13141C] text-slate-400 hover:text-white hover:bg-white/5 border border-white/5"
+                            ? "bg-[var(--accent-primary)] text-white" 
+                            : "bg-[var(--bg-card)] text-[var(--text-muted)] hover:text-white border border-[var(--border-subtle)]"
                         }`}
                       >
                         {tab}
                       </button>
                     ))}
                   </div>
-                  
-                  <button className="hidden sm:flex items-center gap-2 bg-[#16171E] border border-white/5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
-                    Sắp xếp: Mới nhất <ChevronDown size={14} />
-                  </button>
                 </div>
               </div>
 
-              {/* Horizontal Scroll Cards */}
-              <div className="flex gap-4 overflow-x-auto custom-scrollbar pb-4 -mx-8 px-8 snap-x">
+              {/* Horizontal Scroll Cards (16:9 Aspect Ratio) */}
+              <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-6 -mx-8 px-8 snap-x">
                 {mockSgkUnits.map((unit, idx) => (
-                  <div key={idx} className="shrink-0 w-[280px] sm:w-[320px] bg-[#13141C] border border-white/5 rounded-3xl overflow-hidden group cursor-pointer snap-start shadow-lg">
-                    {/* Thumbnail */}
-                    <div className="relative h-[160px] w-full overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#16171E] via-transparent to-transparent z-10" />
+                  <div key={idx} className="shrink-0 w-[280px] sm:w-[340px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl overflow-hidden group hover-lift snap-start cursor-pointer">
+                    
+                    {/* Thumbnail 16:9 */}
+                    <div className="relative aspect-video w-full overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-transparent z-10" />
                       <img 
                         src={unit.img} 
                         alt={unit.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
-                      <div className="absolute top-4 left-4 z-20 bg-black/60 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-[9px] font-black uppercase text-white tracking-widest">
-                        Unit {idx + 1} • Lớp 6
+                      
+                      {/* Top Badges */}
+                      <div className="absolute top-3 left-3 z-20 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-md text-[10px] font-bold uppercase text-white tracking-widest">
+                        Unit {idx + 1}
                       </div>
-                      {idx === 0 && (
-                        <div className="absolute top-4 right-4 z-20 bg-[#10B981] px-2.5 py-1 rounded-lg text-[9px] font-black uppercase text-white tracking-widest shadow-md">
-                          Đang học
-                        </div>
-                      )}
+                      <div className="absolute top-3 right-3 z-20 bg-[var(--status-success)]/90 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold uppercase text-white tracking-widest shadow-md">
+                        {unit.difficulty}
+                      </div>
                     </div>
                     
                     {/* Content */}
-                    <div className="p-5 space-y-4">
+                    <div className="p-5 flex flex-col gap-4">
                       <div>
-                        <h4 className="text-lg font-black text-white">{unit.title}</h4>
-                        <p className="text-[11px] text-slate-400 font-medium mt-1 truncate">{unit.desc}</p>
+                        <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors line-clamp-1">{unit.title}</h4>
+                        <p className="text-sm text-[var(--text-muted)] font-medium mt-1 line-clamp-2">{unit.desc}</p>
                       </div>
                       
                       {/* Progress */}
                       <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-black text-slate-400 uppercase">
-                          <span>Tiến độ</span>
-                          <span className="text-white">{unit.progress}%</span>
+                        <div className="flex items-center justify-between text-xs font-bold text-[var(--text-muted)] uppercase">
+                          <span>Hoàn thành</span>
+                          <span className="text-[var(--text-primary)]">{unit.progress}%</span>
                         </div>
                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-[#6366F1] rounded-full"
+                            className="h-full bg-[var(--accent-secondary)] rounded-full transition-all duration-1000"
                             style={{ width: `${unit.progress}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                            <BookOpen size={12} /> {unit.lessons} bài học
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" /> {unit.difficulty}
-                          </span>
+                      {/* Footer & CTA */}
+                      <div className="flex items-center justify-between pt-4 border-t border-[var(--border-subtle)] mt-auto">
+                        <div className="text-sm text-[var(--text-muted)] font-medium flex items-center gap-1.5">
+                          <BookOpen size={14} /> {unit.lessons} bài học
                         </div>
-                        <button className="w-7 h-7 rounded-full bg-[#6366F1] text-white flex items-center justify-center hover:bg-[#4F46E5] transition-colors shadow-[0_0_10px_rgba(99,102,241,0.3)]">
-                          <ArrowRight size={14} />
+                        <button className="px-4 py-1.5 rounded-full bg-white/5 hover:bg-[var(--accent-primary)] text-white text-sm font-bold flex items-center justify-center transition-colors group-hover:bg-[var(--accent-primary)] group-hover:shadow-[0_4px_15px_rgba(124,58,237,0.4)]">
+                          Học tiếp <ArrowRight size={14} className="ml-1" />
                         </button>
                       </div>
                     </div>
@@ -384,54 +379,53 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           <aside className="w-full xl:w-[320px] shrink-0 space-y-6">
             
             {/* Leaderboard Widget */}
-            <div className="bg-[#16171E] border border-white/5 rounded-[2rem] p-6 shadow-xl">
+            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6">
               <div className="flex items-center justify-between mb-6">
-                <h4 className="text-sm font-black text-white">Bảng xếp hạng tuần</h4>
-                <a href="#" className="text-[10px] text-[#818CF8] font-bold hover:underline">Xem tất cả</a>
+                <h4 className="text-lg font-bold text-[var(--text-primary)]">Bảng xếp hạng</h4>
+                <a href="#" className="text-xs text-[var(--accent-primary)] font-bold hover:underline">Xem tất cả</a>
               </div>
-              <div className="flex items-center gap-4 bg-white/5 border border-white/5 rounded-2xl p-4">
-                <div className="w-12 h-12 bg-[#1E1B4B] border border-[#312E81] rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
-                  <Shield size={20} className="text-[#818CF8]" fill="currentColor" />
+              <div className="flex items-center gap-4 bg-[var(--bg-primary)]/50 border border-[var(--border-subtle)] rounded-xl p-4">
+                <div className="w-12 h-12 bg-[var(--bg-primary)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center shrink-0">
+                  <Shield size={20} className="text-[var(--text-muted)]" fill="currentColor" />
                 </div>
                 <div>
-                  <h5 className="text-xs font-black text-[#818CF8]">Chưa xếp hạng</h5>
-                  <p className="text-[10px] text-slate-400 font-medium leading-relaxed mt-1">Hoàn thành thêm 3 bài học để có thứ hạng đầu tiên!</p>
+                  <h5 className="text-sm font-bold text-[var(--text-muted)]">Chưa xếp hạng</h5>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Học thêm 3 bài để tham gia!</p>
                 </div>
               </div>
             </div>
 
             {/* Quests Widget */}
-            <div className="bg-[#16171E] border border-white/5 rounded-[2rem] p-6 shadow-xl space-y-5">
+            <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 space-y-5">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-black text-white">Nhiệm vụ hằng ngày</h4>
-                <a href="#" className="text-[10px] text-[#818CF8] font-bold hover:underline">Xem tất cả</a>
+                <h4 className="text-lg font-bold text-[var(--text-primary)]">Nhiệm vụ</h4>
+                <a href="#" className="text-xs text-[var(--accent-primary)] font-bold hover:underline">Xem tất cả</a>
               </div>
               
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
+                <div className="flex items-center justify-between text-sm font-bold text-[var(--text-primary)]">
                   <span>Kiếm 10 KN học tập</span>
-                  <span className="text-slate-500 text-[10px] font-black">0 / 10 KN</span>
+                  <span className="text-[var(--text-muted)] text-xs">0 / 10 KN</span>
                 </div>
-                <div className="w-full h-2.5 bg-white/5 rounded-full relative overflow-hidden flex items-center pr-1 border border-white/5">
-                  <div className="h-full bg-[#818CF8] rounded-full" style={{ width: "0%" }} />
-                  <span className="absolute right-1 text-[10px]">🎁</span>
+                <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                  <div className="h-full bg-[var(--accent-secondary)] rounded-full" style={{ width: "0%" }} />
                 </div>
               </div>
             </div>
 
             {/* Sign Up CTA Widget */}
             {role === 'guest' && (
-              <div className="bg-gradient-to-br from-[#1E1B4B] to-[#0F172A] border border-[#312E81] rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#6366F1] blur-[50px] opacity-30 pointer-events-none" />
-                <h4 className="text-base font-black text-white mb-2 relative z-10">Lưu lại tiến trình của bạn!</h4>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed mb-5 relative z-10">
-                  Tạo tài khoản miễn phí để lưu trữ mọi tiến trình học tập.
+              <div className="bg-gradient-to-br from-[var(--accent-primary)]/20 to-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl p-6 relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--accent-primary)] blur-[50px] opacity-20 pointer-events-none" />
+                <h4 className="text-lg font-bold text-[var(--text-primary)] mb-2 relative z-10">Lưu tiến trình học!</h4>
+                <p className="text-sm text-[var(--text-muted)] font-medium leading-relaxed mb-6 relative z-10">
+                  Đăng ký tài khoản miễn phí để lưu lại quá trình chinh phục tiếng Anh của bạn.
                 </p>
                 <Link 
                   href="/signup" 
-                  className="w-full bg-[#6366F1] hover:bg-[#4F46E5] text-white font-black text-xs uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(99,102,241,0.3)] active:translate-y-[2px] active:shadow-none text-center block relative z-10"
+                  className="w-full bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white font-bold text-sm py-3 rounded-full transition-all text-center block relative z-10 shadow-[0_4px_15px_rgba(124,58,237,0.3)] hover-lift"
                 >
-                  Đăng nhập / Tạo tài khoản
+                  Tạo tài khoản
                 </Link>
               </div>
             )}
