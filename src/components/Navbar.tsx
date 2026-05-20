@@ -9,7 +9,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 const simplifiedLinks = [
   { label: "Học SGK", href: "/learn", icon: BookOpen },
   { label: "Khám phá", href: "/stories", icon: Compass },
-  { label: "Lịch sử học", href: "/dashboard", icon: LayoutDashboard }
+  { label: "Lịch sử học", href: "/learn", icon: LayoutDashboard }
 ];
 
 const NAV_HEIGHT = 72;
@@ -302,7 +302,7 @@ export default function Navbar() {
                           Khám phá
                         </Link>
 
-                        <Link href="/dashboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                        <Link href="/learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
                           isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
                         }`}>
                           <LayoutDashboard size={14} />
@@ -415,7 +415,7 @@ export default function Navbar() {
                     </Link>
 
                     <Link
-                      href="/dashboard"
+                      href="/learn"
                       onClick={closeMenu}
                       className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >

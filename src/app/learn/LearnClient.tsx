@@ -140,10 +140,10 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
             {[
               { label: "HỌC", href: "/learn", icon: Home, active: true },
               { label: "CHỮ CÁI", href: "/learn", icon: Globe },
-              { label: "BẢNG XẾP HẠNG", href: "/dashboard", icon: Trophy },
+              { label: "BẢNG XẾP HẠNG", href: "/learn", icon: Trophy },
               { label: "NHIỆM VỤ", href: "/learn", icon: Target },
               { label: "CỬA HÀNG", href: "/#pricing", icon: ShoppingBag },
-              { label: "HỒ SƠ", href: "/dashboard", icon: User },
+              { label: "HỒ SƠ", href: "/learn", icon: User },
             ].map((link) => (
               <Link
                 key={link.label}
@@ -561,9 +561,9 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           {[
             { label: "HỌC", href: "/learn", icon: Home, active: true },
             { label: "LUYỆN TẬP", href: "/learn", icon: Globe },
-            { label: "XẾP HẠNG", href: "/dashboard", icon: Trophy },
+            { label: "XẾP HẠNG", href: "/learn", icon: Trophy },
             { label: "NHIỆM VỤ", href: "/learn", icon: Target },
-            { label: "HỒ SƠ", href: "/dashboard", icon: User },
+            { label: "HỒ SƠ", href: "/learn", icon: User },
           ].map((link) => (
             <Link
               key={link.label}

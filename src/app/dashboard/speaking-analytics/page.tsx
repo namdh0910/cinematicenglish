@@ -54,9 +54,9 @@ export default function SpeakingAnalytics() {
           
           {/* Top navigation path */}
           <div>
-            <Link href="/dashboard">
+            <Link href="/learn">
               <span className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
-                <ChevronLeft size={14} /> Về Bảng điều khiển
+                <ChevronLeft size={14} /> Về Lộ trình học
               </span>
             </Link>
           </div>

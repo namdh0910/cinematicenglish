@@ -11,7 +11,7 @@ function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultRole = searchParams.get('role') === 'teacher' ? 'teacher' : 'user';
-  const redirectTo = searchParams.get('from') || '/dashboard';
+  const redirectTo = searchParams.get('from') || '/learn';
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -93,7 +93,7 @@ function SignupForm() {
             </p>
           </div>
           <Link 
-            href={redirectTo !== '/dashboard' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
+            href={redirectTo !== '/learn' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
             className="inline-block px-6 py-3 rounded-xl bg-white text-black font-black text-sm hover:bg-amber-400 transition-colors"
           >
             Về trang đăng nhập
@@ -239,7 +239,7 @@ function SignupForm() {
           <p className="text-center text-xs text-white/40">
             Đã có tài khoản?{' '}
             <Link 
-              href={redirectTo !== '/dashboard' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
+              href={redirectTo !== '/learn' ? `/login?from=${encodeURIComponent(redirectTo)}` : '/login'} 
               className="text-violet-400 hover:text-violet-300 font-bold transition-colors"
             >
               Đăng nhập

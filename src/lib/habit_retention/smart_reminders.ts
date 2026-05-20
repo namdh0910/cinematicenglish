@@ -27,7 +27,7 @@ export class SmartRemindersEngine {
         notificationTitle: "Resume your progress ⚡",
         notificationBody: `Pick up right where you left off on "${profile.unfinishedLessonTitle}". Just one tap to continue.`,
         priorityWeight: 95,
-        targetRoute: "/dashboard"
+        targetRoute: "/learn"
       };
     }
 
@@ -57,7 +57,7 @@ export class SmartRemindersEngine {
         notificationTitle: "Mindful break recommended 🧘",
         notificationBody: "Great work this week. Rest your voice today—active retention requires structural pause windows.",
         priorityWeight: 50,
-        targetRoute: "/dashboard"
+        targetRoute: "/learn"
       };
     }
 

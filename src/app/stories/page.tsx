@@ -159,12 +159,12 @@ export default function StoriesPage() {
               <Card 
                 key={story.id} 
                 padding="none" 
-                className="overflow-hidden group flex flex-col h-full rounded-[24px] border border-[#EBEBEA] hover:border-[#BFDBFE] hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] bg-[#FFFFFF] shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-500" 
+                className="overflow-hidden group flex flex-col h-full rounded-[24px] bg-white border border-slate-200 text-slate-900 shadow-sm hover:border-slate-300 hover:shadow-md transition-all duration-500" 
                 transition={{ delay: i * 0.05 }}
               >
                 {/* 40%+ Image Area */}
-                <div className="h-64 relative overflow-hidden bg-black shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+                <div className="h-64 relative overflow-hidden bg-slate-100 shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-200/20 via-transparent to-transparent z-10" />
                   
                   {/* Grain Overlay */}
                   <div className="absolute inset-0 z-20 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png")' }}></div>
@@ -177,30 +177,30 @@ export default function StoriesPage() {
                       target.onerror = null;
                       target.src = "/images/default-poster.svg";
                     }}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
+                    className="w-full h-full object-cover opacity-100 group-hover:scale-105 transition-all duration-700 ease-out"
                   />
                   
-                  <Badge variant="violet" className="absolute top-4 right-4 z-30 backdrop-blur-md bg-black/40 border-none">{story.category}</Badge>
+                  <Badge variant="violet" className="absolute top-4 right-4 z-30 backdrop-blur-md bg-white/90 border border-slate-200 text-slate-900 shadow-sm">{story.category}</Badge>
                   <div className="absolute bottom-4 left-6 flex gap-2 z-30">
-                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold text-white border-white/20">{story.level}</Badge>
-                    <Badge variant="outline" className="bg-black/60 backdrop-blur-md font-bold text-white border-white/20">▶ {story.duration}</Badge>
+                    <Badge variant="outline" className="bg-white/90 backdrop-blur-md font-bold text-slate-900 border border-slate-200">{story.level}</Badge>
+                    <Badge variant="outline" className="bg-white/90 backdrop-blur-md font-bold text-slate-900 border border-slate-200">▶ {story.duration}</Badge>
                   </div>
                 </div>
                 
                 {/* Content Area */}
-                <div className="p-6 flex flex-col flex-1 bg-[#FFFFFF] z-30 relative -mt-4 rounded-t-[24px]">
+                <div className="p-6 flex flex-col flex-1 bg-white z-30 relative -mt-4 rounded-t-[24px]">
                   <div className="flex items-start justify-between gap-4 mb-4">
-                    <h3 className="font-display font-black text-2xl leading-tight text-[#1A1A18] group-hover:text-[#2563EB] transition-colors line-clamp-2">
+                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                       {story.title}
                     </h3>
                   </div>
                   
-                  <p className="text-sm text-[#3D3D3B] leading-relaxed mb-6 line-clamp-3 flex-1 font-medium">
+                  <p className="text-sm text-slate-500 leading-relaxed mb-6 line-clamp-3 flex-1 font-medium">
                     {story.description}
                   </p>
                   
                   {story.plays ? (
-                    <div className="pt-6 border-t border-[#EBEBEA] flex items-center justify-between mt-auto w-full">
+                    <div className="pt-6 border-t border-slate-200 flex items-center justify-between mt-auto w-full">
                       <div className="flex items-center gap-1" style={{ fontSize: '12px', color: '#6B7280', display: 'flex', alignItems: 'center' }}>
                         <Users size={14} className="text-[#6B7280]" />
                         <span>{story.plays.toLocaleString()} lượt học</span>

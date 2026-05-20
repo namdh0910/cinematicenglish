@@ -35,6 +35,12 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   const url = req.nextUrl.clone()
 
+  // Gracefully redirect any direct request to /dashboard or /dashboard/ to /learn
+  if (url.pathname === '/dashboard' || url.pathname === '/dashboard/') {
+    url.pathname = '/learn'
+    return NextResponse.redirect(url)
+  }
+
   // Define protected routes (dashboard and learn will be protected client-side with a cinematic glass modal)
   const protectedStudentRoutes = ['/practice', '/classroom', '/chat', '/community', '/exam', '/feed', '/journal']
   const isProtectedStudent = protectedStudentRoutes.some(r => url.pathname.startsWith(r) || url.pathname === r)
@@ -68,7 +74,7 @@ export async function middleware(req: NextRequest) {
   if (role !== 'guest' && (url.pathname === '/login' || url.pathname === '/signup' || url.pathname === '/admin/login')) {
     if (role === 'admin') url.pathname = '/admin'
     else if (role === 'teacher') url.pathname = '/teacher'
-    else url.pathname = '/dashboard'
+    else url.pathname = '/learn'
     return NextResponse.redirect(url)
   }
 
@@ -91,7 +97,7 @@ export async function middleware(req: NextRequest) {
   // 5. STUDENT ENFORCEMENT
   if (role === 'student') {
     if (isTeacherRoute || isAdminRoute) {
-      url.pathname = '/dashboard'
+      url.pathname = '/learn'
       return NextResponse.redirect(url)
     }
     return res

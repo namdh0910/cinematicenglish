@@ -30,7 +30,7 @@ export default async function LessonDetailPage({ params }: PageProps) {
 
   if (error || !lesson) {
     console.error("Failed to fetch lesson detail:", error);
-    redirect("/dashboard");
+    redirect("/learn");
   }
 
   // Support both capitalized and lowercased lesson types (Speaking / speaking)
@@ -48,10 +48,10 @@ export default async function LessonDetailPage({ params }: PageProps) {
             Hệ thống nhận thấy bài học này có thể thuộc cấu phần Dictation hoặc Trắc nghiệm khác. Xin vui lòng quay lại giao diện Lộ Trình để chọn bài luyện nói nhé!
           </p>
           <a
-            href="/dashboard"
+            href="/learn"
             className="inline-block w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-500/10"
           >
-            Quay lại Dashboard
+            Quay lại Lộ trình
           </a>
         </div>
       </div>

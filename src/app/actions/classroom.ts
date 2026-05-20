@@ -162,7 +162,7 @@ export async function joinClassroomByCode(code: string) {
     return { success: false, error: 'Không thể tham gia lớp học. Vui lòng thử lại.' };
   }
 
-  revalidatePath('/dashboard');
+  revalidatePath('/learn');
   return { success: true, data: classroom };
 }
 

@@ -14,7 +14,9 @@ import {
   Star, 
   Award,
   Trophy,
-  VolumeX
+  VolumeX,
+  X,
+  AlertCircle
 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { evaluateSpeaking } from "@/app/actions/speaking";
@@ -245,7 +247,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
             const updated = [...prev];
             updated[activeTurn] = {
               score: result.accuracy,
-              completed: result.accuracy >= 60,
+              completed: result.accuracy >= 80,
               wordEvaluations: result.wordEvaluations,
               feedback: result.coachFeedback,
             };
@@ -320,401 +322,319 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
     };
   }, []);
 
-  return (
-    <div className="bg-[#f8f9fa] min-h-screen text-slate-800 pb-16 font-sans">
-      {/* 1. ROOM HEADER */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/dashboard"
-              className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors text-slate-600"
-            >
-              <ChevronLeft size={20} />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <span>{lesson.units?.grades?.title || "Khối lớp"}</span>
-                <span>•</span>
-                <span>{lesson.units?.unit_no || "Unit"}</span>
-              </div>
-              <h1 className="text-base md:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
-                {lesson.title}
-              </h1>
-            </div>
-          </div>
+  // Word-by-word highlight inside bubble (ELSA style)
+  const renderWords = () => {
+    const currentSentence = dialogs[activeTurn]?.text || "";
+    
+    if (currentWordEvaluations && currentWordEvaluations.length > 0) {
+      return (
+        <div className="flex flex-wrap gap-x-2 gap-y-1 font-extrabold text-3xl md:text-4xl text-slate-800 leading-normal tracking-tight font-display select-text">
+          {currentWordEvaluations.map((w, idx) => {
+            let colorClass = "text-slate-800";
+            if (w.status === "correct") {
+              colorClass = "text-emerald-500 hover:text-emerald-600";
+            } else if (w.status === "imperfect") {
+              colorClass = "text-amber-500 hover:text-amber-600";
+            } else if (w.status === "missing") {
+              colorClass = "text-rose-500 line-through decoration-rose-300 hover:text-rose-600";
+            }
 
-          {/* Progression Indicator Card */}
-          <div className="flex items-center gap-4 shrink-0 bg-slate-50 border border-slate-100 px-4 py-2 rounded-2xl">
-            <div className="text-right hidden sm:block">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tiến trình hội thoại</p>
-              <p className="text-xs font-black text-slate-700">{completedCount} / {dialogs.length} hoàn thành</p>
-            </div>
-            <div className="relative w-12 h-12 flex items-center justify-center">
-              <svg className="w-12 h-12 -rotate-90">
-                <circle cx="24" cy="24" r="20" fill="transparent" stroke="#e2e8f0" strokeWidth="4" />
-                <circle 
-                  cx="24" 
-                  cy="24" 
-                  r="20" 
-                  fill="transparent" 
-                  stroke="#3b82f6" 
-                  strokeWidth="4" 
-                  strokeDasharray={`${2 * Math.PI * 20}`}
-                  strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPercent / 100)}`}
-                  strokeLinecap="round"
-                  className="transition-all duration-700 ease-out"
-                />
-              </svg>
-              <span className="absolute text-[10px] font-black text-blue-600">{progressPercent}%</span>
-            </div>
-          </div>
+            return (
+              <span 
+                key={idx}
+                className={`${colorClass} cursor-pointer transition-colors px-0.5 rounded hover:bg-slate-50`}
+                onClick={() => speakSentence(w.word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,""))}
+                title={`Độ chính xác: ${w.accuracy}% (Bấm để nghe từ này)`}
+              >
+                {w.word}
+              </span>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return (
+      <h3 className="text-3xl md:text-4xl font-extrabold text-slate-800 leading-normal tracking-tight font-display select-text">
+        {currentSentence}
+      </h3>
+    );
+  };
+
+  return (
+    <div className="bg-[#f8f9fa] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+      {/* 1. ROOM HEADER - FOCUS MODE */}
+      <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between gap-6 shrink-0 z-40">
+        {/* Exit button */}
+        <Link 
+          href="/learn"
+          className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100/80"
+          title="Thoát"
+        >
+          <X size={28} className="stroke-[2.5]" />
+        </Link>
+
+        {/* Duolingo progress bar */}
+        <div className="flex-1 h-4 bg-slate-200/60 rounded-full overflow-hidden border border-slate-300/30 relative">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.3)] relative"
+          >
+            {/* Shiny overlay for realistic 3D feel */}
+            <div className="absolute top-0.5 inset-x-1 h-1 bg-white/20 rounded-full" />
+          </motion.div>
+        </div>
+
+        {/* Completion Stats / Hearts or Streaks (e.g. Flame emoji) */}
+        <div className="flex items-center gap-1.5 font-extrabold text-amber-500 text-base md:text-lg select-none">
+          <span>🔥</span>
+          <span>{completedCount}</span>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* 2. CENTERED CONTENT */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-6 flex flex-col items-center justify-center gap-8 md:gap-10">
+        <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-8 md:gap-10">
           
-          {/* 2. LEFT COLUMN: VISUAL CONVERSATION DIALOGUE SCRIPT (Zalo/Messenger Chat Style) */}
-          <section className="lg:col-span-6 space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest">Kịch Bản Hội Thoại (Bấm để chọn vai)</h2>
-              <span className="text-[10px] text-blue-500 font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">SGK Global Success</span>
+          {/* Mascot Teacher: Cute breathing/floating robot/teacher container */}
+          <motion.div
+            animate={{ y: [0, -6, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            className="relative w-24 h-24 md:w-32 md:h-32 bg-gradient-to-tr from-blue-100 to-indigo-50 border-2 border-blue-200 rounded-3xl flex items-center justify-center shadow-lg shrink-0 select-none"
+          >
+            <span className="text-5xl md:text-6xl">🤖</span>
+            {/* Little status light */}
+            <span className="absolute -bottom-1 -right-1 bg-emerald-500 border-2 border-white w-5 h-5 rounded-full shadow-sm animate-pulse" />
+          </motion.div>
+
+          {/* Chat Bubble: Contains the giant English target text and speaker icon */}
+          <div className="relative bg-white border-2 border-slate-200/80 rounded-[2.5rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] max-w-xl flex-1 flex flex-col gap-6
+            before:content-[''] before:absolute before:left-1/2 before:-top-3 before:-translate-x-1/2 before:w-6 before:h-6 before:bg-white before:border-l-2 before:border-t-2 before:border-slate-200/80 before:rotate-45 before:rounded-tl-md
+            md:before:left-auto md:before:-left-3 md:before:top-12 md:before:-translate-x-0 md:before:border-t-0 md:before:border-l-2 md:before:border-b-2 md:before:rotate-45 md:before:rounded-bl-md"
+          >
+            {/* Speaker/Speaker Role Tag */}
+            <div className="flex items-center justify-between gap-4">
+              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                dialogs[activeTurn]?.speaker?.toLowerCase().includes("phong")
+                  ? "bg-blue-50 text-blue-600 border border-blue-100"
+                  : "bg-orange-50 text-orange-600 border border-orange-100"
+              }`}>
+                {dialogs[activeTurn]?.speaker}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Câu {activeTurn + 1} / {dialogs.length}
+              </span>
             </div>
 
-            <div className="bg-white border border-slate-200/80 rounded-[32px] p-6 shadow-sm min-h-[350px] lg:min-h-[500px] flex flex-col gap-6 overflow-y-auto">
-              {dialogs.map((dialog, index) => {
-                const isActive = activeTurn === index;
-                const isPhong = dialog.speaker?.toLowerCase().includes("phong");
-                const hasScore = dialogueScores[index] !== null;
-                const scoreData = dialogueScores[index];
-
-                return (
-                  <motion.div
-                    key={index}
-                    onClick={() => {
-                      setActiveTurn(index);
-                      handleResetTurn();
-                    }}
-                    whileHover={{ scale: 1.01 }}
-                    className={`flex gap-3 cursor-pointer items-start transition-all p-3 rounded-2xl ${
-                      isActive 
-                        ? "bg-slate-50/80 ring-2 ring-blue-500/25 border-slate-200 shadow-sm" 
-                        : "hover:bg-slate-50/40 border border-transparent"
-                    } ${isPhong ? "flex-row" : "flex-row-reverse text-right"}`}
-                  >
-                    {/* Chat Bubble Avatar */}
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 shadow-sm ${
-                      isPhong 
-                        ? "bg-blue-600 text-white" 
-                        : "bg-orange-500 text-white"
-                    }`}>
-                      {dialog.speaker[0].toUpperCase()}
-                    </div>
-
-                    {/* Chat Bubble Details */}
-                    <div className={`flex flex-col max-w-[75%] gap-1 ${isPhong ? "items-start" : "items-end"}`}>
-                      {/* Speaker Name */}
-                      <span className={`text-[10px] font-black uppercase tracking-wider ${
-                        isPhong ? "text-blue-600" : "text-orange-600"
-                      }`}>
-                        {dialog.speaker}
-                      </span>
-
-                      {/* Bubble Text */}
-                      <div className={`px-4.5 py-3 rounded-3xl text-sm leading-relaxed border ${
-                        isActive
-                          ? (isPhong 
-                              ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                              : "bg-orange-500 text-white border-orange-500 shadow-md")
-                          : (isPhong 
-                              ? "bg-blue-50/60 text-slate-800 border-blue-100/80" 
-                              : "bg-orange-50/60 text-slate-800 border-orange-100/80")
-                      }`}>
-                        <p className="font-bold">{dialog.text}</p>
-                      </div>
-
-                      {/* Turn Status Indicators */}
-                      <div className="flex items-center gap-1.5 mt-1">
-                        {hasScore && scoreData && (
-                          <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full border ${
-                            scoreData.score >= 80 
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
-                              : "bg-amber-50 text-amber-700 border-amber-100"
-                          }`}>
-                            <Star size={8} fill="currentColor" /> {scoreData.score}%
-                          </span>
-                        )}
-                        {isActive && (
-                          <span className="text-[9px] font-black uppercase text-blue-500 tracking-wider animate-pulse flex items-center gap-1">
-                            <Mic size={10} /> Đang tập nói...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* 3. RIGHT COLUMN: ACTION & EVALUATION HUB (VoiceRecorder & Light Mode Score Card) */}
-          <section className="lg:col-span-6 space-y-6">
-            
-            {/* ACTIVE ACTION CARD */}
-            <div className="bg-white border border-slate-200/80 rounded-[32px] p-8 shadow-md space-y-6 text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-orange-500" />
+            {/* Giant target sentence text display */}
+            <div className="flex gap-4 items-start justify-between">
+              <div className="flex-1 text-left">
+                {renderWords()}
+              </div>
               
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Câu thoại cần phát âm</span>
-                <div className="flex justify-center items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                    dialogs[activeTurn]?.speaker?.toLowerCase().includes("phong")
-                      ? "bg-blue-50 text-blue-600 border border-blue-100"
-                      : "bg-orange-50 text-orange-600 border border-orange-100"
-                  }`}>
-                    {dialogs[activeTurn]?.speaker}
-                  </span>
+              {/* Compact Speaker Icon */}
+              <button
+                onClick={() => speakSentence(dialogs[activeTurn]?.text)}
+                disabled={isPlayingTTS}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all shrink-0 ${
+                  isPlayingTTS 
+                    ? "bg-slate-100 border-slate-200 text-slate-400" 
+                    : "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 hover:scale-105 active:scale-95 shadow-sm"
+                }`}
+                title="Nghe phát âm mẫu"
+              >
+                {isPlayingTTS ? (
+                  <VolumeX size={20} className="animate-pulse" />
+                ) : (
+                  <Volume2 size={20} className="stroke-[2.5]" />
+                )}
+              </button>
+            </div>
+
+            {/* Encouraging coach advice if any */}
+            {currentFeedback && currentScore !== null && (
+              <div className="flex gap-3 items-start bg-slate-50 border border-slate-100 p-4 rounded-2xl mt-2">
+                <div className="text-xl select-none">👩‍🏫</div>
+                <div className="text-left">
+                  <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider mb-0.5">Lời khuyên của Cô:</p>
+                  <p className="text-xs text-slate-600 font-bold leading-relaxed">
+                    {currentFeedback}
+                  </p>
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* Huge target sentence text display */}
-              <div className="py-4 space-y-4">
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-snug tracking-tight font-display">
-                  &ldquo;{dialogs[activeTurn]?.text}&rdquo;
-                </h3>
-                
-                {/* Premium Speech Synthesis TTS Button */}
-                <button
-                  onClick={() => speakSentence(dialogs[activeTurn]?.text)}
-                  disabled={isPlayingTTS}
-                  className={`mx-auto px-4 py-2 rounded-xl flex items-center gap-2 text-xs font-black uppercase tracking-widest border transition-all ${
-                    isPlayingTTS 
-                      ? "bg-slate-100 border-slate-200 text-slate-400" 
-                      : "bg-blue-50 border-blue-100 text-blue-600 hover:bg-blue-100"
-                  }`}
-                >
-                  {isPlayingTTS ? (
-                    <>
-                      <VolumeX size={14} className="animate-bounce" /> Lắng nghe...
-                    </>
-                  ) : (
-                    <>
-                      <Volume2 size={14} /> Nghe phát âm mẫu (AI)
-                    </>
-                  )}
-                </button>
-              </div>
+        </div>
+      </main>
 
-              {/* 4. DYNAMIC MICROPHONE WAVEFORM RECORDER */}
-              <div className="space-y-6">
-                {/* Light Mode Web Audio visualizer */}
-                <div className="h-28 flex items-end justify-center gap-1 px-4 pb-4 bg-slate-50 border border-slate-100 rounded-2xl relative overflow-hidden">
-                  <div className="absolute inset-x-0 bottom-0 h-1 bg-slate-200/50" />
-                  
-                  {waveform.map((h, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ height: h + "%" }}
-                      className="w-1.5 rounded-full transition-all duration-75"
-                      style={{
-                        background: isRecording
-                          ? "linear-gradient(to top, #3b82f6, #60a5fa)"
-                          : "rgba(148, 163, 184, 0.2)",
-                        minHeight: "6px"
-                      }}
-                    />
-                  ))}
-
-                  {isAnalyzing && (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-20"
-                    >
-                      <motion.div 
-                        animate={{ rotate: 360 }}
-                        transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                        className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full shadow-sm"
-                      />
-                      <span className="text-[10px] font-black tracking-widest uppercase text-blue-600">AI đang phân tích giọng đọc...</span>
-                    </motion.div>
-                  )}
-                </div>
-
-                {/* Recorder Control Buttons */}
-                <div className="flex flex-col items-center gap-4">
-                  {!audioUrl ? (
+      {/* 3. DYNAMIC STICKY BOTTOM ACTION BAR */}
+      <footer className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out border-t pb-8 pt-6 px-6 ${
+        currentScore === null 
+          ? "bg-white border-slate-200/80 shadow-[0_-8px_30px_rgb(0,0,0,0.03)]" 
+          : currentScore >= 80 
+            ? "bg-[#d7f5db] border-t-2 border-[#b8ebd0]" 
+            : "bg-[#ffdfe0] border-t-2 border-[#ffc4c6]"
+      }`}>
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
+          
+          <AnimatePresence mode="wait">
+            {currentScore === null ? (
+              /* State 1: Default / Recording State */
+              <motion.div
+                key="default-mic"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="w-full flex flex-col items-center gap-4 py-2"
+              >
+                {isAnalyzing ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin shadow-sm" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 animate-pulse">
+                      AI đang phân tích giọng đọc...
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    {/* Giant 3D microphone button */}
                     <div className="relative">
+                      {/* Recording expanding waves */}
+                      {isRecording && (
+                        <>
+                          <motion.div
+                            initial={{ scale: 0.9, opacity: 0.6 }}
+                            animate={{ scale: 1.6, opacity: 0 }}
+                            transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
+                            className="absolute inset-0 bg-red-400 rounded-full z-0"
+                          />
+                          <motion.div
+                            initial={{ scale: 0.9, opacity: 0.8 }}
+                            animate={{ scale: 1.3, opacity: 0 }}
+                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.4, ease: "easeOut" }}
+                            className="absolute inset-0 bg-red-300 rounded-full z-0"
+                          />
+                        </>
+                      )}
+
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-500 shadow-md ${
-                          isRecording 
-                            ? "bg-red-500 text-white shadow-red-500/20" 
-                            : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20"
+                        className={`w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all duration-300 z-10 relative cursor-pointer text-white ${
+                          isRecording
+                            ? "bg-red-500 hover:bg-red-600 shadow-[0_6px_0_#b91c1c] active:translate-y-[6px] active:shadow-none"
+                            : "bg-blue-500 hover:bg-blue-600 shadow-[0_6px_0_#1d4ed8] active:translate-y-[6px] active:shadow-none"
                         }`}
+                        title={isRecording ? "Dừng ghi âm" : "Bắt đầu ghi âm"}
                       >
-                        {isRecording ? <Square size={28} fill="currentColor" /> : <Mic size={32} />}
-                      </motion.button>
-                      <AnimatePresence>
-                        {isRecording && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-sm animate-pulse"
-                          >
-                            ĐANG THU
-                          </motion.div>
+                        {isRecording ? (
+                          <Square size={28} fill="currentColor" />
+                        ) : (
+                          <Mic size={32} className="stroke-[2.5]" />
                         )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-5 justify-center">
-                      {/* Retry Button */}
-                      <button
-                        onClick={handleResetTurn}
-                        className="w-12 h-12 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all"
-                        title="Nói lại"
-                      >
-                        <RefreshCw size={18} />
-                      </button>
-                      
-                      {/* Listen Playback Button */}
-                      <button
-                        onClick={() => audioUrl && new Audio(audioUrl).play()}
-                        className="w-16 h-16 rounded-full bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-all shadow-sm"
-                        title="Nghe lại bài nói của bạn"
-                      >
-                        <Play size={26} fill="currentColor" className="ml-1" />
-                      </button>
-
-                      {/* Confirm and Proceed Button */}
-                      <button
-                        onClick={handleNextTurn}
-                        disabled={activeTurn === dialogs.length - 1}
-                        className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Lưu & Sang câu tiếp"
-                      >
-                        <CheckCircle2 size={18} />
-                      </button>
-                    </div>
-                  )}
-
-                  {micError && (
-                    <div className="text-red-600 text-xs font-bold px-4 py-2 bg-red-50 rounded-xl border border-red-100 max-w-sm">
-                      {micError}
-                    </div>
-                  )}
-
-                  <p className="text-[10px] font-black tracking-widest uppercase text-slate-400">
-                    {isRecording ? "Chạm biểu tượng vuông để dừng & chấm điểm" : audioUrl ? "Lắng nghe hoặc thử lại câu thoại" : "Chạm biểu tượng Micro để bắt đầu nói"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 5. THẺ KẾT QUẢ: PURE WHITE ACCURACY & FEEDBACK CARD */}
-            <AnimatePresence>
-              {!isRecording && currentFeedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 15 }}
-                  className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-lg space-y-6 text-left relative overflow-hidden"
-                >
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-5 border-b border-slate-100">
-                    <div className="flex gap-3 items-center">
-                      <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500 shrink-0">
-                        <Award size={20} />
-                      </div>
-                      <div>
-                        <div className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Đánh giá AI Coach</div>
-                        <h4 className="text-sm font-bold text-slate-800">Kết quả luyện nói của em</h4>
-                      </div>
+                      </motion.button>
                     </div>
 
-                    {currentScore !== null && (
-                      <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 px-4 py-2 rounded-2xl self-center md:self-auto">
-                        <div className="text-right">
-                          <p className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Độ chuẩn xác</p>
-                          <p className="text-xs font-bold text-slate-600">
-                            {currentScore >= 80 ? "Xuất sắc" : currentScore >= 60 ? "Khá tốt" : "Cần rèn luyện thêm"}
-                          </p>
-                        </div>
-                        <span className={`text-3xl font-black font-display ${
-                          currentScore >= 80 ? "text-emerald-600" :
-                          currentScore >= 60 ? "text-amber-600" :
-                          "text-rose-600"
-                        }`}>
-                          {currentScore}%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Word-by-word visual highlight list on White Background */}
-                  {currentWordEvaluations && currentWordEvaluations.length > 0 && (
-                    <div className="space-y-2.5">
-                      <div className="text-[10px] uppercase tracking-widest font-black text-slate-400">Chi tiết phát âm từng từ:</div>
-                      <div className="flex flex-wrap gap-2 text-sm font-bold">
-                        {currentWordEvaluations.map((w, idx) => (
-                          <span 
-                            key={idx}
-                            className={`px-3 py-1 rounded-xl border transition-all ${
-                              w.status === "correct" 
-                                ? "text-emerald-700 bg-emerald-50 border-emerald-100" 
-                                : w.status === "imperfect" 
-                                ? "text-amber-700 bg-amber-50 border-amber-100" 
-                                : "text-rose-700 bg-rose-50 border-rose-100 line-through decoration-rose-300"
-                            }`}
-                          >
-                            {w.word}
-                          </span>
+                    {/* Microphone input visualizer */}
+                    {isRecording && (
+                      <div className="flex items-center justify-center gap-1 h-6">
+                        {waveform.slice(0, 15).map((h, i) => (
+                          <motion.div
+                            key={i}
+                            animate={{ height: `${h * 0.25}px` }}
+                            className="w-1 bg-red-400 rounded-full"
+                            style={{ minHeight: "4px" }}
+                          />
                         ))}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Encouraging coach message */}
-                  <div className="flex gap-4 items-start bg-slate-50 border border-slate-100 p-4.5 rounded-2xl">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-sm shrink-0">
-                      👩‍🏫
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider mb-0.5">Lời khuyên của Cô:</p>
-                      <p className="text-xs text-slate-600 font-bold leading-relaxed">
-                        {currentFeedback}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Flow Action Trigger Buttons */}
-                  <div className="flex justify-end gap-3 pt-2">
-                    {activeTurn < dialogs.length - 1 ? (
-                      <button
-                        onClick={handleNextTurn}
-                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md shadow-blue-500/10 flex items-center gap-2"
-                      >
-                        Nói câu tiếp theo →
-                      </button>
+                    {micError ? (
+                      <span className="text-red-500 text-xs font-bold px-4 py-1.5 bg-red-50 rounded-xl border border-red-100 max-w-sm mt-1 animate-pulse">
+                        ⚠️ {micError}
+                      </span>
                     ) : (
-                      <Link href="/dashboard" className="w-full">
-                        <button className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md flex items-center justify-center gap-2">
-                          <Trophy size={14} fill="currentColor" /> Hoàn thành bài học!
-                        </button>
-                      </Link>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        {isRecording ? "Đang thu âm... Chạm nút đỏ để chấm điểm" : "Chạm biểu tượng Micro để bắt đầu nói"}
+                      </span>
                     )}
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </section>
+                )}
+              </motion.div>
+            ) : currentScore >= 80 ? (
+              /* State 2: Success Graded State (>80%) */
+              <motion.div
+                key="success-bar"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-1"
+              >
+                {/* Left message */}
+                <div className="flex items-center gap-4 text-[#155724] select-none text-center sm:text-left">
+                  <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-[0_4px_0_#0f766e] shrink-0">
+                    <CheckCircle2 size={28} className="stroke-[3]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black tracking-tight leading-tight">Tuyệt vời! ({currentScore}%)</h4>
+                    <p className="text-sm font-semibold opacity-95">
+                      Bạn đã hoàn thành xuất sắc câu thoại này.
+                    </p>
+                  </div>
+                </div>
 
+                {/* Right button */}
+                <button
+                  onClick={handleNextTurn}
+                  className="w-full sm:w-auto px-10 py-4 bg-[#58cc02] hover:bg-[#46a302] text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_5px_0_#3fa001] active:translate-y-[5px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {activeTurn < dialogs.length - 1 ? (
+                    "Tiếp tục"
+                  ) : (
+                    <>
+                      <Trophy size={16} fill="currentColor" /> Hoàn thành bài học! 🎉
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            ) : (
+              /* State 3: Failure Graded State (<80%) */
+              <motion.div
+                key="fail-bar"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-1"
+              >
+                {/* Left message */}
+                <div className="flex items-center gap-4 text-[#721c24] select-none text-center sm:text-left">
+                  <div className="w-14 h-14 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-[0_4px_0_#9f1239] shrink-0">
+                    <AlertCircle size={28} className="stroke-[3]" />
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-black tracking-tight leading-tight">Thử lại một chút nhé ({currentScore}%)</h4>
+                    <p className="text-sm font-semibold opacity-95">
+                      Cần đạt trên 80% để hoàn thành. Hãy sửa các từ màu đỏ.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right button */}
+                <button
+                  onClick={handleResetTurn}
+                  className="w-full sm:w-auto px-10 py-4 bg-[#ff4b4b] hover:bg-[#ea4343] text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_5px_0_#ea2b2b] active:translate-y-[5px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <RefreshCw size={16} className="stroke-[2.5]" /> Thử lại ngay
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
