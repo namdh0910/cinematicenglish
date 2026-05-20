@@ -2,13 +2,14 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Menu, X, Play, LogOut, Flame, LayoutDashboard, Sparkles, User, BookOpen } from "lucide-react";
+import { Menu, X, Play, LogOut, Flame, LayoutDashboard, Sparkles, User, BookOpen, Trophy, Target } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 
 const simplifiedLinks = [
-  { label: "Học SGK", href: "/learn", icon: BookOpen },
-  { label: "Lịch sử học", href: "/learn", icon: LayoutDashboard }
+  { label: "Học SGK", href: "/learn?tab=learn", baseHref: "/learn", tab: "learn", icon: BookOpen },
+  { label: "Bảng xếp hạng", href: "/learn?tab=leaderboard", baseHref: "/learn", tab: "leaderboard", icon: Trophy },
+  { label: "Nhiệm vụ", href: "/learn?tab=quests", baseHref: "/learn", tab: "quests", icon: Target }
 ];
 
 const NAV_HEIGHT = 72;
@@ -34,6 +35,26 @@ export default function Navbar() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [streakCount, setStreakCount] = useState<number>(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState("learn");
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        setActiveTab(params.get("tab") || "learn");
+      }
+    };
+    
+    handleUrlChange();
+    
+    window.addEventListener("popstate", handleUrlChange);
+    window.addEventListener("hashchange", handleUrlChange);
+    
+    return () => {
+      window.removeEventListener("popstate", handleUrlChange);
+      window.removeEventListener("hashchange", handleUrlChange);
+    };
+  }, [pathname]);
 
   // Load auth state and listen to changes
   useEffect(() => {
@@ -170,7 +191,7 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm ${pathname.startsWith("/learn") ? "lg:hidden" : ""}`}
+        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm ${pathname.startsWith("/learn") ? "hidden" : ""}`}
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
@@ -186,8 +207,8 @@ export default function Navbar() {
           {/* Desktop Nav Links (Only if logged in) */}
           {role !== 'guest' && (
             <nav className="hidden md:flex items-center gap-8">
-              {simplifiedLinks.map((l) => {
-                const isActive = pathname === l.href;
+               {simplifiedLinks.map((l) => {
+                const isActive = pathname === l.baseHref && activeTab === l.tab;
                 return (
                   <Link
                     key={l.href}
@@ -287,20 +308,25 @@ export default function Navbar() {
                         </div>
 
                         {/* Dropdown Options */}
-                        <Link href="/learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                        <Link href="/learn?tab=learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
                           isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
                         }`}>
                           <BookOpen size={14} />
                           Học SGK
                         </Link>
 
-
-
-                        <Link href="/learn" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                        <Link href="/learn?tab=leaderboard" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
                           isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
                         }`}>
-                          <LayoutDashboard size={14} />
-                          Lịch sử học
+                          <Trophy size={14} />
+                          Bảng xếp hạng
+                        </Link>
+
+                        <Link href="/learn?tab=quests" onClick={closeMenu} className={`flex items-center gap-2 p-2 rounded-xl text-xs font-bold transition-colors ${
+                          isLightMode ? "text-slate-600 hover:text-slate-800 hover:bg-slate-50" : "text-white/70 hover:text-white hover:bg-white/5"
+                        }`}>
+                          <Target size={14} />
+                          Nhiệm vụ
                         </Link>
 
                         {profile?.subscriptionPlan === 'free' && (
@@ -391,7 +417,7 @@ export default function Navbar() {
                 {role !== 'guest' ? (
                   <>
                     <Link
-                      href="/learn"
+                      href="/learn?tab=learn"
                       onClick={closeMenu}
                       className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
@@ -399,15 +425,22 @@ export default function Navbar() {
                       Học SGK
                     </Link>
 
-
-
                     <Link
-                      href="/learn"
+                      href="/learn?tab=leaderboard"
                       onClick={closeMenu}
                       className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
                     >
-                      <LayoutDashboard size={18} />
-                      Lịch sử học
+                      <Trophy size={18} />
+                      Bảng xếp hạng
+                    </Link>
+
+                    <Link
+                      href="/learn?tab=quests"
+                      onClick={closeMenu}
+                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                    >
+                      <Target size={18} />
+                      Nhiệm vụ
                     </Link>
 
                     {profile?.subscriptionPlan === 'free' && (

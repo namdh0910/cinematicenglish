@@ -397,7 +397,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
       {/* ─── HEADER BAR ──────────────────────────────────────────────────────── */}
       <header className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between z-10 shrink-0 shadow-sm">
         <Link 
-          href="/dashboard"
+          href="/learn"
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 transition-colors text-xs font-black uppercase tracking-widest"
         >
           <ChevronLeft size={16} /> Thoát
@@ -862,7 +862,7 @@ export default function LessonPlayerClient({ lesson }: LessonPlayerClientProps) 
                 <RefreshCw size={12} /> Luyện tập lại
               </button>
               <button 
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/learn")}
                 className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-blue-500/10"
               >
                 Về Trang Chủ Bảng Điều Khiển

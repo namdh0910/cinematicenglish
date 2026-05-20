@@ -180,18 +180,18 @@ export default function GradeClient({ grade }: GradeClientProps) {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#1899D6] shadow-[0_4px_0_#1482B5] active:translate-y-[4px] active:shadow-none transition-all">
               <Play size={16} fill="white" className="ml-0.5 text-white" />
             </div>
-            <span className="font-display font-black text-2xl tracking-tight text-[#1A1A18]">Cinematic</span>
+            <span className="font-display font-black text-2xl tracking-tight text-[#1A1A18]">Global Success</span>
           </Link>
 
           {/* Navigation Links with Duolingo style active state */}
           <nav className="flex flex-col gap-2.5">
             {[
-              { label: "HỌC", href: "/learn", icon: Home, active: true },
-              { label: "CHỮ CÁI", href: "/learn", icon: Globe },
-              { label: "BẢNG XẾP HẠNG", href: "/learn", icon: Trophy },
-              { label: "NHIỆM VỤ", href: "/learn", icon: Target },
+              { label: "HỌC", href: "/learn?tab=learn", icon: Home, active: true },
+              { label: "CHỮ CÁI", href: "/learn?tab=alphabet", icon: Globe },
+              { label: "BẢNG XẾP HẠNG", href: "/learn?tab=leaderboard", icon: Trophy },
+              { label: "NHIỆM VỤ", href: "/learn?tab=quests", icon: Target },
               { label: "CỬA HÀNG", href: "/#pricing", icon: ShoppingBag },
-              { label: "HỒ SƠ", href: "/learn", icon: User },
+              { label: "HỒ SƠ", href: "/learn?tab=profile", icon: User },
             ].map((link) => (
               <Link
                 key={link.label}
@@ -556,11 +556,11 @@ export default function GradeClient({ grade }: GradeClientProps) {
         {/* 4. MOBILE BOTTOM NAVIGATION BAR */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t-2 border-[#E5E5E5] flex items-center justify-around z-40 shadow-lg">
           {[
-            { label: "HỌC", href: "/learn", icon: Home, active: true },
-            { label: "LUYỆN TẬP", href: "/learn", icon: Globe },
-            { label: "XẾP HẠNG", href: "/learn", icon: Trophy },
-            { label: "NHIỆM VỤ", href: "/learn", icon: Target },
-            { label: "HỒ SƠ", href: "/learn", icon: User },
+            { label: "HỌC", href: "/learn?tab=learn", icon: Home, active: true },
+            { label: "CHỮ CÁI", href: "/learn?tab=alphabet", icon: Globe },
+            { label: "XẾP HẠNG", href: "/learn?tab=leaderboard", icon: Trophy },
+            { label: "NHIỆM VỤ", href: "/learn?tab=quests", icon: Target },
+            { label: "HỒ SƠ", href: "/learn?tab=profile", icon: User },
           ].map((link) => (
             <Link
               key={link.label}

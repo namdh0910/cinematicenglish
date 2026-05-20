@@ -35,7 +35,7 @@ export default function FeedPage() {
       <main className="flex-1 pt-20 relative flex flex-col">
         {/* Header Overlay */}
         <div className="container-custom py-4 flex items-center justify-between z-30">
-          <Link href="/dashboard" className="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-glass-hover transition-all">
+          <Link href="/learn" className="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-glass-hover transition-all">
             <ArrowLeft size={20} />
           </Link>
           <div className="flex items-center gap-3">

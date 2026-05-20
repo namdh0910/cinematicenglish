@@ -156,7 +156,7 @@ function ClassroomHubContent() {
               Thử lại
             </button>
             <Link
-              href="/dashboard"
+              href="/learn"
               className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition-colors"
             >
               Về bảng điều khiển
@@ -176,7 +176,7 @@ function ClassroomHubContent() {
           
           {/* Header section with back shortcut */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <Link href="/dashboard">
+            <Link href="/learn">
               <span className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
                 <ArrowLeft size={14} /> Quay về Trung tâm
               </span>

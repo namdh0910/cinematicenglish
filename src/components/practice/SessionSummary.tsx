@@ -86,7 +86,7 @@ export default function SessionSummary({
           <RefreshCw size={12} /> Luyện thêm lượt nữa
         </button>
 
-        <Link href="/dashboard">
+        <Link href="/learn">
           <span className="px-6 py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-white text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
             <Home size={12} /> Trang chủ
           </span>

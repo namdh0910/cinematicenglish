@@ -17,7 +17,7 @@ export default function PracticePage() {
           
           {/* Top navigation path */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <Link href="/dashboard">
+            <Link href="/learn">
               <span className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1 cursor-pointer">
                 <ChevronLeft size={14} /> Về Bảng điều khiển
               </span>

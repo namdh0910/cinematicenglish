@@ -174,7 +174,7 @@ export default function ExamPlayer({ params }: { params: Promise<{ id: string }>
       {/* ─── FULL SCREEN FOCUS HEADER ─── */}
       <header className="border-b border-white/5 bg-[#08080c] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/dashboard">
+          <Link href="/learn">
             <span className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer block">
               <ChevronLeft size={16} />
             </span>
@@ -257,7 +257,7 @@ export default function ExamPlayer({ params }: { params: Promise<{ id: string }>
               </Card>
 
               <div className="pt-4">
-                <Link href="/dashboard">
+                <Link href="/learn">
                   <span className="px-6 py-3 rounded-xl bg-white text-black font-black uppercase tracking-widest text-[10px] hover:bg-amber-400 transition-colors cursor-pointer">
                     Về Bảng điều khiển
                   </span>

@@ -26,7 +26,7 @@ export default function CommunityPage() {
       <main className="pt-24 pb-12">
         <Section container={false} className="max-w-2xl mx-auto px-4">
           <div className="flex items-center gap-4 mb-8">
-            <Link href="/dashboard" className="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-glass-hover transition-all">
+            <Link href="/learn" className="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-glass-hover transition-all">
               <ArrowLeft size={20} />
             </Link>
             <div className="flex-1">

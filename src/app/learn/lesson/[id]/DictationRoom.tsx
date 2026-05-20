@@ -154,7 +154,7 @@ export default function DictationRoom({ lesson }: DictationRoomProps) {
       {/* Header breadcrumb */}
       <header className="max-w-4xl mx-auto px-6 pt-8 flex items-center justify-between w-full relative z-10">
         <Link 
-          href="/dashboard"
+          href="/learn"
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 transition-colors text-xs font-black uppercase tracking-widest"
         >
           <ChevronLeft size={16} /> Thoát Dictation
@@ -304,7 +304,7 @@ export default function DictationRoom({ lesson }: DictationRoomProps) {
                 </button>
                 
                 <Link
-                  href="/dashboard"
+                  href="/learn"
                   className="flex-1 py-4 bg-gradient-to-r from-[#3B82F6] to-[#8B5CF6] text-white font-black text-sm uppercase tracking-widest rounded-2xl transition-all flex items-center justify-center gap-1.5 shadow-md hover:opacity-95 active:scale-[0.99] cursor-pointer text-center"
                 >
                   Hoàn thành <Award size={14} />
@@ -357,7 +357,7 @@ export default function DictationRoom({ lesson }: DictationRoomProps) {
                     Xem lại bài
                   </button>
                   <Link
-                    href="/dashboard"
+                    href="/learn"
                     className="flex-1 py-3.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-blue-500/10 text-center"
                   >
                     Trở về Dashboard

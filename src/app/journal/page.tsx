@@ -20,7 +20,7 @@ export default function CinematicJournal() {
       {/* Header */}
       <header className="relative z-50 p-6 md:p-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/dashboard" className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all group">
+          <Link href="/learn" className="w-12 h-12 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-all group">
             <ChevronLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
           </Link>
           <div className="text-center">
