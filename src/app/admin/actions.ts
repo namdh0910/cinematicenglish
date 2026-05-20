@@ -337,6 +337,65 @@ export async function getGradeWithDetails(gradeId: string) {
     console.error("Error fetching grade details, using fallback:", error);
     return mockGrade;
   }
+
+  // Fetch all units that belong directly to this grade (since some units created in admin might not have semester_id)
+  const { data: allUnits } = await supabase
+    .from('units')
+    .select(`
+      *,
+      lessons (
+        *
+      )
+    `)
+    .eq('grade_id', gradeId);
+
+  let semesters = grade.semesters || [];
+  if (semesters.length === 0) {
+    semesters = [{
+      id: "default-semester-id-" + gradeId,
+      title: "Học kỳ I",
+      order_index: 1,
+      units: []
+    }];
+  }
+
+  if (allUnits && allUnits.length > 0) {
+    const sortedSems = [...semesters].sort((a: any, b: any) => a.order_index - b.order_index);
+    const firstSemesterId = sortedSems[0].id;
+
+    // Create a map of semester_id to their units
+    const semUnitsMap: Record<string, any[]> = {};
+    semesters.forEach((sem: any) => {
+      semUnitsMap[sem.id] = [];
+    });
+
+    allUnits.forEach((unit: any) => {
+      const semId = unit.semester_id || firstSemesterId;
+      if (semUnitsMap[semId]) {
+        semUnitsMap[semId].push(unit);
+      } else {
+        semUnitsMap[firstSemesterId].push(unit);
+      }
+    });
+
+    // Assign mapped units back to grade.semesters
+    grade.semesters = semesters.map((sem: any) => {
+      const units = semUnitsMap[sem.id] || [];
+      const sortedUnits = units.sort((a: any, b: any) => {
+        const orderA = a.order_index !== undefined && a.order_index !== null ? a.order_index : 0;
+        const orderB = b.order_index !== undefined && b.order_index !== null ? b.order_index : 0;
+        if (orderA !== orderB) return orderA - orderB;
+        return (a.unit_no || "").localeCompare(b.unit_no || "", undefined, { numeric: true });
+      });
+      return {
+        ...sem,
+        units: sortedUnits
+      };
+    });
+  } else {
+    grade.semesters = semesters;
+  }
+
   return grade;
 }
 
