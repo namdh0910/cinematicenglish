@@ -533,6 +533,23 @@ export async function saveLessonProgress({
       console.error('Error saving lesson progress:', error);
       return { success: false, error: error.message };
     }
+
+    if (isCompleted) {
+      // Award +20 XP to student profile on completion
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('xp_score')
+        .eq('id', userId)
+        .single();
+      if (profile) {
+        const currentXp = profile.xp_score || 0;
+        await supabase
+          .from('profiles')
+          .update({ xp_score: currentXp + 20 })
+          .eq('id', userId);
+      }
+    }
+
     return { success: true };
   } catch (err: any) {
     console.error('saveLessonProgress error:', err);

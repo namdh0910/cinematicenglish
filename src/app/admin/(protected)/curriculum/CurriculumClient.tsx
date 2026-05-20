@@ -100,7 +100,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
 
   // Form states - Lesson
   const [lessonTitle, setLessonTitle] = useState("");
-  const [lessonType, setLessonType] = useState<"Speaking" | "Dictation">("Speaking");
+  const [lessonType, setLessonType] = useState<"Speaking" | "Dictation" | "Quiz">("Speaking");
   const [lessonOrder, setLessonOrder] = useState(1);
   const [lessonDesc, setLessonDesc] = useState("");
   const [isSavingLesson, setIsSavingLesson] = useState(false);
@@ -113,6 +113,45 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
   // Dictation: audio & text (blanks are auto-extracted from text)
   const [dictationAudioUrl, setDictationAudioUrl] = useState("");
   const [dictationPassage, setDictationPassage] = useState("");
+
+  // Quiz: list of questions, options, and correctAnswer
+  const [quizQuestions, setQuizQuestions] = useState<Array<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }>>([
+    { question: "", options: ["", "", "", ""], correctAnswer: 0 }
+  ]);
+
+  const addQuizQuestion = () => {
+    setQuizQuestions([
+      ...quizQuestions,
+      { question: "", options: ["", "", "", ""], correctAnswer: 0 }
+    ]);
+  };
+
+  const removeQuizQuestion = (index: number) => {
+    if (quizQuestions.length === 1) return;
+    setQuizQuestions(quizQuestions.filter((_, idx) => idx !== index));
+  };
+
+  const handleQuizQuestionChange = (index: number, field: string, value: any) => {
+    const updated = [...quizQuestions];
+    if (field === "question") {
+      updated[index].question = value;
+    } else if (field === "correctAnswer") {
+      updated[index].correctAnswer = Number(value);
+    }
+    setQuizQuestions(updated);
+  };
+
+  const handleQuizOptionChange = (qIndex: number, oIndex: number, value: string) => {
+    const updated = [...quizQuestions];
+    updated[qIndex].options[oIndex] = value;
+    setQuizQuestions(updated);
+  };
+
+  const optionLetters = ["A", "B", "C", "D"];
 
   // Toast notification state
   const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" }>({
@@ -283,6 +322,14 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
           text: dictationPassage.trim(),
           blanks: extractedBlanks
         };
+      } else if (lessonType === "Quiz") {
+        contentJson = {
+          questions: quizQuestions.map(q => ({
+            question: q.question.trim(),
+            options: q.options.map(opt => opt.trim()),
+            correctAnswer: q.correctAnswer
+          }))
+        };
       }
 
       const newLesson = await createLesson({
@@ -305,6 +352,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
         setDialogues([{ speaker: "", text: "", translation: "" }]);
         setDictationAudioUrl("");
         setDictationPassage("");
+        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0 }]);
         setShowLessonModal(false);
 
         triggerToast("Đã tạo bài học thành công!");
@@ -496,6 +544,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
                                         setDialogues([{ speaker: "", text: "", translation: "" }]);
                                         setDictationAudioUrl("");
                                         setDictationPassage("");
+                                        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0 }]);
                                         setShowLessonModal(true);
                                       }}
                                       className="px-2.5 py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-[9px] font-black text-violet-400 transition-all uppercase tracking-wider flex items-center gap-1 shrink-0"
@@ -783,6 +832,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
                     >
                       <option value="Speaking">🗣️ Luyện Nói (Speaking)</option>
                       <option value="Dictation">🎧 Nghe Điền Từ (Dictation)</option>
+                      <option value="Quiz">📝 Trắc Nghiệm (Quiz)</option>
                     </select>
                   </div>
                 </div>
@@ -920,6 +970,86 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
                           <br />
                           VD: <code className="bg-purple-950 px-1 py-0.5 rounded text-purple-200">I love [playing] football.</code> sẽ tạo ô trống hiển thị và tự động trích xuất đáp án là <code className="bg-purple-950 px-1 py-0.5 rounded text-purple-200">playing</code>.
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 3. DYNAMIC QUIZ FORM */}
+                  {lessonType === "Quiz" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                          <HelpCircle size={13} /> Cấu hình câu hỏi trắc nghiệm
+                        </span>
+                        <button
+                          type="button"
+                          onClick={addQuizQuestion}
+                          className="px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 border border-blue-500/20 text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                        >
+                          <Plus size={10} strokeWidth={3} /> Thêm câu hỏi
+                        </button>
+                      </div>
+
+                      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1.5 custom-scrollbar">
+                        {quizQuestions.map((q, qIdx) => (
+                          <div key={qIdx} className="p-4 bg-[#1e1e1e] border border-white/5 hover:border-white/10 rounded-xl space-y-3 relative">
+                            {quizQuestions.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeQuizQuestion(qIdx)}
+                                className="absolute top-3 right-3 text-white/20 hover:text-red-400 transition-colors"
+                                title="Xóa câu hỏi"
+                              >
+                                <X size={15} />
+                              </button>
+                            )}
+
+                            <div className="text-[10px] font-bold text-white/60">Câu hỏi #{qIdx + 1}</div>
+
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Nội dung câu hỏi</label>
+                              <input
+                                type="text"
+                                value={q.question}
+                                onChange={(e) => handleQuizQuestionChange(qIdx, "question", e.target.value)}
+                                placeholder="Ví dụ: What is the capital of France?"
+                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white font-semibold"
+                                required
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {q.options.map((opt, oIdx) => (
+                                <div key={oIdx} className="space-y-1">
+                                  <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Đáp án {optionLetters[oIdx]}</label>
+                                  <input
+                                    type="text"
+                                    value={opt}
+                                    onChange={(e) => handleQuizOptionChange(qIdx, oIdx, e.target.value)}
+                                    placeholder={`Nhập đáp án ${optionLetters[oIdx]}...`}
+                                    className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white"
+                                    required
+                                  />
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Đáp án đúng</label>
+                              <select
+                                value={q.correctAnswer}
+                                onChange={(e) => handleQuizQuestionChange(qIdx, "correctAnswer", e.target.value)}
+                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white cursor-pointer font-bold"
+                              >
+                                {optionLetters.map((letter, oIdx) => (
+                                  <option key={oIdx} value={oIdx}>
+                                    Đáp án {letter}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
