@@ -191,93 +191,72 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           {/* MIDDLE COLUMN */}
           <main className="flex-1 space-y-8 min-w-0">
             
-            {/* Hero Welcome Banner */}
-            <div className="relative rounded-[2.5rem] bg-[#16171E] border border-white/5 overflow-hidden p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 shadow-2xl">
-              {/* Background Glow */}
-              <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-[#1E1B4B]/80 to-transparent pointer-events-none" />
+            {/* Hero Welcome Banner - Cinematic */}
+            <div className="relative rounded-[24px] bg-[var(--bg-card)] border border-[var(--border-subtle)] overflow-hidden flex flex-col lg:flex-row min-h-[320px] shadow-2xl">
               
-              {/* Left Progress Chart */}
-              <div className="relative shrink-0 w-32 h-32">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="64" cy="64" r="54" stroke="#1F2937" strokeWidth="8" fill="transparent" />
-                  <circle 
-                    cx="64" cy="64" r="54" 
-                    stroke="url(#gradient)" strokeWidth="8" fill="transparent" 
-                    strokeDasharray={2 * Math.PI * 54}
-                    strokeDashoffset={2 * Math.PI * 54 * (1 - 0.85)}
-                    strokeLinecap="round"
-                    className="drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]"
-                  />
-                  <defs>
-                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#3B82F6" />
-                      <stop offset="100%" stopColor="#10B981" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-[9px] text-[#94A3B8] font-black uppercase tracking-widest">Tiến độ tuần</span>
-                  <span className="text-2xl font-black text-white mt-0.5">85%</span>
-                  <span className="text-[8px] text-[#34D399] font-bold mt-1">Mục tiêu 5 ngày</span>
-                </div>
-              </div>
-
-              {/* Center Text */}
-              <div className="flex-1 z-10 relative space-y-2">
-                <p className="text-[#818CF8] text-xs font-black uppercase tracking-widest">Chào mừng trở lại</p>
-                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight flex items-center gap-3">
-                  Chào, {profile?.full_name ? profile.full_name.split(' ')[0] : "Học viên"}! <span className="text-3xl animate-wave">👋</span>
+              {/* Left Content (Greeting, Stats, CTA) */}
+              <div className="flex-1 p-8 lg:p-12 z-10 flex flex-col justify-center">
+                <p className="text-[var(--accent-primary)] text-sm font-bold uppercase tracking-widest mb-2">Chào mừng trở lại</p>
+                <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-primary)] tracking-tight leading-tight mb-2">
+                  Chào, {profile?.full_name ? profile.full_name.split(' ')[0] : "Học viên"}!
                 </h2>
-                <p className="text-sm text-slate-400 font-medium">Hôm nay bạn muốn học chủ đề gì?</p>
+                <p className="text-sm text-[var(--text-muted)] font-medium mb-8 max-w-md">
+                  Bạn đã sẵn sàng để tiếp tục hành trình chinh phục tiếng Anh hôm nay chưa?
+                </p>
                 
-                {/* Stats Row */}
-                <div className="flex items-center gap-6 pt-6">
-                  <div className="text-center">
-                    <p className="text-xl font-black text-white">5</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-1">Ngày streak</p>
+                {/* Horizontal Stats Cards */}
+                <div className="flex flex-wrap gap-4 mb-8">
+                  <div className="flex items-center gap-3 bg-[var(--bg-primary)]/50 border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 backdrop-blur-md">
+                    <Flame size={18} className="text-[var(--text-muted)]" />
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider leading-none">Ngày streak</p>
+                      <p className="text-lg font-bold text-[var(--text-primary)] leading-tight">{streakCount}</p>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="text-center">
-                    <p className="text-xl font-black text-white">28</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-1">Bài đã học</p>
+                  <div className="flex items-center gap-3 bg-[var(--bg-primary)]/50 border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 backdrop-blur-md">
+                    <CheckCircle2 size={18} className="text-[var(--text-muted)]" />
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider leading-none">Bài đã học</p>
+                      <p className="text-lg font-bold text-[var(--text-primary)] leading-tight">28</p>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="text-center">
-                    <p className="text-xl font-black text-[#818CF8]">92%</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-1">Phát âm TB</p>
+                  <div className="flex items-center gap-3 bg-[var(--bg-primary)]/50 border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 backdrop-blur-md">
+                    <Target size={18} className="text-[var(--text-muted)]" />
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider leading-none">Độ chính xác</p>
+                      <p className="text-lg font-bold text-[var(--text-primary)] leading-tight">92%</p>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
-                  <div className="text-center">
-                    <p className="text-xl font-black text-[#8B5CF6]">560</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-1 flex items-center gap-1 justify-center">
-                      <Sparkles size={10} /> XP tích lũy
-                    </p>
+                  <div className="flex items-center gap-3 bg-[var(--bg-primary)]/50 border border-[var(--border-subtle)] rounded-xl px-4 py-2.5 backdrop-blur-md">
+                    <Sparkles size={18} className="text-[var(--text-muted)]" />
+                    <div>
+                      <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider leading-none">XP Tích lũy</p>
+                      <p className="text-lg font-bold text-[var(--text-primary)] leading-tight">560</p>
+                    </div>
                   </div>
                 </div>
+
+                {/* Continue Learning CTA */}
+                <button className="flex items-center justify-center gap-2 bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white font-bold py-3.5 px-8 rounded-full transition-all hover-lift w-max shadow-[0_4px_20px_rgba(124,58,237,0.4)]">
+                  <Play size={16} fill="currentColor" /> Tiếp tục học
+                </button>
               </div>
 
-              {/* Right Decorative Image (Leo DiCaprio placeholder using Unsplash tuxedo man) */}
-              <div className="absolute right-0 bottom-0 h-[120%] w-[40%] hidden lg:block opacity-90 mix-blend-screen pointer-events-none"
-                   style={{
-                     backgroundImage: "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop')",
-                     backgroundSize: "cover",
-                     backgroundPosition: "center top",
-                     WebkitMaskImage: "linear-gradient(to right, transparent, black 40%)"
-                   }}
-              >
-              </div>
-
-              {/* Quote Card */}
-              <div className="hidden lg:block absolute bottom-8 right-8 bg-[#0F1015]/80 backdrop-blur-md border border-white/10 rounded-2xl p-4 w-64 z-20 shadow-2xl">
-                <p className="text-xs text-white/90 font-semibold italic leading-relaxed text-center">
-                  "You miss 100% of the shots you don't take."
-                </p>
-                <p className="text-[10px] text-slate-400 text-center mt-2 font-black">— Wayne Gretzky</p>
-                <div className="flex justify-center gap-1.5 mt-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6366F1]" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+              {/* Right Decorative Illustration */}
+              <div className="relative w-full lg:w-5/12 h-64 lg:h-auto min-h-[320px] overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)] via-transparent to-transparent z-10" />
+                <img 
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" 
+                  alt="Students learning" 
+                  className="w-full h-full object-cover object-center opacity-60 mix-blend-luminosity"
+                />
+                
+                {/* Quote Overlay */}
+                <div className="absolute bottom-8 right-8 left-8 z-20 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-5">
+                  <p className="text-sm text-white/90 font-medium italic leading-relaxed">
+                    "Language is the road map of a culture. It tells you where its people come from and where they are going."
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)] mt-2 font-bold">— Rita Mae Brown</p>
                 </div>
               </div>
             </div>
