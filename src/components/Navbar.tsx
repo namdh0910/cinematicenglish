@@ -198,21 +198,33 @@ function NavbarContent() {
 
           {/* Navigation Links Column (Centered absolutely for mathematical precision and stability) */}
           {role !== 'guest' && (
-            <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 top-0 h-full items-center gap-8">
+            <nav 
+              className="hidden md:flex absolute top-0 h-full items-center gap-8 z-20"
+              style={{ left: "50%", transform: "translateX(-50%)" }}
+            >
               {simplifiedLinks.map((l) => {
-                const isActive = pathname === l.baseHref && activeTab === l.tab;
+                const isActive = pathname.startsWith(l.baseHref) && activeTab === l.tab;
                 return (
                   <Link
                     key={l.href}
                     href={l.href}
-                    className={`text-[14px] font-semibold tracking-[-0.01em] transition-colors flex items-center gap-1.5 h-full border-b-2 ${
+                    className={`relative text-[14px] font-semibold tracking-[-0.01em] transition-colors flex items-center gap-1.5 h-full px-1 ${
                       isActive 
-                        ? "text-[#3B82F6] border-[#3B82F6]" 
-                        : "text-[#3D3D3B] border-transparent hover:text-[#3B82F6] hover:border-[#3B82F6]"
+                        ? "text-[#3B82F6]" 
+                        : "text-[#3D3D3B] hover:text-[#3B82F6]"
                     }`}
                   >
                     <l.icon size={15} />
                     <span>{l.label}</span>
+                    
+                    {/* Beautiful Sliding Underline */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeTabUnderline"
+                        className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#3B82F6] rounded-t-full z-20"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
                   </Link>
                 );
               })}
@@ -428,7 +440,9 @@ function NavbarContent() {
                     <Link
                       href="/learn?tab=learn"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className={`text-lg font-bold flex items-center gap-3 py-3 border-b border-[#EBEBEA] transition-colors ${
+                        activeTab === "learn" ? "text-[#3B82F6]" : "text-[#3D3D3B] hover:text-[#3B82F6]"
+                      }`}
                     >
                       <BookOpen size={18} />
                       Học SGK
@@ -437,7 +451,9 @@ function NavbarContent() {
                     <Link
                       href="/learn?tab=alphabet"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className={`text-lg font-bold flex items-center gap-3 py-3 border-b border-[#EBEBEA] transition-colors ${
+                        activeTab === "alphabet" ? "text-[#3B82F6]" : "text-[#3D3D3B] hover:text-[#3B82F6]"
+                      }`}
                     >
                       <Globe size={18} />
                       Chữ cái
@@ -446,7 +462,9 @@ function NavbarContent() {
                     <Link
                       href="/learn?tab=leaderboard"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className={`text-lg font-bold flex items-center gap-3 py-3 border-b border-[#EBEBEA] transition-colors ${
+                        activeTab === "leaderboard" ? "text-[#3B82F6]" : "text-[#3D3D3B] hover:text-[#3B82F6]"
+                      }`}
                     >
                       <Trophy size={18} />
                       Bảng xếp hạng
@@ -455,7 +473,9 @@ function NavbarContent() {
                     <Link
                       href="/learn?tab=quests"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className={`text-lg font-bold flex items-center gap-3 py-3 border-b border-[#EBEBEA] transition-colors ${
+                        activeTab === "quests" ? "text-[#3B82F6]" : "text-[#3D3D3B] hover:text-[#3B82F6]"
+                      }`}
                     >
                       <Target size={18} />
                       Nhiệm vụ
@@ -464,7 +484,9 @@ function NavbarContent() {
                     <Link
                       href="/learn?tab=profile"
                       onClick={closeMenu}
-                      className="text-lg font-bold text-[#3D3D3B] hover:text-[#3B82F6] flex items-center gap-3 py-3 border-b border-[#EBEBEA]"
+                      className={`text-lg font-bold flex items-center gap-3 py-3 border-b border-[#EBEBEA] transition-colors ${
+                        activeTab === "profile" ? "text-[#3B82F6]" : "text-[#3D3D3B] hover:text-[#3B82F6]"
+                      }`}
                     >
                       <User size={18} />
                       Hồ sơ
