@@ -356,7 +356,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
         setDialogues([{ speaker: "", text: "", translation: "" }]);
         setDictationAudioUrl("");
         setDictationPassage("");
-        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
         setShowLessonModal(false);
 
         triggerToast("Đã tạo bài học thành công!");
@@ -548,7 +548,7 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
                                         setDialogues([{ speaker: "", text: "", translation: "" }]);
                                         setDictationAudioUrl("");
                                         setDictationPassage("");
-                                        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0 }]);
+                                        setQuizQuestions([{ question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]);
                                         setShowLessonModal(true);
                                       }}
                                       className="px-2.5 py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-[9px] font-black text-violet-400 transition-all uppercase tracking-wider flex items-center gap-1 shrink-0"
