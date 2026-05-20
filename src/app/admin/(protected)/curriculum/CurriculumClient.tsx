@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   BookOpen, 
   ChevronRight, 
+  ChevronDown,
   Plus, 
   Layers, 
   GraduationCap,
@@ -15,7 +16,10 @@ import {
   HelpCircle,
   Volume2,
   Mic,
-  ClipboardList
+  ClipboardList,
+  Folder,
+  FolderOpen,
+  FileText
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { 
@@ -59,91 +63,129 @@ interface CurriculumClientProps {
 
 export default function CurriculumClient({ initialGrades }: CurriculumClientProps) {
   const router = useRouter();
+  
+  // Main data states
   const [grades, setGrades] = useState<Grade[]>(initialGrades);
-  const [selectedGradeId, setSelectedGradeId] = useState<string | null>(
-    initialGrades.length > 0 ? initialGrades[0].id : null
-  );
+  const [unitsMap, setUnitsMap] = useState<Record<string, Unit[]>>({});
+  const [lessonsMap, setLessonsMap] = useState<Record<string, Lesson[]>>({});
+  
+  // Expanded tree nodes
+  const [expandedGrades, setExpandedGrades] = useState<Record<string, boolean>>({});
+  const [expandedUnits, setExpandedUnits] = useState<Record<string, boolean>>({});
+  
+  // On-demand loading indicators
+  const [loadingUnits, setLoadingUnits] = useState<Record<string, boolean>>({});
+  const [loadingLessons, setLoadingLessons] = useState<Record<string, boolean>>({});
 
-  const [units, setUnits] = useState<Unit[]>([]);
+  // Active contextual IDs for Modal triggers
+  const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null);
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
-  const [isLoadingUnits, setIsLoadingUnits] = useState(false);
 
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [isLoadingLessons, setIsLoadingLessons] = useState(false);
-
-  // Modals / add states
+  // Modals visibility
   const [showGradeModal, setShowGradeModal] = useState(false);
+  const [showUnitModal, setShowUnitModal] = useState(false);
+  const [showLessonModal, setShowLessonModal] = useState(false);
+
+  // Form states - Grade
   const [gradeTitle, setGradeTitle] = useState("");
   const [gradeDesc, setGradeDesc] = useState("");
   const [gradeOrder, setGradeOrder] = useState(1);
   const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
 
-  const [showUnitModal, setShowUnitModal] = useState(false);
+  // Form states - Unit
   const [unitNo, setUnitNo] = useState("");
   const [unitTitle, setUnitTitle] = useState("");
   const [unitDesc, setUnitDesc] = useState("");
   const [isSubmittingUnit, setIsSubmittingUnit] = useState(false);
 
-  // Lesson Form states
+  // Form states - Lesson
   const [lessonTitle, setLessonTitle] = useState("");
-  const [lessonType, setLessonType] = useState<"Speaking" | "Dictation" | "Quiz">("Speaking");
+  const [lessonType, setLessonType] = useState<"Speaking" | "Dictation">("Speaking");
   const [lessonOrder, setLessonOrder] = useState(1);
   const [lessonDesc, setLessonDesc] = useState("");
   const [isSavingLesson, setIsSavingLesson] = useState(false);
 
   // Dynamic lesson content states
-  // Speaking: dialogue array
+  // Speaking: list of dialogues
   const [dialogues, setDialogues] = useState<Array<{ speaker: string; text: string; translation: string }>>([
     { speaker: "", text: "", translation: "" }
   ]);
-  // Dictation: audio & text & blanks
+  // Dictation: audio & text (blanks are auto-extracted from text)
   const [dictationAudioUrl, setDictationAudioUrl] = useState("");
   const [dictationPassage, setDictationPassage] = useState("");
-  const [dictationBlanks, setDictationBlanks] = useState("");
-  // Quiz: question & options & correct option index
-  const [quizQuestion, setQuizQuestion] = useState("");
-  const [quizOptions, setQuizOptions] = useState(["", "", "", ""]);
-  const [quizCorrectAnswer, setQuizCorrectAnswer] = useState(0);
 
-  // Load units when grade changes
-  useEffect(() => {
-    if (selectedGradeId) {
-      setIsLoadingUnits(true);
-      setSelectedUnitId(null);
-      setLessons([]);
-      
-      getUnits(selectedGradeId)
-        .then((data) => {
-          setUnits(data);
-          if (data.length > 0) {
-            setSelectedUnitId(data[0].id);
-          }
-        })
-        .catch((err) => console.error("Error loading units:", err))
-        .finally(() => setIsLoadingUnits(false));
-    } else {
-      setUnits([]);
-      setSelectedUnitId(null);
-      setLessons([]);
-    }
-  }, [selectedGradeId]);
+  // Toast notification state
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: "success" | "error" }>({
+    show: false,
+    message: "",
+    type: "success"
+  });
 
-  // Load lessons when unit changes
-  useEffect(() => {
-    if (selectedUnitId) {
-      setIsLoadingLessons(true);
-      getLessons(selectedUnitId)
-        .then((data) => {
-          setLessons(data);
-          setLessonOrder(data.length + 1);
-        })
-        .catch((err) => console.error("Error loading lessons:", err))
-        .finally(() => setIsLoadingLessons(false));
-    } else {
-      setLessons([]);
-      setLessonOrder(1);
+  // Display toast helper
+  const triggerToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  // Toggle Grade Expansion
+  const toggleGrade = async (gradeId: string) => {
+    const isExpanded = !expandedGrades[gradeId];
+    setExpandedGrades(prev => ({ ...prev, [gradeId]: isExpanded }));
+
+    if (isExpanded && !unitsMap[gradeId]) {
+      setLoadingUnits(prev => ({ ...prev, [gradeId]: true }));
+      try {
+        const data = await getUnits(gradeId);
+        setUnitsMap(prev => ({ ...prev, [gradeId]: data }));
+      } catch (err) {
+        console.error("Error loading units:", err);
+        triggerToast("Lỗi khi tải danh sách Unit", "error");
+      } finally {
+        setLoadingUnits(prev => ({ ...prev, [gradeId]: false }));
+      }
     }
-  }, [selectedUnitId]);
+  };
+
+  // Toggle Unit Expansion
+  const toggleUnit = async (unitId: string) => {
+    const isExpanded = !expandedUnits[unitId];
+    setExpandedUnits(prev => ({ ...prev, [unitId]: isExpanded }));
+
+    if (isExpanded && !lessonsMap[unitId]) {
+      setLoadingLessons(prev => ({ ...prev, [unitId]: true }));
+      try {
+        const data = await getLessons(unitId);
+        setLessonsMap(prev => ({ ...prev, [unitId]: data }));
+      } catch (err) {
+        console.error("Error loading lessons:", err);
+        triggerToast("Lỗi khi tải danh sách bài tập", "error");
+      } finally {
+        setLoadingLessons(prev => ({ ...prev, [unitId]: false }));
+      }
+    }
+  };
+
+  // Reload Units for a Grade
+  const reloadUnits = async (gradeId: string) => {
+    try {
+      const data = await getUnits(gradeId);
+      setUnitsMap(prev => ({ ...prev, [gradeId]: data }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Reload Lessons for a Unit
+  const reloadLessons = async (unitId: string) => {
+    try {
+      const data = await getLessons(unitId);
+      setLessonsMap(prev => ({ ...prev, [unitId]: data }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Handle Grade Submit
   const handleGradeSubmit = async (e: React.FormEvent) => {
@@ -158,14 +200,14 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
       });
       if (newGrade) {
         setGrades([...grades, newGrade].sort((a, b) => a.order_index - b.order_index));
-        setSelectedGradeId(newGrade.id);
+        triggerToast("Đã tạo khối lớp mới thành công! 🎓");
       }
       setGradeTitle("");
       setGradeDesc("");
       setShowGradeModal(false);
     } catch (err) {
       console.error(err);
-      alert("Error adding grade");
+      triggerToast("Lỗi khi thêm khối lớp mới", "error");
     } finally {
       setIsSubmittingGrade(false);
     }
@@ -179,13 +221,15 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
     try {
       const newUnit = await createUnitNew({
         grade_id: selectedGradeId,
-        unit_no: unitNo || `Unit ${units.length + 1}`,
+        unit_no: unitNo || `Unit ${ (unitsMap[selectedGradeId] || []).length + 1 }`,
         title: unitTitle,
         description: unitDesc
       });
       if (newUnit) {
-        setUnits([...units, newUnit]);
-        setSelectedUnitId(newUnit.id);
+        await reloadUnits(selectedGradeId);
+        // Auto expand grade
+        setExpandedGrades(prev => ({ ...prev, [selectedGradeId]: true }));
+        triggerToast("Đã tạo Unit mới thành công! 📖");
       }
       setUnitNo("");
       setUnitTitle("");
@@ -193,13 +237,13 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
       setShowUnitModal(false);
     } catch (err) {
       console.error(err);
-      alert("Error adding unit");
+      triggerToast("Lỗi khi thêm Unit mới", "error");
     } finally {
       setIsSubmittingUnit(false);
     }
   };
 
-  // Dialogue array helper controls
+  // Speaking form handlers
   const addDialogueRow = () => {
     setDialogues([...dialogues, { speaker: "", text: "", translation: "" }]);
   };
@@ -213,13 +257,6 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
     setDialogues(updated);
   };
 
-  // Quiz options changes
-  const handleQuizOptionChange = (idx: number, val: string) => {
-    const updated = [...quizOptions];
-    updated[idx] = val;
-    setQuizOptions(updated);
-  };
-
   // Lesson Save Submit
   const handleLessonSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,43 +264,40 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
     setIsSavingLesson(true);
 
     try {
-      // Structure JSON content based on lesson type
+      // Package dynamic JSON content depending on the active lesson type
       let contentJson: any = {};
+      
       if (lessonType === "Speaking") {
-        // Save both dialogues & sentences array for complete backward/forward compatibility
         contentJson = {
-          dialogs: dialogues.map(d => ({ speaker: d.speaker, text: d.text, translation: d.translation })),
-          sentences: dialogues.map(d => ({ speaker: d.speaker, text: d.text, translation: d.translation })),
-          dialogues: dialogues.map(d => ({ speaker: d.speaker, text: d.text, translation: d.translation }))
+          dialogs: dialogues.map(d => ({ speaker: d.speaker.trim(), text: d.text.trim(), translation: d.translation.trim() })),
+          sentences: dialogues.map(d => ({ speaker: d.speaker.trim(), text: d.text.trim(), translation: d.translation.trim() })),
+          dialogues: dialogues.map(d => ({ speaker: d.speaker.trim(), text: d.text.trim(), translation: d.translation.trim() }))
         };
       } else if (lessonType === "Dictation") {
+        // Automatically extract bracketed words [...]
+        const bracketMatches = dictationPassage.match(/\[(.*?)\]/g) || [];
+        const extractedBlanks = bracketMatches.map(m => m.slice(1, -1).trim()).filter(b => b.length > 0);
+
         contentJson = {
-          audioUrl: dictationAudioUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-          text: dictationPassage,
-          blanks: dictationBlanks.split(",").map(b => b.trim()).filter(b => b.length > 0)
-        };
-      } else if (lessonType === "Quiz") {
-        contentJson = {
-          question: quizQuestion,
-          options: quizOptions,
-          correctAnswer: Number(quizCorrectAnswer)
+          audioUrl: dictationAudioUrl.trim() || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+          text: dictationPassage.trim(),
+          blanks: extractedBlanks
         };
       }
 
       const newLesson = await createLesson({
         unit_id: selectedUnitId,
-        title: lessonTitle,
+        title: lessonTitle.trim(),
         type: lessonType,
         order_index: Number(lessonOrder),
-        description: lessonDesc,
+        description: lessonDesc.trim(),
         content: contentJson
       });
 
       if (newLesson) {
-        // Refresh lessons list
-        const updated = await getLessons(selectedUnitId);
-        setLessons(updated);
-        setLessonOrder(updated.length + 1);
+        await reloadLessons(selectedUnitId);
+        // Auto expand unit
+        setExpandedUnits(prev => ({ ...prev, [selectedUnitId]: true }));
         
         // Reset Lesson fields
         setLessonTitle("");
@@ -271,628 +305,650 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
         setDialogues([{ speaker: "", text: "", translation: "" }]);
         setDictationAudioUrl("");
         setDictationPassage("");
-        setDictationBlanks("");
-        setQuizQuestion("");
-        setQuizOptions(["", "", "", ""]);
-        setQuizCorrectAnswer(0);
+        setShowLessonModal(false);
 
-        alert("Thêm bài tập mới thành công! 🎉");
+        triggerToast("Đã tạo bài học thành công!");
       }
     } catch (err) {
       console.error(err);
-      alert("Error adding lesson");
+      triggerToast("Lỗi khi lưu bài tập", "error");
     } finally {
       setIsSavingLesson(false);
     }
   };
 
   // Delete Lesson
-  const handleDeleteLesson = async (lessonId: string) => {
+  const handleDeleteLesson = async (lessonId: string, unitId: string) => {
     if (!confirm("Bạn có chắc chắn muốn xoá bài tập này?")) return;
-    if (!selectedUnitId) return;
     try {
-      await deleteLesson(lessonId, selectedUnitId);
-      const updated = await getLessons(selectedUnitId);
-      setLessons(updated);
-      setLessonOrder(updated.length + 1);
+      await deleteLesson(lessonId, unitId);
+      await reloadLessons(unitId);
+      triggerToast("Đã xóa bài tập thành công!");
     } catch (err) {
       console.error(err);
-      alert("Error deleting lesson");
+      triggerToast("Lỗi khi xóa bài tập", "error");
     }
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[700px] relative z-10">
-      
-      {/* =========================================================================
-          COLUMN 1: GRADES PANEL (Khối Lớp)
-          ========================================================================= */}
-      <div className="w-full lg:w-[25%] bg-[#121212] border border-white/5 rounded-[32px] p-6 flex flex-col justify-between">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-display font-black tracking-tight text-white flex items-center gap-2">
-              <GraduationCap className="text-amber-500" size={20} />
-              Khối Lớp (Grades)
+    <div className="space-y-6 relative z-10 pb-20">
+      {/* Toast Alert */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className={`fixed bottom-6 right-6 z-[1100] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border text-sm font-semibold tracking-wide ${
+              toast.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                : "bg-red-500/10 border-red-500/30 text-red-400"
+            }`}
+          >
+            <div className={`w-2 h-2 rounded-full ${toast.type === "success" ? "bg-emerald-400 animate-pulse" : "bg-red-400"} shrink-0`} />
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Curriculum Command Center Tree View */}
+      <div className="bg-[#121212] border border-white/5 rounded-[32px] p-6 lg:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-6">
+          <div className="space-y-1">
+            <h3 className="text-xl font-display font-black tracking-tight text-white flex items-center gap-2.5">
+              <GraduationCap className="text-amber-500" size={24} />
+              Sơ Đồ Giáo Trình
             </h3>
-            <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">
-              {grades.length} Lớp
-            </span>
+            <p className="text-xs text-white/40 font-medium">Bản đồ cấu trúc và biên soạn học liệu thuộc chương trình học Global Success.</p>
           </div>
-
-          <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
-            {grades.map((grade) => {
-              const isSelected = selectedGradeId === grade.id;
-              return (
-                <button
-                  key={grade.id}
-                  onClick={() => setSelectedGradeId(grade.id)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between group ${
-                    isSelected
-                      ? "bg-amber-500/10 border-amber-500/50 text-white shadow-lg"
-                      : "bg-[#181818]/60 border-white/5 hover:border-white/10 text-white/60 hover:text-white"
-                  }`}
-                >
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-mono text-white/20 group-hover:text-amber-500/40">#{grade.order_index}</span>
-                    <span className="font-bold text-sm truncate">{grade.title}</span>
-                    <span className="text-[10px] text-white/30 truncate mt-0.5">{grade.description}</span>
-                  </div>
-                  <ChevronRight 
-                    size={16} 
-                    className={`transition-transform duration-300 ${
-                      isSelected ? "translate-x-1 text-amber-500" : "opacity-0 group-hover:opacity-100"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <button
-          onClick={() => {
-            setGradeOrder(grades.length + 1);
-            setShowGradeModal(true);
-          }}
-          className="mt-6 w-full py-4 border-2 border-dashed border-white/10 hover:border-amber-500/50 rounded-2xl flex items-center justify-center gap-2 text-white/40 hover:text-amber-500 bg-white/2 hover:bg-amber-500/[0.02] transition-all text-xs font-black uppercase tracking-wider"
-        >
-          <Plus size={16} /> Thêm Khối Lớp mới
-        </button>
-      </div>
-
-      {/* =========================================================================
-          COLUMN 2: UNITS PANEL (Bài Học)
-          ========================================================================= */}
-      <div className="w-full lg:w-[30%] bg-[#121212] border border-white/5 rounded-[32px] p-6 flex flex-col justify-between">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-display font-black tracking-tight text-white flex items-center gap-2">
-              <BookOpen className="text-violet-500" size={20} />
-              Bài Học (Units)
-            </h3>
-            <span className="text-[10px] bg-violet-500/10 border border-violet-500/20 text-violet-400 px-2 py-0.5 rounded-full font-bold">
-              {units.length} Units
-            </span>
-          </div>
-
-          {!selectedGradeId ? (
-            <div className="py-20 text-center text-white/20 text-xs italic font-medium">
-              Vui lòng chọn Khối Lớp trước.
-            </div>
-          ) : isLoadingUnits ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-3">
-              <Loader2 className="animate-spin text-violet-500" size={24} />
-              <span className="text-xs text-white/20 italic font-medium">Đang tải danh sách Unit...</span>
-            </div>
-          ) : units.length === 0 ? (
-            <div className="py-20 text-center text-white/20 text-xs italic font-medium">
-              Khối lớp này chưa có Unit nào.
-            </div>
-          ) : (
-            <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar">
-              {units.map((unit) => {
-                const isSelected = selectedUnitId === unit.id;
-                return (
-                  <button
-                    key={unit.id}
-                    onClick={() => setSelectedUnitId(unit.id)}
-                    className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between group ${
-                      isSelected
-                        ? "bg-violet-500/10 border-violet-500/50 text-white shadow-lg"
-                        : "bg-[#181818]/60 border-white/5 hover:border-white/10 text-white/60 hover:text-white"
-                    }`}
-                  >
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[10px] font-black text-violet-500 uppercase tracking-wider">{unit.unit_no}</span>
-                      <span className="font-bold text-sm truncate mt-0.5">{unit.title}</span>
-                      <span className="text-[10px] text-white/30 truncate mt-0.5">{unit.description}</span>
-                    </div>
-                    <ChevronRight 
-                      size={16} 
-                      className={`transition-transform duration-300 ${
-                        isSelected ? "translate-x-1 text-violet-400" : "opacity-0 group-hover:opacity-100"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {selectedGradeId && (
+          
           <button
             onClick={() => {
-              setUnitNo(`Unit ${units.length + 1}`);
-              setShowUnitModal(true);
+              setGradeOrder(grades.length + 1);
+              setShowGradeModal(true);
             }}
-            className="mt-6 w-full py-4 border-2 border-dashed border-white/10 hover:border-violet-500/50 rounded-2xl flex items-center justify-center gap-2 text-white/40 hover:text-violet-400 bg-white/2 hover:bg-violet-500/[0.02] transition-all text-xs font-black uppercase tracking-wider"
+            className="px-5 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-black font-black uppercase tracking-wider text-[11px] shadow-[0_4px_0_rgba(217,119,6,0.3)] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2"
           >
-            <Plus size={16} /> Thêm Unit mới
+            <Plus size={14} strokeWidth={3} /> Thêm Khối Lớp mới
           </button>
-        )}
+        </div>
+
+        {/* Tree Body */}
+        <div className="space-y-4">
+          {grades.length === 0 ? (
+            <div className="py-20 text-center text-white/20 text-sm italic font-medium">
+              Chưa có khối lớp học nào trong hệ thống. Vui lòng thêm khối lớp mới!
+            </div>
+          ) : (
+            grades.map((grade) => {
+              const isGradeExpanded = !!expandedGrades[grade.id];
+              const gradeUnitsList = unitsMap[grade.id] || [];
+              const isUnitsLoading = !!loadingUnits[grade.id];
+
+              return (
+                <div 
+                  key={grade.id} 
+                  className={`border rounded-3xl transition-all duration-300 ${
+                    isGradeExpanded ? "bg-[#181818]/40 border-white/10" : "bg-[#181818]/15 border-white/5 hover:border-white/10"
+                  }`}
+                >
+                  {/* GRADE NODE HEADER */}
+                  <div className="p-4 sm:p-5 flex items-center justify-between gap-4">
+                    <button
+                      onClick={() => toggleGrade(grade.id)}
+                      className="flex-1 flex items-center gap-3 text-left focus:outline-none group min-w-0"
+                    >
+                      <div className={`p-2 rounded-xl transition-all ${
+                        isGradeExpanded ? "bg-amber-500/10 text-amber-500" : "bg-white/5 text-white/40 group-hover:text-white"
+                      }`}>
+                        {isGradeExpanded ? <FolderOpen size={18} /> : <Folder size={18} />}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-mono text-white/20">#{grade.order_index}</span>
+                          <span className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate">
+                            {grade.title}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-white/40 truncate max-w-xl mt-0.5">{grade.description}</p>
+                      </div>
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedGradeId(grade.id);
+                          setUnitNo(`Unit ${gradeUnitsList.length + 1}`);
+                          setShowUnitModal(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all uppercase tracking-wider flex items-center gap-1 shrink-0"
+                        title="Thêm Unit mới vào khối này"
+                      >
+                        <Plus size={10} strokeWidth={3} /> Thêm Unit
+                      </button>
+
+                      <button
+                        onClick={() => toggleGrade(grade.id)}
+                        className="p-2 rounded-xl hover:bg-white/5 text-white/40 hover:text-white transition-all shrink-0"
+                      >
+                        {isGradeExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* UNITS LIST (GRADE INNER CONTENT) */}
+                  {isGradeExpanded && (
+                    <div className="px-5 pb-5 pt-1 border-t border-white/5">
+                      {isUnitsLoading ? (
+                        <div className="py-8 flex flex-col items-center justify-center gap-2">
+                          <Loader2 className="animate-spin text-amber-500" size={20} />
+                          <span className="text-[10px] text-white/30 italic">Đang tải danh sách Unit...</span>
+                        </div>
+                      ) : gradeUnitsList.length === 0 ? (
+                        <div className="py-6 text-center text-white/20 text-xs italic font-medium">
+                          Khối lớp này chưa có Unit nào.
+                        </div>
+                      ) : (
+                        <div className="space-y-3.5 pl-2 border-l border-white/5 mt-2 ml-4">
+                          {gradeUnitsList.map((unit) => {
+                            const isUnitExpanded = !!expandedUnits[unit.id];
+                            const unitLessonsList = lessonsMap[unit.id] || [];
+                            const isLessonsLoading = !!loadingLessons[unit.id];
+
+                            return (
+                              <div 
+                                key={unit.id}
+                                className={`border rounded-2xl transition-all duration-300 ${
+                                  isUnitExpanded ? "bg-[#1d1d1d]/60 border-white/10" : "bg-[#181818]/40 border-white/5 hover:border-white/10"
+                                }`}
+                              >
+                                {/* UNIT NODE HEADER */}
+                                <div className="p-3.5 flex items-center justify-between gap-3">
+                                  <button
+                                    onClick={() => toggleUnit(unit.id)}
+                                    className="flex-1 flex items-center gap-3 text-left focus:outline-none group min-w-0"
+                                  >
+                                    <div className={`p-1.5 rounded-lg transition-all ${
+                                      isUnitExpanded ? "bg-violet-500/10 text-violet-400" : "bg-white/5 text-white/40 group-hover:text-white"
+                                    }`}>
+                                      <BookOpen size={15} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[9px] font-black uppercase text-violet-400 tracking-wider font-mono">
+                                          {unit.unit_no}
+                                        </span>
+                                        <span className="text-xs font-bold text-white group-hover:text-violet-400 transition-colors truncate">
+                                          {unit.title}
+                                        </span>
+                                      </div>
+                                      <p className="text-[9px] text-white/30 truncate mt-0.5">{unit.description}</p>
+                                    </div>
+                                  </button>
+
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedUnitId(unit.id);
+                                        setLessonOrder(unitLessonsList.length + 1);
+                                        setLessonTitle("");
+                                        setLessonDesc("");
+                                        setDialogues([{ speaker: "", text: "", translation: "" }]);
+                                        setDictationAudioUrl("");
+                                        setDictationPassage("");
+                                        setShowLessonModal(true);
+                                      }}
+                                      className="px-2.5 py-1.5 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-[9px] font-black text-violet-400 transition-all uppercase tracking-wider flex items-center gap-1 shrink-0"
+                                    >
+                                      <Plus size={10} strokeWidth={3} /> Thêm Bài Tập
+                                    </button>
+
+                                    <button
+                                      onClick={() => toggleUnit(unit.id)}
+                                      className="p-1.5 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-all shrink-0"
+                                    >
+                                      {isUnitExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* LESSONS LIST (UNIT INNER CONTENT) */}
+                                {isUnitExpanded && (
+                                  <div className="px-4 pb-4 pt-1 border-t border-white/5">
+                                    {isLessonsLoading ? (
+                                      <div className="py-6 flex flex-col items-center justify-center gap-1.5">
+                                        <Loader2 className="animate-spin text-violet-500" size={16} />
+                                        <span className="text-[9px] text-white/30 italic">Đang tải danh sách bài tập...</span>
+                                      </div>
+                                    ) : unitLessonsList.length === 0 ? (
+                                      <div className="py-4 text-center text-white/20 text-[10px] italic font-medium">
+                                        Unit này chưa có bài tập nào. Hãy nhấn Thêm Bài Tập!
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-2 pl-2 border-l border-white/5 mt-1.5 ml-3">
+                                        {unitLessonsList.map((lesson) => (
+                                          <div
+                                            key={lesson.id}
+                                            className="p-2.5 bg-[#151515] border border-white/5 rounded-xl flex items-center justify-between gap-3 group/lesson"
+                                          >
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                              <FileText size={13} className="text-white/20 shrink-0" />
+                                              <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                  <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md shrink-0 ${
+                                                    lesson.type.toLowerCase() === "speaking" 
+                                                      ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" 
+                                                      : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                                  }`}>
+                                                    {lesson.type}
+                                                  </span>
+                                                  <span className="text-[9px] font-mono text-white/20">#{lesson.order_index}</span>
+                                                  <span className="text-xs font-semibold text-white/80 truncate">
+                                                    {lesson.title}
+                                                  </span>
+                                                </div>
+                                                {lesson.description && (
+                                                  <p className="text-[9px] text-white/30 truncate mt-0.5">{lesson.description}</p>
+                                                )}
+                                              </div>
+                                            </div>
+
+                                            <button
+                                              onClick={() => handleDeleteLesson(lesson.id, unit.id)}
+                                              className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/25 text-red-400 hover:bg-red-500/20 opacity-0 group-hover/lesson:opacity-100 transition-opacity shrink-0"
+                                              title="Xóa bài tập này"
+                                            >
+                                              <Trash2 size={12} />
+                                            </button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* =========================================================================
-          COLUMN 3: LESSONS & CREATION FORM PANEL (Bài Tập)
+          MODALS ZONE
           ========================================================================= */}
-      <div className="w-full lg:w-[45%] bg-[#121212] border border-white/5 rounded-[32px] p-6 flex flex-col space-y-6">
-        
-        {/* Current Lessons View */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-display font-black tracking-tight text-white flex items-center gap-2">
-              <ClipboardList className="text-blue-500" size={20} />
-              Bài Tập (Lessons)
-            </h3>
-            <span className="text-[10px] bg-blue-500/10 border border-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold">
-              {lessons.length} Bài tập
-            </span>
-          </div>
-
-          {!selectedUnitId ? (
-            <div className="py-12 text-center text-white/20 text-xs italic font-medium border border-white/5 rounded-2xl bg-[#181818]/20">
-              Vui lòng chọn Unit trước để quản lý bài tập.
-            </div>
-          ) : isLoadingLessons ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 border border-white/5 rounded-2xl bg-[#181818]/20">
-              <Loader2 className="animate-spin text-blue-500" size={20} />
-              <span className="text-xs text-white/20 italic font-medium">Đang tải danh sách bài tập...</span>
-            </div>
-          ) : lessons.length === 0 ? (
-            <div className="py-12 text-center text-white/20 text-xs italic font-medium border border-white/5 rounded-2xl bg-[#181818]/20">
-              Unit này chưa có bài tập nào. Hãy thêm bài mới bên dưới!
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-2.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-              {lessons.map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="p-3.5 bg-[#181818]/80 border border-white/5 rounded-2xl flex items-center justify-between gap-3 group"
-                >
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                        lesson.type.toLowerCase() === "speaking" ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                        lesson.type.toLowerCase() === "dictation" ? "bg-purple-500/10 text-purple-400 border border-purple-500/20" :
-                        "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      }`}>
-                        {lesson.type}
-                      </span>
-                      <span className="text-[10px] text-white/20 font-mono">#{lesson.order_index}</span>
-                    </div>
-                    <span className="font-bold text-xs text-white truncate mt-1">{lesson.title}</span>
-                    <span className="text-[9px] text-white/30 truncate">{lesson.description}</span>
-                  </div>
-
-                  <button
-                    onClick={() => handleDeleteLesson(lesson.id)}
-                    className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Xóa bài tập"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Lesson Creator Form */}
-        {selectedUnitId && (
-          <div className="pt-4 border-t border-white/5 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <h4 className="text-xs font-black uppercase tracking-wider text-white/50">Thêm Bài Tập Mới</h4>
-            </div>
-
-            <form onSubmit={handleLessonSubmit} className="space-y-4 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+      
+      {/* 1. GRADE MODAL */}
+      <AnimatePresence>
+        {showGradeModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6 relative text-white shadow-2xl"
+            >
+              <button 
+                onClick={() => setShowGradeModal(false)}
+                className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
               
-              {/* Row 1: Title and Type */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <h3 className="text-xl font-display font-black text-white flex items-center gap-2">
+                  <GraduationCap className="text-amber-500" size={22} />
+                  Thêm Khối Lớp Mới
+                </h3>
+                <p className="text-[11px] text-white/40 font-medium">Khởi tạo cấp học/khối lớp học mới bám sát sách Global Success</p>
+              </div>
+
+              <form onSubmit={handleGradeSubmit} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Tiêu đề bài tập</label>
-                  <input
-                    type="text"
-                    value={lessonTitle}
-                    onChange={(e) => setLessonTitle(e.target.value)}
-                    placeholder="Ví dụ: Luyện Phát Âm Bài 1"
-                    className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white"
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Tên Khối Lớp</label>
+                  <input 
+                    type="text" 
+                    value={gradeTitle}
+                    onChange={(e) => setGradeTitle(e.target.value)}
+                    placeholder="Ví dụ: Grade 10 - Global Success"
+                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 text-white transition-all font-semibold"
                     required
                   />
                 </div>
+                
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Loại bài tập (Type)</label>
-                  <select
-                    value={lessonType}
-                    onChange={(e) => setLessonType(e.target.value as any)}
-                    className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white cursor-pointer"
-                  >
-                    <option value="Speaking">🗣️ Luyện Phát Âm (Speaking)</option>
-                    <option value="Dictation">🎧 Nghe Điền Từ (Dictation)</option>
-                    <option value="Quiz">📝 Thi Trắc Nghiệm (Quiz)</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Row 2: Description and Order */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2 space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Mô tả bài học</label>
-                  <input
-                    type="text"
-                    value={lessonDesc}
-                    onChange={(e) => setLessonDesc(e.target.value)}
-                    placeholder="Tóm tắt ngắn mục tiêu bài tập..."
-                    className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white"
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Mô Tả Chương Trình</label>
+                  <textarea 
+                    value={gradeDesc}
+                    onChange={(e) => setGradeDesc(e.target.value)}
+                    placeholder="Ví dụ: Chương trình Tiếng Anh học kỳ bám sát cải cách mới."
+                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 h-20 resize-none text-white transition-all"
+                    required
                   />
                 </div>
+
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Thứ tự hiển thị</label>
-                  <input
-                    type="number"
-                    value={lessonOrder}
-                    onChange={(e) => setLessonOrder(Number(e.target.value))}
-                    className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white"
+                  <input 
+                    type="number" 
+                    value={gradeOrder}
+                    onChange={(e) => setGradeOrder(Number(e.target.value))}
+                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 text-white font-mono"
                     required
                   />
                 </div>
+
+                <button 
+                  type="submit"
+                  disabled={isSubmittingGrade}
+                  className="w-full py-4 rounded-2xl bg-amber-500 text-black font-black uppercase tracking-widest text-xs shadow-[0_4px_0_rgba(217,119,6,0.3)] active:translate-y-[2px] active:shadow-none hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
+                >
+                  {isSubmittingGrade ? <Loader2 className="animate-spin" size={16} /> : "Tạo Khối Lớp"}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 2. UNIT MODAL */}
+      <AnimatePresence>
+        {showUnitModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6 relative text-white shadow-2xl"
+            >
+              <button 
+                onClick={() => setShowUnitModal(false)}
+                className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="space-y-1">
+                <h3 className="text-xl font-display font-black text-white flex items-center gap-2">
+                  <BookOpen className="text-violet-500" size={22} />
+                  Thêm Unit Mới
+                </h3>
+                <p className="text-[11px] text-white/40 font-medium">Khởi tạo bài học lớn (Unit) mới chứa trong khối lớp</p>
               </div>
 
-              {/* DYNAMIC CONTENT INPUTS */}
-              <div className="p-4 bg-[#161616] border border-white/5 rounded-2xl space-y-4">
+              <form onSubmit={handleUnitSubmit} className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Mã (No)</label>
+                    <input 
+                      type="text" 
+                      value={unitNo}
+                      onChange={(e) => setUnitNo(e.target.value)}
+                      placeholder="VD: Unit 1"
+                      className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 text-white font-mono font-semibold"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Tiêu đề</label>
+                    <input 
+                      type="text" 
+                      value={unitTitle}
+                      onChange={(e) => setUnitTitle(e.target.value)}
+                      placeholder="Ví dụ: Family Life"
+                      className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 text-white font-semibold"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Mô Tả Unit</label>
+                  <textarea 
+                    value={unitDesc}
+                    onChange={(e) => setUnitDesc(e.target.value)}
+                    placeholder="Ví dụ: Đời sống và nghĩa vụ gia đình..."
+                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 h-20 resize-none text-white"
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={isSubmittingUnit}
+                  className="w-full py-4 rounded-2xl bg-violet-500 text-white font-black uppercase tracking-widest text-xs shadow-[0_4px_0_rgba(109,40,217,0.3)] active:translate-y-[2px] active:shadow-none hover:bg-violet-600 transition-all flex items-center justify-center gap-2"
+                >
+                  {isSubmittingUnit ? <Loader2 className="animate-spin" size={16} /> : "Tạo Unit mới"}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 3. DYNAMIC LESSON BUILDER MODAL */}
+      <AnimatePresence>
+        {showLessonModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-2xl bg-[#121212] border border-white/10 rounded-[32px] p-6 sm:p-8 space-y-6 relative text-white shadow-2xl max-h-[90vh] flex flex-col"
+            >
+              <button 
+                onClick={() => setShowLessonModal(false)}
+                className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="space-y-1 shrink-0">
+                <h3 className="text-xl font-display font-black text-white flex items-center gap-2">
+                  <ClipboardList className="text-blue-500" size={22} />
+                  Bộ Đúc Bài Tập Thông Minh
+                </h3>
+                <p className="text-[11px] text-white/40 font-medium">Thiết lập bài học và nội dung đa phương tiện thông minh động.</p>
+              </div>
+
+              <form onSubmit={handleLessonSubmit} className="space-y-5 overflow-y-auto flex-1 pr-2 custom-scrollbar">
                 
-                {/* 1. SPEAKING FORM */}
-                {lessonType === "Speaking" && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
-                        <Mic size={12} /> Cấu hình đoạn hội thoại speaking
-                      </span>
-                      <button
-                        type="button"
-                        onClick={addDialogueRow}
-                        className="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold hover:bg-amber-500/20 transition-all flex items-center gap-1"
-                      >
-                        <Plus size={10} /> Thêm dòng
-                      </button>
-                    </div>
+                {/* Basic Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Tiêu đề bài tập</label>
+                    <input
+                      type="text"
+                      value={lessonTitle}
+                      onChange={(e) => setLessonTitle(e.target.value)}
+                      placeholder="Ví dụ: Luyện Phát Âm Unit 1"
+                      className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white font-semibold"
+                      required
+                    />
+                  </div>
 
-                    <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                      {dialogues.map((row, idx) => (
-                        <div key={idx} className="p-3 bg-[#1e1e1e] border border-white/5 rounded-xl space-y-2 relative">
-                          <button
-                            type="button"
-                            onClick={() => removeDialogueRow(idx)}
-                            disabled={dialogues.length === 1}
-                            className="absolute top-2 right-2 text-white/20 hover:text-red-400 disabled:opacity-30 disabled:hover:text-white/20"
-                          >
-                            <X size={14} />
-                          </button>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Loại bài tập</label>
+                    <select
+                      value={lessonType}
+                      onChange={(e) => setLessonType(e.target.value as any)}
+                      className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white font-semibold cursor-pointer"
+                    >
+                      <option value="Speaking">🗣️ Luyện Nói (Speaking)</option>
+                      <option value="Dictation">🎧 Nghe Điền Từ (Dictation)</option>
+                    </select>
+                  </div>
+                </div>
 
-                          <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Mô tả bài tập</label>
+                    <input
+                      type="text"
+                      value={lessonDesc}
+                      onChange={(e) => setLessonDesc(e.target.value)}
+                      placeholder="Ví dụ: Đoạn đối thoại mẫu giữa Phong và Nam..."
+                      className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Thứ tự hiển thị</label>
+                    <input
+                      type="number"
+                      value={lessonOrder}
+                      onChange={(e) => setLessonOrder(Number(e.target.value))}
+                      className="w-full bg-[#181818] border border-white/5 hover:border-white/10 rounded-xl p-3 text-xs focus:outline-none focus:border-blue-500/50 text-white font-mono"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* DYNAMIC FORMS SECTION */}
+                <div className="p-4 sm:p-5 bg-[#161616] border border-white/5 rounded-2xl space-y-4">
+                  
+                  {/* 1. DYNAMIC SPEAKING FORM */}
+                  {lessonType === "Speaking" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1.5">
+                          <Mic size={12} /> Cấu hình đoạn hội thoại speaking
+                        </span>
+                        <button
+                          type="button"
+                          onClick={addDialogueRow}
+                          className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                        >
+                          <Plus size={10} strokeWidth={3} /> Thêm câu thoại
+                        </button>
+                      </div>
+
+                      <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1.5 custom-scrollbar">
+                        {dialogues.map((row, idx) => (
+                          <div key={idx} className="p-3.5 bg-[#1e1e1e] border border-white/5 hover:border-white/10 rounded-xl space-y-2 relative">
+                            <button
+                              type="button"
+                              onClick={() => removeDialogueRow(idx)}
+                              disabled={dialogues.length === 1}
+                              className="absolute top-3 right-3 text-white/20 hover:text-red-400 disabled:opacity-30 transition-colors"
+                              title="Xóa câu thoại"
+                            >
+                              <X size={15} />
+                            </button>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                              <div className="space-y-0.5">
+                                <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Nhân vật</label>
+                                <input
+                                  type="text"
+                                  value={row.speaker}
+                                  onChange={(e) => handleDialogueChange(idx, "speaker", e.target.value)}
+                                  placeholder="Ví dụ: Phong"
+                                  className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500/50 text-white font-semibold"
+                                  required
+                                />
+                              </div>
+                              <div className="sm:col-span-2 space-y-0.5">
+                                <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Câu thoại (Tiếng Anh)</label>
+                                <input
+                                  type="text"
+                                  value={row.text}
+                                  onChange={(e) => handleDialogueChange(idx, "text", e.target.value)}
+                                  placeholder="Ví dụ: I love studying English, Phong."
+                                  className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500/50 text-white"
+                                  required
+                                />
+                              </div>
+                            </div>
+
                             <div className="space-y-0.5">
-                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/30">Nhân vật</label>
+                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Dịch nghĩa (Tiếng Việt)</label>
                               <input
                                 type="text"
-                                value={row.speaker}
-                                onChange={(e) => handleDialogueChange(idx, "speaker", e.target.value)}
-                                placeholder="Ví dụ: Nam"
-                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:border-amber-500/50 text-white"
+                                value={row.translation}
+                                onChange={(e) => handleDialogueChange(idx, "translation", e.target.value)}
+                                placeholder="Ví dụ: Mình rất thích học tiếng Anh, Phong ạ."
+                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500/50 text-white"
                                 required
                               />
                             </div>
-                            <div className="col-span-2 space-y-0.5">
-                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/30">Câu thoại (Tiếng Anh)</label>
-                              <input
-                                type="text"
-                                value={row.text}
-                                onChange={(e) => handleDialogueChange(idx, "text", e.target.value)}
-                                placeholder="Ví dụ: How are you doing today?"
-                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:border-amber-500/50 text-white"
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-0.5">
-                            <label className="text-[8px] font-bold uppercase tracking-wider text-white/30">Câu dịch (Tiếng Việt)</label>
-                            <input
-                              type="text"
-                              value={row.translation}
-                              onChange={(e) => handleDialogueChange(idx, "translation", e.target.value)}
-                              placeholder="Ví dụ: Hôm nay bạn thế nào?"
-                              className="w-full bg-[#121212] border border-white/5 rounded-lg px-2 py-1 text-[10px] focus:outline-none focus:border-amber-500/50 text-white"
-                              required
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. DICTATION FORM */}
-                {lessonType === "Dictation" && (
-                  <div className="space-y-3.5">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-purple-400 uppercase tracking-widest">
-                      <Volume2 size={12} /> Cấu hình nghe điền từ dictation
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Đường dẫn Audio (URL)</label>
-                      <input
-                        type="url"
-                        value={dictationAudioUrl}
-                        onChange={(e) => setDictationAudioUrl(e.target.value)}
-                        placeholder="https://example.com/audio.mp3"
-                        className="w-full bg-[#121212] border border-white/5 rounded-xl p-2.5 text-xs focus:outline-none focus:border-purple-500/50 text-white"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Đoạn văn chứa chỗ trống [...]</label>
-                      <textarea
-                        value={dictationPassage}
-                        onChange={(e) => setDictationPassage(e.target.value)}
-                        placeholder="Ví dụ: I love learning [...] because it is extremely [...] for my future."
-                        className="w-full bg-[#121212] border border-white/5 rounded-xl p-2.5 text-xs focus:outline-none focus:border-purple-500/50 text-white h-20 resize-none"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Từ điền chính xác (cách nhau bằng dấu phẩy)</label>
-                      <input
-                        type="text"
-                        value={dictationBlanks}
-                        onChange={(e) => setDictationBlanks(e.target.value)}
-                        placeholder="Ví dụ: English, useful"
-                        className="w-full bg-[#121212] border border-white/5 rounded-xl p-2.5 text-xs focus:outline-none focus:border-purple-500/50 text-white"
-                        required
-                      />
-                      <span className="text-[8px] text-white/20 italic block">Các từ này khớp theo thứ tự các ký hiệu [...] trong đoạn văn.</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. QUIZ FORM */}
-                {lessonType === "Quiz" && (
-                  <div className="space-y-3.5">
-                    <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-400 uppercase tracking-widest">
-                      <HelpCircle size={12} /> Cấu hình câu hỏi trắc nghiệm
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Câu hỏi (Question)</label>
-                      <textarea
-                        value={quizQuestion}
-                        onChange={(e) => setQuizQuestion(e.target.value)}
-                        placeholder="Nhập câu hỏi tại đây..."
-                        className="w-full bg-[#121212] border border-white/5 rounded-xl p-2.5 text-xs focus:outline-none focus:border-emerald-500/50 text-white h-16 resize-none"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">4 Đáp án lựa chọn</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {quizOptions.map((opt, oIdx) => (
-                          <div key={oIdx} className="space-y-0.5">
-                            <span className="text-[8px] font-bold uppercase text-white/30">Đáp án {String.fromCharCode(65 + oIdx)}</span>
-                            <input
-                              type="text"
-                              value={opt}
-                              onChange={(e) => handleQuizOptionChange(oIdx, e.target.value)}
-                              placeholder={`Lựa chọn ${String.fromCharCode(65 + oIdx)}`}
-                              className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-500/50 text-white"
-                              required
-                            />
                           </div>
                         ))}
                       </div>
                     </div>
+                  )}
 
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Đáp án đúng</label>
-                      <select
-                        value={quizCorrectAnswer}
-                        onChange={(e) => setQuizCorrectAnswer(Number(e.target.value))}
-                        className="w-full bg-[#121212] border border-white/5 rounded-xl p-2.5 text-xs focus:outline-none focus:border-emerald-500/50 text-white cursor-pointer"
-                      >
-                        <option value={0}>Đáp án A</option>
-                        <option value={1}>Đáp án B</option>
-                        <option value={2}>Đáp án C</option>
-                        <option value={3}>Đáp án D</option>
-                      </select>
+                  {/* 2. DYNAMIC DICTATION FORM */}
+                  {lessonType === "Dictation" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-1.5 text-[10px] font-black text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                        <Volume2 size={13} /> Cấu hình nghe điền từ dictation
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Đường dẫn Audio (URL)</label>
+                        <input
+                          type="url"
+                          value={dictationAudioUrl}
+                          onChange={(e) => setDictationAudioUrl(e.target.value)}
+                          placeholder="https://example.com/audio/unit1-lesson.mp3"
+                          className="w-full bg-[#121212] border border-white/5 rounded-xl p-3 text-xs focus:outline-none focus:border-purple-500/50 text-white font-mono"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold uppercase tracking-widest text-white/40">Nội dung đoạn văn</label>
+                        <textarea
+                          value={dictationPassage}
+                          onChange={(e) => setDictationPassage(e.target.value)}
+                          placeholder="Ví dụ: I love [playing] football with my friends because it is extremely [fun]."
+                          className="w-full bg-[#121212] border border-white/5 rounded-xl p-3.5 text-xs focus:outline-none focus:border-purple-500/50 text-white h-28 resize-none leading-relaxed font-semibold"
+                          required
+                        />
+                        
+                        <div className="p-3.5 bg-purple-500/5 border border-purple-500/10 rounded-xl text-[10px] text-purple-300 leading-relaxed font-medium space-y-1">
+                          <span className="font-bold text-purple-400 block">💡 Hướng dẫn định dạng ô điền từ:</span>
+                          Sử dụng cặp dấu ngoặc vuông <code className="bg-purple-950 px-1 py-0.5 rounded text-purple-200">[word]</code> bọc quanh từ cần ẩn đi để đúc thành ô trống cho học sinh nhập liệu.
+                          <br />
+                          VD: <code className="bg-purple-950 px-1 py-0.5 rounded text-purple-200">I love [playing] football.</code> sẽ tạo ô trống hiển thị và tự động trích xuất đáp án là <code className="bg-purple-950 px-1 py-0.5 rounded text-purple-200">playing</code>.
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-              </div>
+                </div>
 
-              {/* Form submit CTA */}
-              <button
-                type="submit"
-                disabled={isSavingLesson}
-                className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-black uppercase tracking-widest text-xs transition-transform flex items-center justify-center gap-2"
-              >
-                {isSavingLesson ? (
-                  <>
-                    <Loader2 className="animate-spin" size={14} />
-                    Đang lưu bài học...
-                  </>
-                ) : (
-                  <>Lưu bài học</>
-                )}
-              </button>
+                {/* Form submit CTA */}
+                <div className="pt-2 shrink-0">
+                  <button
+                    type="submit"
+                    disabled={isSavingLesson}
+                    className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white font-black uppercase tracking-widest text-xs shadow-[0_4px_0_rgba(37,99,235,0.3)] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSavingLesson ? (
+                      <>
+                        <Loader2 className="animate-spin" size={14} />
+                        Đang lưu bài tập...
+                      </>
+                    ) : (
+                      <>Tạo bài học mới</>
+                    )}
+                  </button>
+                </div>
 
-            </form>
+              </form>
+            </motion.div>
           </div>
         )}
-
-      </div>
-
-      {/* =========================================================================
-          MODALS AREA
-          ========================================================================= */}
-      {/* 1. GRADE MODAL */}
-      {showGradeModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6 relative text-white"
-          >
-            <button 
-              onClick={() => setShowGradeModal(false)}
-              className="absolute top-6 right-6 text-white/40 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-            
-            <div className="space-y-1">
-              <h3 className="text-2xl font-display font-black text-white">Thêm Khối Lớp Mới</h3>
-              <p className="text-xs text-white/40">Định nghĩa khối lớp học bám sát sách Global Success</p>
-            </div>
-
-            <form onSubmit={handleGradeSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Tên Khối Lớp</label>
-                <input 
-                  type="text" 
-                  value={gradeTitle}
-                  onChange={(e) => setGradeTitle(e.target.value)}
-                  placeholder="Ví dụ: Grade 10 - Global Success"
-                  className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 text-white"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Mô Tả Chương Trình</label>
-                <textarea 
-                  value={gradeDesc}
-                  onChange={(e) => setGradeDesc(e.target.value)}
-                  placeholder="Ví dụ: Chương trình Tiếng Anh lớp 10 học kỳ 1 và 2 bám sát sách giáo khoa mới nhất"
-                  className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 h-24 resize-none text-white"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Thứ tự hiển thị</label>
-                <input 
-                  type="number" 
-                  value={gradeOrder}
-                  onChange={(e) => setGradeOrder(Number(e.target.value))}
-                  className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-amber-500/50 text-white"
-                  required
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isSubmittingGrade}
-                className="w-full py-4 rounded-2xl bg-amber-500 text-black font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                {isSubmittingGrade ? <Loader2 className="animate-spin" size={16} /> : "Tạo Khối Lớp"}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* 2. UNIT MODAL */}
-      {showUnitModal && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6 relative text-white"
-          >
-            <button 
-              onClick={() => setShowUnitModal(false)}
-              className="absolute top-6 right-6 text-white/40 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-            
-            <div className="space-y-1">
-              <h3 className="text-2xl font-display font-black text-white">Thêm Unit Mới</h3>
-              <p className="text-xs text-white/40">Định nghĩa bài học/chương trình học bám sát sách Global Success</p>
-            </div>
-
-            <form onSubmit={handleUnitSubmit} className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Mã Unit (No)</label>
-                  <input 
-                    type="text" 
-                    value={unitNo}
-                    onChange={(e) => setUnitNo(e.target.value)}
-                    placeholder="Ví dụ: Unit 1"
-                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 text-white"
-                    required
-                  />
-                </div>
-                
-                <div className="col-span-2 space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Tên Unit (Tiêu đề)</label>
-                  <input 
-                    type="text" 
-                    value={unitTitle}
-                    onChange={(e) => setUnitTitle(e.target.value)}
-                    placeholder="Ví dụ: Family Life"
-                    className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-white/40">Mô Tả Unit</label>
-                <textarea 
-                  value={unitDesc}
-                  onChange={(e) => setUnitDesc(e.target.value)}
-                  placeholder="Ví dụ: Đời sống gia đình và trách nhiệm của thành viên."
-                  className="w-full bg-[#181818] border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-violet-500/50 h-24 resize-none text-white"
-                  required
-                />
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isSubmittingUnit}
-                className="w-full py-4 rounded-2xl bg-violet-500 text-white font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                {isSubmittingUnit ? <Loader2 className="animate-spin" size={16} /> : "Tạo Unit mới"}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      )}
+      </AnimatePresence>
 
     </div>
   );
