@@ -330,131 +330,292 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
                       // Define VIP Theme configuration
                       let theme = {
-                        barColor: "#58CC02",
-                        emoji: "🏫",
-                        emojiBg: "bg-[#E8F9EE] border-emerald-100 text-emerald-600",
-                        gradient: "from-[#F4FDF7] via-white to-white",
-                        border: "border-[#E2F7E7]",
-                        hoverBorder: "hover:border-[#58CC02] hover:shadow-[0_6px_0_#A6E97E]",
-                        shadowColor: "shadow-[0_4px_0_#58CC02]",
-                        badgeBg: "bg-[#E8F9EE] text-[#58CC02] border-[#B3F2C9]"
+                        cardBg: "bg-[#EAFBF0]", // Lớp 6 default (emerald green)
+                        borderColor: "border-[#C2E7CC]",
+                        hoverBorder: "hover:border-[#10B981]",
+                        glowShadow: "shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.18)]",
+                        titleColor: "text-[#065F46]",
+                        descColor: "text-emerald-700/80",
+                        accentColor: "#10B981",
+                        badgeBg: "bg-[#E6F4EA] text-[#10B981] border-[#A7F3D0]",
+                        btnBg: "bg-white border-[#10B981]/30 text-[#10B981] shadow-[0_4px_0_#10B981]",
+                        btnHoverShadow: "hover:shadow-[0_4px_0_#10B981]",
+                        moduleText: "text-emerald-600/80"
                       };
 
                       if (isCinematic) {
                         theme = {
-                          barColor: "#F59E0B", // Luxury Gold
-                          emoji: "🎬",
-                          emojiBg: "bg-[#FFF8E7] border-amber-100 text-amber-600",
-                          gradient: "from-[#FFFDF2] via-white to-white",
-                          border: "border-[#FFF0CE]",
-                          hoverBorder: "hover:border-[#F59E0B] hover:shadow-[0_6px_0_#FCDCA2]",
-                          shadowColor: "shadow-[0_4px_0_#F59E0B]",
-                          badgeBg: "bg-[#FFF8E7] text-[#B45309] border-[#FFE0B2]"
+                          cardBg: "bg-[#18181B]", // Elegant dark background for film
+                          borderColor: "border-[#27272A]",
+                          hoverBorder: "hover:border-[#F59E0B]",
+                          glowShadow: "shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(245,158,11,0.22)]",
+                          titleColor: "text-white",
+                          descColor: "text-zinc-400",
+                          accentColor: "#F59E0B",
+                          badgeBg: "bg-[#27272A] text-[#F59E0B] border-[#F59E0B]/30",
+                          btnBg: "bg-[#F59E0B] border-transparent text-black shadow-[0_4px_0_#B45309]",
+                          btnHoverShadow: "hover:shadow-[0_4px_0_#B45309]",
+                          moduleText: "text-[#F59E0B]"
                         };
                       } else if (isGrade10) {
                         theme = {
-                          barColor: "#1899D6",
-                          emoji: "🎒",
-                          emojiBg: "bg-[#E8F4FD] border-blue-100 text-blue-600",
-                          gradient: "from-[#F5FAFF] via-white to-white",
-                          border: "border-[#D6EDFF]",
-                          hoverBorder: "hover:border-[#1899D6] hover:shadow-[0_6px_0_#84D8FF]",
-                          shadowColor: "shadow-[0_4px_0_#1899D6]",
-                          badgeBg: "bg-[#E8F4FD] text-[#1899D6] border-[#B3DFFF]"
+                          cardBg: "bg-[#3B3EC6]", // Solid Quizlet indigo blue
+                          borderColor: "border-[#3B3EC6]",
+                          hoverBorder: "hover:border-white/90",
+                          glowShadow: "shadow-[0_8px_30px_rgba(59,62,198,0.1)] hover:shadow-[0_20px_40px_rgba(59,62,198,0.35)]",
+                          titleColor: "text-white",
+                          descColor: "text-indigo-100/90",
+                          accentColor: "#FFFFFF",
+                          badgeBg: "bg-white/10 text-white border-white/20",
+                          btnBg: "bg-white border-transparent text-[#3B3EC6] shadow-[0_4px_0_#2A2C9F]",
+                          btnHoverShadow: "hover:shadow-[0_4px_0_#2A2C9F]",
+                          moduleText: "text-indigo-100"
                         };
                       } else if (isGrade11) {
                         theme = {
-                          barColor: "#8B5CF6",
-                          emoji: "📚",
-                          emojiBg: "bg-[#F2EDFC] border-purple-100 text-purple-600",
-                          gradient: "from-[#FAF6FE] via-white to-white",
-                          border: "border-[#EBE2FC]",
-                          hoverBorder: "hover:border-[#8B5CF6] hover:shadow-[0_6px_0_#C5A6FA]",
-                          shadowColor: "shadow-[0_4px_0_#8B5CF6]",
-                          badgeBg: "bg-[#F2EDFC] text-[#8B5CF6] border-[#E1D4FB]"
+                          cardBg: "bg-[#F2EDFC]", // Royal purple pastel
+                          borderColor: "border-[#EBE2FC]",
+                          hoverBorder: "hover:border-[#8B5CF6]",
+                          glowShadow: "shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(139,92,246,0.18)]",
+                          titleColor: "text-[#5B21B6]",
+                          descColor: "text-purple-700/80",
+                          accentColor: "#8B5CF6",
+                          badgeBg: "bg-[#F2EDFC] text-[#8B5CF6] border-[#E1D4FB]",
+                          btnBg: "bg-white border-[#8B5CF6]/30 text-[#8B5CF6] shadow-[0_4px_0_#8B5CF6]",
+                          btnHoverShadow: "hover:shadow-[0_4px_0_#8B5CF6]",
+                          moduleText: "text-purple-600/80"
                         };
                       } else if (isGrade12) {
                         theme = {
-                          barColor: "#EC4899", // Premium Rose Pink
-                          emoji: "🎓",
-                          emojiBg: "bg-[#FDF2F8] border-pink-100 text-pink-600",
-                          gradient: "from-[#FDF2F8] via-white to-white",
-                          border: "border-[#FBCFE8]",
-                          hoverBorder: "hover:border-[#EC4899] hover:shadow-[0_6px_0_#F9A8D4]",
-                          shadowColor: "shadow-[0_4px_0_#EC4899]",
-                          badgeBg: "bg-[#FDF2F8] text-[#EC4899] border-[#FBCFE8]"
-                        };
-                      } else if (isLop6) {
-                        theme = {
-                          barColor: "#10B981", // Emerald
-                          emoji: "🏫",
-                          emojiBg: "bg-[#E6F4EA] border-emerald-100 text-emerald-600",
-                          gradient: "from-[#EAF7ED] via-white to-white",
-                          border: "border-[#C2E7CC]",
-                          hoverBorder: "hover:border-[#10B981] hover:shadow-[0_6px_0_#A7F3D0]",
-                          shadowColor: "shadow-[0_4px_0_#10B981]",
-                          badgeBg: "bg-[#E6F4EA] text-[#10B981] border-[#A7F3D0]"
+                          cardBg: "bg-[#FDF2F8]", // Premium rose pink pastel
+                          borderColor: "border-[#FBCFE8]",
+                          hoverBorder: "hover:border-[#EC4899]",
+                          glowShadow: "shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(236,72,153,0.18)]",
+                          titleColor: "text-[#9D174D]",
+                          descColor: "text-pink-700/80",
+                          accentColor: "#EC4899",
+                          badgeBg: "bg-[#FDF2F8] text-[#EC4899] border-[#FBCFE8]",
+                          btnBg: "bg-white border-[#EC4899]/30 text-[#EC4899] shadow-[0_4px_0_#EC4899]",
+                          btnHoverShadow: "hover:shadow-[0_4px_0_#EC4899]",
+                          moduleText: "text-pink-600/80"
                         };
                       }
 
-                      return (
-                        <motion.div
-                          key={grade.id}
-                          whileHover={{ y: -6, scale: 1.01 }}
-                          className={`group relative flex flex-col justify-between h-[245px] bg-gradient-to-br ${theme.gradient} border-2 ${theme.border} rounded-[2.2rem] p-6 shadow-[0_6px_0_#E5E5E5] ${theme.hoverBorder} transition-all duration-300 overflow-hidden`}
-                        >
-                          {/* Top Header Badge */}
-                          <div className="flex items-center justify-between">
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${theme.emojiBg} border text-3xl shadow-[0_4px_12px_rgba(0,0,0,0.05)]`}>
-                              {theme.emoji}
+                      // Visual Mockup Renderer based on Grade Type
+                      const renderVisualMockup = () => {
+                        if (isLop6) {
+                          // Lớp 6 (Emerald): Matching Game Grid mockup ("Ghép thẻ")
+                          return (
+                            <div className="relative w-full h-[180px] bg-emerald-50/40 rounded-3xl border border-[#C2E7CC]/40 flex items-center justify-center p-3 overflow-hidden select-none">
+                              <div className="grid grid-cols-2 gap-2.5 w-full max-w-[220px]">
+                                <div className="bg-white border border-[#C2E7CC]/60 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[62px] transition-all">
+                                  <span className="text-xl">🎒</span>
+                                  <span className="text-[10px] font-black text-[#065F46] mt-0.5">backpack</span>
+                                </div>
+                                <div className="bg-white border-2 border-[#10B981] rounded-2xl p-2 flex flex-col items-center justify-center shadow-[0_4px_0_rgba(16,185,129,0.15)] h-[62px] relative overflow-hidden">
+                                  <span className="text-xl">📘</span>
+                                  <span className="text-[10px] font-black text-[#10B981] mt-0.5">book</span>
+                                  <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#10B981] flex items-center justify-center">
+                                    <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                  </div>
+                                </div>
+                                <div className="bg-[#10B981] text-white rounded-2xl p-2 flex flex-col items-center justify-center shadow-md h-[62px]">
+                                  <span className="text-[10px] font-black tracking-wide">sách</span>
+                                </div>
+                                <div className="bg-white border border-[#C2E7CC]/60 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[62px] transition-all">
+                                  <span className="text-xl">✏️</span>
+                                  <span className="text-[10px] font-black text-[#065F46] mt-0.5">pencil</span>
+                                </div>
+                              </div>
                             </div>
-                            
-                            <div className="flex flex-col items-end gap-1">
-                              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${theme.badgeBg} border shadow-sm flex items-center gap-1`}>
-                                <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
-                                ĐANG HỌC
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Content details */}
-                          <div className="mt-4 flex-1 flex flex-col justify-end z-10">
-                            <h4 className="text-lg font-black text-[#1A1A18] tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
-                              {grade.title}
-                            </h4>
-                            <p className="text-xs text-[#777777] font-semibold mt-1.5 leading-snug line-clamp-2">
-                              {grade.description}
-                            </p>
-                            
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100/80">
-                              <span className="text-[9px] text-[#888888] font-black uppercase tracking-wider flex items-center gap-1">
-                                <BookOpen size={13} style={{ color: theme.barColor }} /> 12 CHUYÊN ĐỀ
-                              </span>
+                          );
+                        } else if (isGrade10) {
+                          // Lớp 10 (Ocean Blue): Interactive 3D Flashcard mockup ("Thẻ ghi nhớ")
+                          return (
+                            <div className="relative w-full h-[180px] bg-[#2E31A6]/80 rounded-3xl border border-white/10 flex items-center justify-center p-3 overflow-hidden select-none">
+                              {/* Background card tilted */}
+                              <div className="absolute w-[180px] h-[105px] bg-white/15 border border-white/20 rounded-2xl transform -rotate-[7deg] -translate-x-4 opacity-50 shadow-lg" />
                               
-                              <Link 
-                                href={`/learn/grade/${grade.id}`}
-                                className={`px-4.5 py-2.5 rounded-2xl bg-white border-2 text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${theme.shadowColor} hover:brightness-105 active:translate-y-[4px] active:shadow-none cursor-pointer`}
-                                style={{ 
-                                  color: theme.barColor, 
-                                  borderColor: theme.barColor + "40"
-                                }}
-                              >
-                                VÀO HỌC <ArrowRight size={11} className="stroke-[2.5]" />
-                              </Link>
+                              {/* Foreground active card */}
+                              <div className="absolute w-[180px] h-[105px] bg-white rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.15)] p-3.5 flex flex-col justify-between transform rotate-[4deg] translate-x-3 border border-white transition-all duration-300 group-hover:rotate-[8deg] group-hover:scale-[1.03]">
+                                <div className="flex items-start justify-between">
+                                  <div className="bg-blue-50 text-blue-600 rounded-lg p-1 text-[8px] font-black leading-none">
+                                    ☘️ Environment
+                                  </div>
+                                  <span className="text-xs text-slate-400">🔊</span>
+                                </div>
+                                <div className="my-1.5 text-center">
+                                  <h5 className="text-xs font-black text-[#1A1A18] tracking-tight uppercase">Biodiversity</h5>
+                                  <p className="text-[9px] text-slate-400 font-medium leading-none mt-1">Đa dạng sinh học</p>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-slate-100 pt-1">
+                                  <span className="text-[8px] text-emerald-600 font-extrabold flex items-center gap-0.5">
+                                    ✓ Đã thuộc
+                                  </span>
+                                  <span className="text-[8px] text-slate-400">Card 3/20</span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
+                          );
+                        } else if (isGrade11) {
+                          // Lớp 11 (Royal Purple): Test panel mockup with circular progress meter ("Kiểm tra")
+                          return (
+                            <div className="relative w-full h-[180px] bg-[#FAF6FE] rounded-3xl border border-[#EBE2FC]/40 flex items-center justify-center p-3 overflow-hidden select-none">
+                              <div className="bg-white rounded-2xl shadow-[0_8px_16px_rgba(139,92,246,0.06)] border border-[#EBE2FC]/50 p-3.5 w-full max-w-[220px] flex items-center justify-between gap-3 transition-all duration-300 group-hover:scale-[1.02]">
+                                <div className="space-y-1.5">
+                                  <div className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Thời gian</div>
+                                  <div className="text-xs font-black text-slate-800 flex items-center gap-1">
+                                    ⏱️ 15:00
+                                  </div>
+                                  <div className="pt-1.5 flex flex-col gap-1">
+                                    <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-0.5">
+                                      ✓ 17 đúng
+                                    </span>
+                                    <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-0.5">
+                                      ✗ 3 sai
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="relative flex flex-col items-center justify-center shrink-0 w-24 h-24">
+                                  {/* Circular SVG Gauge */}
+                                  <svg className="w-20 h-20 transform -rotate-90">
+                                    {/* Track circle */}
+                                    <circle cx="40" cy="40" r="32" stroke="#F1F3F9" strokeWidth="7" fill="transparent" />
+                                    {/* Animated stroke progress circle */}
+                                    <circle 
+                                      cx="40" cy="40" r="32" 
+                                      stroke="#8B5CF6" strokeWidth="7" fill="transparent" 
+                                      strokeDasharray={2 * Math.PI * 32}
+                                      strokeDashoffset={2 * Math.PI * 32 * (1 - 0.85)}
+                                      strokeLinecap="round"
+                                    />
+                                  </svg>
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-sm font-black text-slate-800 tracking-tight leading-none">85%</span>
+                                    <span className="text-[7px] text-[#8B5CF6] font-black uppercase tracking-widest mt-0.5">ĐẠT</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        } else if (isGrade12) {
+                          // Lớp 12 (Rose Pink): Spelling Fill-in question mockup ("Học")
+                          return (
+                            <div className="relative w-full h-[180px] bg-pink-50/20 rounded-3xl border border-[#FBCFE8]/40 flex items-center justify-center p-3 overflow-hidden select-none">
+                              <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_8px_16px_rgba(236,72,153,0.06)] p-3.5 w-full max-w-[230px] flex flex-col justify-between h-[130px] transition-all duration-300 group-hover:scale-[1.02]">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1 text-[8px] font-black text-pink-500 uppercase tracking-widest leading-none mb-1">
+                                    <span>✍️ VIẾT ĐÁP ÁN</span>
+                                  </div>
+                                  <h6 className="text-[10px] font-black text-[#1A1A18] leading-tight">
+                                    📚 "Cơ hội nghề nghiệp"
+                                  </h6>
+                                  <p className="text-[9px] text-[#777777] font-semibold italic">
+                                    Great career <span className="border-b border-[#777777] px-1 font-black text-[#1A1A18]">_________</span> are ahead.
+                                  </p>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 py-1.5 text-[9px] text-emerald-800 font-black flex items-center justify-between">
+                                    <span className="flex items-center gap-1">
+                                      opportunities<span className="w-[1.5px] h-3 bg-emerald-600 animate-pulse inline-block" />
+                                    </span>
+                                    <span className="text-emerald-500 font-bold">✓ Đúng rồi!</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        } else {
+                          // Cinematic Learning (Gold Theme): Film Strip Player mockup with subtitle highlights
+                          return (
+                            <div className="relative w-full h-[180px] bg-zinc-950 rounded-3xl border border-zinc-800 flex flex-col justify-between p-3.5 overflow-hidden select-none">
+                              {/* Top Bar Player Controls */}
+                              <div className="flex items-center justify-between text-[8px] text-zinc-500 font-extrabold border-b border-zinc-900 pb-1.5">
+                                <span className="flex items-center gap-1 text-[#F59E0B]">
+                                  🎬 CINEMATIC PLAYER
+                                </span>
+                                <span>01:42 / 03:05</span>
+                              </div>
+                              
+                              {/* Dialogue Subtitles block */}
+                              <div className="my-auto py-1 flex flex-col items-center justify-center text-center">
+                                <p className="text-[10px] md:text-[11px] text-zinc-100 font-black leading-tight max-w-[190px]">
+                                  "It's not about the <span className="text-[#F59E0B] font-extrabold underline decoration-wavy underline-offset-2">destination</span>..."
+                                </p>
+                                <p className="text-[8px] text-zinc-500 font-medium leading-none mt-1">
+                                  "Không phải là về đích đến..."
+                                </p>
+                              </div>
+                              
+                              {/* Seekbar and Floating dictionary card */}
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="bg-zinc-800 h-1.5 rounded-full w-full relative">
+                                    <div className="bg-[#F59E0B] h-full rounded-full w-[55%] relative flex items-center justify-end">
+                                      <span className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-md border border-[#F59E0B]" />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between text-[7px] text-zinc-500 font-black">
+                                  <span>Tập 2: The Journey</span>
+                                  <span className="text-[#F59E0B]">HD 1080p</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                      };
 
-                          {/* Bottom decorative color progress bar */}
-                          <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-slate-100/80">
-                            <div 
-                              className="h-full rounded-r-full"
-                              style={{ 
-                                backgroundColor: theme.barColor, 
-                                width: "60%" 
-                              }}
-                            />
-                          </div>
-                        </motion.div>
+                      return (
+                        <Link 
+                          key={grade.id}
+                          href={`/learn/grade/${grade.id}`}
+                          className="group block select-none"
+                        >
+                          <motion.div
+                            whileHover={{ y: -10 }}
+                            className={`relative flex flex-col justify-between h-[450px] ${theme.cardBg} border-2 ${theme.borderColor} rounded-[2.5rem] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] ${theme.hoverBorder} ${theme.glowShadow} transition-all duration-500 overflow-hidden`}
+                          >
+                            {/* Card Header area */}
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${theme.badgeBg} border shadow-sm flex items-center gap-1`}>
+                                  <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                                  Đang học
+                                </span>
+                                <span className="text-xl">{isCinematic ? "🎬" : isLop6 ? "🏫" : isGrade10 ? "🎒" : isGrade11 ? "📚" : "🎓"}</span>
+                              </div>
+                              <h4 className={`text-xl font-black ${theme.titleColor} tracking-tight text-center pb-2`}>
+                                {grade.title}
+                              </h4>
+                            </div>
+
+                            {/* Custom Visual Mockup Canvas */}
+                            <div className="my-2.5">
+                              {renderVisualMockup()}
+                            </div>
+
+                            {/* Card Footer details */}
+                            <div className="space-y-3.5 z-10 pt-2 border-t border-dashed border-slate-200/50">
+                              <p className={`text-xs ${theme.descColor} font-semibold leading-relaxed line-clamp-2 h-8`}>
+                                {grade.description}
+                              </p>
+                              
+                              <div className="flex items-center justify-between">
+                                <span className={`text-[9px] ${theme.moduleText} font-black uppercase tracking-wider flex items-center gap-1.5`}>
+                                  <BookOpen size={13} className="stroke-[2.5]" /> 12 CHUYÊN ĐỀ HỌC
+                                </span>
+                                
+                                <button 
+                                  className={`px-4.5 py-2.5 rounded-2xl bg-white border-2 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5 shrink-0 ${theme.btnBg} group-hover:brightness-105 active:translate-y-[4px] active:shadow-none cursor-pointer`}
+                                >
+                                  VÀO HỌC <ArrowRight size={11} className="stroke-[3] group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </Link>
                       );
                     })}
                   </div>
