@@ -298,7 +298,7 @@ export default function HomePage() {
                   0đ <span className="text-xs text-[#777777] font-extrabold uppercase">/ mãi mãi</span>
                 </div>
                 <ul className="space-y-4 mb-10">
-                  {['Học thử 3 phân cảnh bài học/ngày', '5 lượt AI chấm phát âm/ngày', 'Lưu trữ 20 từ vựng cốt lõi', 'Theo dõi tiến độ học tập cơ bản'].map((item, i) => (
+                  {['Học thử 3 bài học/ngày', '5 lượt AI chấm phát âm/ngày', 'Lưu trữ 20 từ vựng cốt lõi', 'Theo dõi tiến độ học tập cơ bản'].map((item, i) => (
                     <li key={i} className="flex items-start gap-3 text-xs text-[#3D3D3B] font-bold">
                       <span className="text-[#1899D6] shrink-0 text-base leading-none">✔️</span> {item}
                     </li>
@@ -357,7 +357,7 @@ export default function HomePage() {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#1899D6] shadow-[0_4px_0_#1482B5]">
               <Play size={16} fill="white" className="ml-0.5 text-white" />
             </div>
-            <span className="font-display font-black text-2xl tracking-tight text-[#1A1A18]">Cinematic</span>
+            <span className="font-display font-black text-2xl tracking-tight text-[#1A1A18]">Global Success</span>
           </div>
           <div className="flex gap-8 text-xs font-black uppercase tracking-wider text-[#777777]">
             <Link href="#" className="hover:text-[#1899D6] transition-colors">Về chúng tôi</Link>
@@ -365,7 +365,7 @@ export default function HomePage() {
             <Link href="#" className="hover:text-[#1899D6] transition-colors">Bảo mật</Link>
           </div>
           <p className="text-[#AFAFAF] text-[10px] font-black uppercase tracking-widest mt-4">
-            © 2026 Cinematic English. All rights reserved. Master standard education.
+            © 2026 Global Success English. All rights reserved. Master standard education.
           </p>
         </div>
       </footer>

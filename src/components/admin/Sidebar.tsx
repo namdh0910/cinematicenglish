@@ -34,7 +34,6 @@ const navGroups = [
   {
     title: "NỘI DUNG HỌC",
     items: [
-      { icon: BookOpen, label: "Câu chuyện", href: "/admin/stories" },
       { icon: GraduationCap, label: "Bài học", href: "/admin/curriculum" },
       { icon: HelpCircle, label: "Bài luyện", href: "/admin/quizzes" },
       { icon: BookOpen, label: "Từ vựng", href: "/admin/vocabulary" },
@@ -80,7 +79,7 @@ export default function Sidebar({ adminProfile }: SidebarProps) {
           </div>
           <div className="flex flex-col">
             <span className="font-display font-black text-sm tracking-tighter leading-none">
-              CINEMATIC<span className="text-amber-500">EN</span>
+              GLOBAL SUCCESS
             </span>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 mt-1">Admin Panel</span>
           </div>

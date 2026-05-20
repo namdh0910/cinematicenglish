@@ -127,7 +127,7 @@ export default function FeedPage() {
 
                     {item.type === "word" && (
                       <div className="space-y-4">
-                        <Badge variant="outline" className="bg-white/10 border-white/20 text-white">Từ vựng Cinematic</Badge>
+                        <Badge variant="outline" className="bg-white/10 border-white/20 text-white">Từ vựng SGK</Badge>
                         <p className="text-5xl font-display font-black tracking-tighter">{item.content}</p>
                         {item.phonetic && <p className="font-mono text-base font-bold text-white/70 italic">{item.phonetic}</p>}
                         {item.meaning && (
@@ -143,15 +143,7 @@ export default function FeedPage() {
                       </div>
                     )}
 
-                    {item.type === "story" && (
-                      <div className="space-y-8">
-                        <div className="text-6xl mb-2">🎬</div>
-                        <p className="text-3xl font-display font-black leading-tight tracking-tight">{item.content}</p>
-                        <Button variant="gold" size="lg" className="shadow-glow-gold" onClick={() => window.location.href='/stories/1'}>
-                          Xem trọn bộ câu chuyện
-                        </Button>
-                      </div>
-                    )}
+
                   </motion.div>
                 </div>
 

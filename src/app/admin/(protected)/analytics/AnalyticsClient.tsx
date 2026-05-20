@@ -90,7 +90,7 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
     // Populate AI cost router usage
     AICostControlRouter.routeInference("Check my pronunciation of path", "Strict oral assessment instructions", "high");
     AICostControlRouter.routeInference("Check my pronunciation of paths", "Strict oral assessment instructions", "high");
-    AICostControlRouter.routeInference("Motivate the learner who is on streak day 5", "Cinematic mentoring guidelines", "low");
+    AICostControlRouter.routeInference("Motivate the learner who is on streak day 5", "Gamified mentoring guidelines", "low");
 
     // Populate system logs
     ObservabilityPipeline.logSystemAction("usr_teacher", "Query Classroom Trend", "class-10a1", "success", 120);
@@ -339,8 +339,8 @@ export default function AnalyticsClient({ initialData }: AnalyticsClientProps) {
             
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
-                <span className="text-white/60">Câu chuyện tương tác đang chạy:</span>
-                <span className="font-mono font-bold text-white">24 stories</span>
+                <span className="text-white/60">Bài học tương tác bám sát SGK:</span>
+                <span className="font-mono font-bold text-white">24 bài học</span>
               </div>
               <div className="flex justify-between items-center border-b border-white/[0.02] pb-2">
                 <span className="text-white/60">Bài luyện tập siêu tốc:</span>

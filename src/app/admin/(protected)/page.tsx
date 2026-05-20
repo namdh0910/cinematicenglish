@@ -40,11 +40,11 @@ const dauData = [
 ];
 
 const categoryData = [
-  { name: "Tâm lý học", plays: 2400 },
-  { name: "Kinh doanh", plays: 4567 },
-  { name: "Triết học", plays: 1398 },
-  { name: "Điện ảnh", plays: 9800 },
-  { name: "Đời sống", plays: 3908 },
+  { name: "Tiếng Anh 6", plays: 2400 },
+  { name: "Tiếng Anh 10", plays: 9800 },
+  { name: "Tiếng Anh 11", plays: 4567 },
+  { name: "Tiếng Anh 12", plays: 3908 },
+  { name: "Luyện IELTS", plays: 1398 },
 ];
 
 const COLORS = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444"];
@@ -97,28 +97,21 @@ export default function DetailedDashboard() {
   // Map stats values
   const statsList = [
     { label: "Tổng học viên", value: data?.stats?.totalUsers?.toLocaleString() || "0", change: "+12%", icon: Users, color: "text-blue-400" },
-    { label: "Câu chuyện đang chạy", value: data?.stats?.totalStories?.toLocaleString() || "0", change: "0", icon: BookOpen, color: "text-emerald-400" },
+    { label: "Bài học hệ thống", value: data?.stats?.totalLessons?.toLocaleString() || "0", change: "0", icon: BookOpen, color: "text-emerald-400" },
     { label: "Tổng lượt luyện tập", value: data?.stats?.totalPlays?.toLocaleString() || "0", change: "+18%", icon: PlayCircle, color: "text-amber-500" },
     { label: "Hội viên cao cấp", value: data?.stats?.totalProUsers?.toLocaleString() || "0", change: "+5.4%", icon: CreditCard, color: "text-violet-400" },
   ];
 
-  // Map popular stories from DB
-  const popularStories = data?.popularStories?.map((s: any) => ({
-    id: s.id,
-    title: s.title,
-    category: s.category ? (s.category.charAt(0).toUpperCase() + s.category.slice(1)) : "Điện ảnh",
-    plays: s.plays?.toLocaleString() || "0",
-    completion: s.difficulty === 'easy' ? '95%' : s.difficulty === 'hard' ? '75%' : '88%'
-  })) || [];
+
 
   // Map latest registered users
   const recentActivities = data?.latestUsers?.map((u: any, idx: number) => {
     const times = ["2 phút trước", "15 phút trước", "42 phút trước", "1 giờ trước", "3 giờ trước"];
     const actions = [
       "đã gia nhập hàng ngũ học viên mới",
-      "đã khởi tạo ritual luyện nói",
+      "đã khởi tạo lộ trình luyện nói",
       "đã đăng ký trải nghiệm thử",
-      "đã tham gia câu lạc bộ Cinematic En",
+      "đã tham gia câu lạc bộ Global Success",
       "đã kích hoạt tài khoản thành công"
     ];
     return {
@@ -136,18 +129,13 @@ export default function DetailedDashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-display font-black tracking-tight text-white">Tổng quan hệ thống</h2>
-          <p className="text-white/40 font-medium italic">"Thông tin trực quan theo thời gian thực về hệ sinh thái Cinematic English."</p>
+          <p className="text-white/40 font-medium italic">"Thông tin trực quan theo thời gian thực về hệ sinh thái Global Success English."</p>
         </div>
         
         <div className="flex items-center gap-3">
-          <Link href="/admin/stories/new">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
-              <Plus size={18} strokeWidth={3} /> Tạo câu chuyện
-            </button>
-          </Link>
           <Link href="/admin/curriculum">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5 border border-white/5 text-white/70 font-bold text-sm hover:bg-white/10 transition-all">
-              <HelpCircle size={18} /> Thêm bài luyện
+            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 text-black font-bold text-sm hover:scale-105 active:scale-95 transition-all shadow-glow-amber">
+              <Plus size={18} strokeWidth={3} /> Quản lý bài học
             </button>
           </Link>
         </div>
@@ -275,68 +263,10 @@ export default function DetailedDashboard() {
         </div>
       </div>
 
-      {/* 4. Activity & Top Stories */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Top Stories Table */}
-        <div className="lg:col-span-3 p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5 overflow-hidden">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
-                <Trophy size={18} />
-              </div>
-              <h3 className="font-bold text-lg">Câu chuyện nổi bật tuần này</h3>
-            </div>
-            <Link href="/admin/stories" className="text-xs font-bold text-amber-500 uppercase tracking-widest hover:underline">Xem tất cả</Link>
-          </div>
-          
-          <div className="overflow-x-auto">
-            {popularStories.length > 0 ? (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-[0.2em] text-white/20 border-b border-white/5">
-                    <th className="pb-4 font-bold">Tên câu chuyện</th>
-                    <th className="pb-4 font-bold">Danh mục</th>
-                    <th className="pb-4 font-bold">Lượt học</th>
-                    <th className="pb-4 font-bold text-right">Tỷ lệ hoàn thành</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {popularStories.map((story: any) => (
-                    <tr key={story.id} className="group hover:bg-white/5 transition-colors">
-                      <td className="py-4 font-bold text-sm group-hover:text-amber-500 transition-colors">
-                        <Link href={`/admin/stories/edit/${story.id}`}>
-                          {story.title}
-                        </Link>
-                      </td>
-                      <td className="py-4">
-                        <span className="px-2 py-1 rounded-md bg-white/5 text-[10px] font-bold text-white/40 border border-white/5 uppercase tracking-widest">
-                          {story.category}
-                        </span>
-                      </td>
-                      <td className="py-4 font-mono text-xs text-white/60">{story.plays}</td>
-                      <td className="py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <span className="font-bold text-xs">{story.completion}</span>
-                          <div className="w-12 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-emerald-500 opacity-60" 
-                              style={{ width: story.completion }} 
-                            />
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="text-center py-10 text-white/30 text-xs italic">Chưa có câu chuyện nào được chơi.</div>
-            )}
-          </div>
-        </div>
-
+      {/* 4. Activity Feed */}
+      <div className="grid grid-cols-1 gap-6">
         {/* Activity Feed */}
-        <div className="lg:col-span-2 p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5">
+        <div className="p-8 rounded-[40px] bg-[#1a1a1a] border border-white/5">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-500/10 text-violet-400">
@@ -346,10 +276,10 @@ export default function DetailedDashboard() {
             </div>
           </div>
           
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentActivities.length > 0 ? (
               recentActivities.map((item: any) => (
-                <div key={item.id} className="flex items-center gap-4 group">
+                <div key={item.id} className="flex items-center gap-4 group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
                   <div className="w-10 h-10 rounded-full border border-white/10 overflow-hidden bg-white/5 shrink-0">
                     <img src={item.avatar} alt={item.user} className="w-full h-full object-cover" />
                   </div>
@@ -363,7 +293,7 @@ export default function DetailedDashboard() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-10 text-white/30 text-xs italic">Chưa có học viên nào hoạt động gần đây.</div>
+              <div className="col-span-full text-center py-10 text-white/30 text-xs italic">Chưa có học viên nào hoạt động gần đây.</div>
             )}
           </div>
         </div>

@@ -366,6 +366,62 @@ export async function createUnit(data: { semester_id: string, title: string, des
   return unit;
 }
 
+export async function getUnits(gradeId: string) {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (isMockMode) {
+    return [
+      { id: "unit-1", grade_id: gradeId, title: "Unit 1: Family Life", unit_no: "Unit 1", description: "Family life responsibilities", cover_image: "" },
+      { id: "unit-2", grade_id: gradeId, title: "Unit 2: Humans and the Environment", unit_no: "Unit 2", description: "Humans and ecosystem", cover_image: "" }
+    ];
+  }
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('units')
+    .select('*')
+    .eq('grade_id', gradeId)
+    .order('unit_no', { ascending: true });
+  if (error) {
+    console.error("Error fetching units:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function getLessons(unitId: string) {
+  const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (isMockMode) {
+    return [
+      { id: "lesson-1", unit_id: unitId, title: "Luyện phát âm Tiếng Anh", type: "Speaking", order_index: 1, description: "Luyện hội thoại speaking", content: { dialogues: [{ character: "Nam", text: "Hello, how are you?", translation: "Xin chào, bạn khỏe không?" }] } },
+      { id: "lesson-2", unit_id: unitId, title: "Luyện nghe điền từ", type: "Dictation", order_index: 2, description: "Nghe audio điền từ vào chỗ trống", content: { audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", passage: "I love learning [...] because it is extremely [...] for my future." } }
+    ];
+  }
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('unit_id', unitId)
+    .order('order_index', { ascending: true });
+  if (error) {
+    console.error("Error fetching lessons:", error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function createUnitNew(data: { grade_id: string, title: string, unit_no: string, description: string }) {
+  const supabase = await createSupabaseServerClient();
+  const { data: unit, error } = await supabase
+    .from('units')
+    .insert([data])
+    .select()
+    .single();
+
+  if (error) throw error;
+  revalidatePath('/admin/curriculum');
+  return unit;
+}
+
+
 export async function getUnitWithDetails(unitId: string) {
   const isMockMode = !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const mockUnit = {
@@ -412,7 +468,7 @@ export async function getUnitWithDetails(unitId: string) {
   return unit;
 }
 
-export async function createLesson(data: { unit_id: string, title: string, type: string, order_index: number }) {
+export async function createLesson(data: { unit_id: string, title: string, type: string, order_index: number, content?: any, description?: string }) {
   const supabase = await createSupabaseServerClient();
   const { data: lesson, error } = await supabase
     .from('lessons')
@@ -422,6 +478,7 @@ export async function createLesson(data: { unit_id: string, title: string, type:
 
   if (error) throw error;
   revalidatePath(`/admin/curriculum/unit/${data.unit_id}`);
+  revalidatePath('/admin/curriculum');
   return lesson;
 }
 
