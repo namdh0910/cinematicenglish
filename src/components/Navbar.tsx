@@ -184,10 +184,10 @@ function NavbarContent() {
         className="sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
-        <div className="w-full max-w-6xl mx-auto h-full flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between px-4 md:px-8">
+        <div className="relative w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
           
           {/* Logo Column */}
-          <div className="flex justify-start items-center">
+          <div className="flex justify-start items-center z-10">
             <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
                 <Play size={14} fill="white" className="ml-0.5 text-white" />
@@ -196,33 +196,31 @@ function NavbarContent() {
             </Link>
           </div>
 
-          {/* Navigation Links Column (Centered) */}
-          <div className="hidden md:flex justify-center items-center w-full">
-            {role !== 'guest' && (
-              <nav className="flex items-center gap-8">
-                {simplifiedLinks.map((l) => {
-                  const isActive = pathname === l.baseHref && activeTab === l.tab;
-                  return (
-                    <Link
-                      key={l.href}
-                      href={l.href}
-                      className={`text-[14px] font-medium tracking-[-0.01em] transition-colors flex items-center gap-1.5 pb-[2px] ${
-                        isActive 
-                          ? "text-[#3B82F6] border-b-2 border-[#3B82F6]" 
-                          : "text-[#3D3D3B] hover:text-[#3B82F6] hover:border-b-2 hover:border-[#3B82F6]"
-                      }`}
-                    >
-                      <l.icon size={15} />
-                      {l.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            )}
-          </div>
+          {/* Navigation Links Column (Centered absolutely for mathematical precision and stability) */}
+          {role !== 'guest' && (
+            <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 top-0 h-full items-center gap-8">
+              {simplifiedLinks.map((l) => {
+                const isActive = pathname === l.baseHref && activeTab === l.tab;
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className={`text-[14px] font-semibold tracking-[-0.01em] transition-colors flex items-center gap-1.5 h-full border-b-2 ${
+                      isActive 
+                        ? "text-[#3B82F6] border-[#3B82F6]" 
+                        : "text-[#3D3D3B] border-transparent hover:text-[#3B82F6] hover:border-[#3B82F6]"
+                    }`}
+                  >
+                    <l.icon size={15} />
+                    <span>{l.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
 
           {/* Right Action Column */}
-          <div className="flex items-center justify-end gap-5">
+          <div className="flex items-center justify-end gap-5 z-10">
             {/* Desktop Auth Section */}
             <div className="hidden md:flex items-center gap-5">
               {role === 'guest' ? (
