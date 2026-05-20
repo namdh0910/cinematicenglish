@@ -196,7 +196,7 @@ export default function Navbar() {
         className="sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
-        <div className="container-custom h-full flex items-center justify-between">
+        <div className="w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0" onClick={closeMenu}>

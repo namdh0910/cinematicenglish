@@ -142,9 +142,9 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       <Navbar />
 
       {/* 2. RESPONSIVE APP SHELL WRAPPER */}
-      <div className="flex-1 flex flex-col w-full min-h-screen">
+      <div className="flex-1 flex flex-col items-center w-full min-h-screen">
         {/* 3-COLUMN MAIN LAYOUT GRID */}
-        <div className="flex-1 grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 py-8 px-4 md:px-8 max-w-6xl mx-auto w-full">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-8 py-8 px-4 md:px-8 max-w-6xl mx-auto w-full">
           
           {/* CỘT GIỮA (Lộ trình lớp học, Ma trận năng lực) */}
           <main className="space-y-10 min-w-0">
