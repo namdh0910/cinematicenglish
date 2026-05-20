@@ -430,7 +430,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       : 100;
 
     return (
-      <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+      <div className="bg-[#EEF6F0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
         {/* Header - Simple Exit */}
         <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between shrink-0 z-40">
           <Link 
@@ -535,7 +535,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
   }
 
   return (
-    <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+    <div className="bg-[#EEF6F0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
       
       {/* 1. ROOM HEADER - FOCUS MODE */}
       <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between gap-6 shrink-0 z-40">
@@ -611,7 +611,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
 
         {/* Teacher coach feedback box inside center content */}
         {currentFeedback && currentScore !== null && (
-          <div className="w-full max-w-xl bg-slate-50 border border-slate-100 p-5 rounded-2xl flex gap-3 text-left">
+          <div className="w-full max-w-xl bg-white border-2 border-slate-200 p-5 rounded-2xl flex gap-3 text-left shadow-sm">
             <div className="text-2xl select-none">👩‍🏫</div>
             <div>
               <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider mb-0.5">Lời khuyên của Cô:</p>

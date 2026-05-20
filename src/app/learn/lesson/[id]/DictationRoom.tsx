@@ -225,7 +225,7 @@ export default function DictationRoom({ lesson }: DictationRoomProps) {
   // Render Golden Cup Celebration Arena on finished
   if (isFinished) {
     return (
-      <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+      <div className="bg-[#EEF6F0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
         {/* Header - Simple Exit */}
         <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between shrink-0 z-40">
           <Link 
@@ -333,7 +333,7 @@ export default function DictationRoom({ lesson }: DictationRoomProps) {
   let blankCounter = 0;
 
   return (
-    <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+    <div className="bg-[#EEF6F0] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
       
       {/* 1. ROOM HEADER - FOCUS MODE */}
       <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between gap-6 shrink-0 z-40">

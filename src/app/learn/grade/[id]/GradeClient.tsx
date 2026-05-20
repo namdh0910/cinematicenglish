@@ -182,7 +182,7 @@ export default function GradeClient({ grade }: GradeClientProps) {
   ];
 
   return (
-    <div className="bg-[#FFFFFF] lg:bg-[#F8FAFC] min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
+    <div className="bg-[#EEF6F0] min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
       {/* Dynamic Top Navbar for mobile (automatically responsive) */}
       <Navbar />
 
