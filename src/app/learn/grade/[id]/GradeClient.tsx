@@ -71,14 +71,16 @@ export default function GradeClient({ grade }: GradeClientProps) {
   const [profile, setProfile] = useState<any>(null);
   const [gradeDropdownOpen, setGradeDropdownOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<any>(null);
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfileAndProgress = async () => {
       try {
         const supabase = createSupabaseBrowserClient();
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
+          // Fetch profile
           const { data: userProfile } = await supabase
             .from("profiles")
             .select("*")
@@ -87,12 +89,24 @@ export default function GradeClient({ grade }: GradeClientProps) {
           if (userProfile) {
             setProfile(userProfile);
           }
+
+          // Fetch completed lessons from lesson_progress
+          const { data: progressData } = await supabase
+            .from("lesson_progress")
+            .select("lesson_id")
+            .eq("user_id", session.user.id)
+            .eq("is_completed", true);
+          
+          if (progressData) {
+            const completedSet = new Set<string>(progressData.map((p: any) => p.lesson_id));
+            setCompletedLessonIds(completedSet);
+          }
         }
       } catch (err) {
-        console.error("Error fetching profile in GradeClient:", err);
+        console.error("Error fetching profile and progress in GradeClient:", err);
       }
     };
-    fetchProfile();
+    fetchProfileAndProgress();
   }, []);
 
   useEffect(() => {
@@ -233,7 +247,7 @@ export default function GradeClient({ grade }: GradeClientProps) {
                         </div>
                         
                         {/* 3D guide button */}
-                        <button className="px-4 py-2 bg-white text-xs font-black rounded-xl border-b-4 border-slate-200 active:border-b-0 active:translate-y-[4px] transition-all whitespace-nowrap z-10 cursor-pointer shrink-0" style={{ color: theme.bg.includes("#") ? theme.bg : "var(--accent-indigo)" }}>
+                        <button className={`px-4 py-2 bg-white text-xs font-black rounded-xl border-b-4 border-slate-200 active:border-b-0 active:translate-y-[4px] transition-all whitespace-nowrap z-10 cursor-pointer shrink-0 ${theme.accent}`}>
                           📖 HƯỚNG DẪN
                         </button>
                       </div>
@@ -247,18 +261,21 @@ export default function GradeClient({ grade }: GradeClientProps) {
                               // Winding offset index calculation
                               const windClass = windingPositions[lessonIdx % windingPositions.length];
                               
-                              // Progress state simulator
-                              // Simulation rule: Semester 1, Unit 1 lessons:
-                              // index 0, 1 -> Completed (crown 👑)
-                              // index 2 -> Active (bouncing bubble 💬 + mascot 🦉)
-                              // index 3+ -> Locked (padlock 🔒)
+                              // Dynamic progress state calculation
+                              const sortedLessons = [...unit.lessons].sort((a, b) => a.order_index - b.order_index);
+                              const isCompleted = completedLessonIds.has(lesson.id);
+                              
                               let status: 'completed' | 'active' | 'locked' = 'locked';
-                              if (unitIdx === 0 && sortedSemesters[0]?.id === activeSemester) {
-                                if (lessonIdx < 2) status = 'completed';
-                                else if (lessonIdx === 2) status = 'active';
-                                else status = 'locked';
+                              if (isCompleted) {
+                                status = 'completed';
                               } else {
-                                status = 'locked';
+                                const isFirstLesson = lessonIdx === 0;
+                                const isPrevCompleted = !isFirstLesson && completedLessonIds.has(sortedLessons[lessonIdx - 1]?.id);
+                                if (isFirstLesson || isPrevCompleted) {
+                                  status = 'active';
+                                } else {
+                                  status = 'locked';
+                                }
                               }
 
                               return (
