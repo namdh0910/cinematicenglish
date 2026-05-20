@@ -186,7 +186,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
         </header>
 
         {/* Dashboard Grid (Middle + Right) */}
-        <div className="flex-1 flex flex-col xl:flex-row gap-8 p-8 max-w-[1600px] w-full mx-auto">
+        <div className="flex-1 flex flex-col xl:flex-row gap-8 p-4 md:p-8 max-w-[1440px] w-full mx-auto pb-24 md:pb-8">
           
           {/* MIDDLE COLUMN */}
           <main className="flex-1 space-y-8 min-w-0">
@@ -435,6 +435,27 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
         </div>
       </div>
       
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/90 backdrop-blur-lg border-t border-[var(--border-subtle)] pb-safe">
+        <div className="flex items-center justify-around p-3">
+          {sidebarLinks.slice(0, 5).map((link) => {
+            const isActive = activeTab === link.id;
+            return (
+              <button
+                key={link.id}
+                onClick={() => setActiveTab(link.id)}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                  isActive ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)]"
+                }`}
+              >
+                <link.icon size={20} className={isActive ? "drop-shadow-[0_0_8px_rgba(124,58,237,0.8)]" : ""} />
+                <span className="text-[10px] font-bold">{link.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
     </div>
   );
 }
