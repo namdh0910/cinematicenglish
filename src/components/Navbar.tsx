@@ -181,7 +181,7 @@ function NavbarContent() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100"
+        className="sticky top-0 left-0 right-0 w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100 flex justify-center"
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="relative w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
@@ -545,7 +545,7 @@ function NavbarContent() {
 export default function Navbar() {
   return (
     <Suspense fallback={
-      <div className="sticky top-0 left-0 right-0 w-full z-50 bg-white border-b border-slate-100" style={{ height: "72px" }}>
+      <div className="sticky top-0 left-0 right-0 w-full z-50 bg-white border-b border-slate-100 flex justify-center" style={{ height: "72px" }}>
         <div className="w-full max-w-6xl mx-auto h-full flex items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-md bg-[#3B82F6]">
