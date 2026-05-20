@@ -171,14 +171,8 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300"
-        style={{ 
-          height: `${NAV_HEIGHT}px`,
-          background: 'rgba(255,255,255,0.95)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          borderBottom: '1px solid #E5E7EB'
-        }}
+        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-slate-200"
+        style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
           
@@ -219,15 +213,15 @@ export default function Navbar() {
               <>
                 <Link 
                   href="/login" 
-                  className="text-[14px] font-medium tracking-[-0.01em] text-[#3D3D3B] hover:text-[#3B82F6] transition-colors"
+                  className="text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
                 >
                   Đăng nhập
                 </Link>
                 <Link 
                   href="/signup" 
-                  className="px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all shadow-md bg-[#3B82F6] text-white"
+                  className="px-6 py-2 rounded-full text-sm font-bold transition-transform transform shadow-md bg-indigo-600 text-white hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-200"
                 >
-                  Bắt đầu
+                  Học miễn phí
                 </Link>
               </>
             ) : (
