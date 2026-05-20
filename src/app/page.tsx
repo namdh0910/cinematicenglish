@@ -192,8 +192,8 @@ export default function HomePage() {
               </div>
               {/* Content */}
               <div className="p-8">
-                <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Phát âm chuẩn xác</h3>
-                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Phát âm chuẩn xác</h3>
+                <p className="text-base text-slate-600 leading-relaxed line-clamp-3">
                   Công nghệ AI nhận diện giọng nói siêu việt, chỉ ra chính xác lỗi sai và cách khắc phục như một giáo viên bản ngữ.
                 </p>
               </div>
@@ -208,7 +208,7 @@ export default function HomePage() {
               className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-2 transition-transform duration-300 border-none overflow-hidden"
             >
               {/* Graphic Box */}
-              <div className="bg-emerald-100 h-48 relative overflow-hidden flex items-center justify-center p-6">
+              <div className="w-full bg-emerald-100 h-48 relative overflow-hidden flex items-end justify-center p-6">
                 <div className="bg-white p-4 rounded-3xl w-full shadow-sm flex flex-col items-center">
                   <div className="text-3xl font-black text-emerald-500 mb-2">98%</div>
                   <div className="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden">
@@ -219,8 +219,8 @@ export default function HomePage() {
               </div>
               {/* Content */}
               <div className="p-8">
-                <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Phản hồi thời gian thực</h3>
-                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Phản hồi thời gian thực</h3>
+                <p className="text-base text-slate-600 leading-relaxed line-clamp-3">
                   Nhận điểm số và nhận xét chi tiết ngay lập tức sau mỗi câu nói. Rèn luyện sự lưu loát và tự tin tuyệt đối.
                 </p>
               </div>
@@ -235,7 +235,7 @@ export default function HomePage() {
               className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-2 transition-transform duration-300 border-none overflow-hidden"
             >
               {/* Graphic Box */}
-              <div className="bg-indigo-100 h-48 relative overflow-hidden flex items-center justify-center p-6">
+              <div className="w-full bg-blue-100 h-48 relative overflow-hidden flex items-end justify-center p-6">
                  <div className="flex items-end justify-center w-full h-24 gap-3">
                   {[30, 50, 40, 80, 60, 100].map((h, i) => (
                     <div key={i} className="w-8 bg-white/40 rounded-t-xl flex flex-col justify-end overflow-hidden">
@@ -246,8 +246,8 @@ export default function HomePage() {
               </div>
               {/* Content */}
               <div className="p-8">
-                <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Lộ trình cá nhân hóa</h3>
-                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">Lộ trình cá nhân hóa</h3>
+                <p className="text-base text-slate-600 leading-relaxed line-clamp-3">
                   Hệ thống tự động phân tích điểm mạnh yếu để xây dựng lộ trình luyện nghe, chép chính tả và nói bám sát năng lực.
                 </p>
               </div>
@@ -258,7 +258,7 @@ export default function HomePage() {
       </section>
 
       {/* 3. PRICING SECTION (Retained Gamification Design) */}
-      <section className="py-24 bg-slate-50">
+      <section className="pt-12 pb-24 bg-slate-50">
         <div className="container-custom">
           <div className="text-center mb-16 space-y-4">
             <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -276,7 +276,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-blue-50 rounded-[2rem] p-10 flex flex-col transition-transform hover:-translate-y-1 border-none shadow-[0_10px_30px_rgba(8,_112,_184,_0.03)]"
+              className="bg-blue-50 rounded-[2rem] p-10 flex flex-col h-full transition-transform hover:-translate-y-1 border-none shadow-[0_10px_30px_rgba(8,_112,_184,_0.03)]"
             >
               <h3 className="text-xl font-bold text-slate-900 mb-2">Tài Khoản Học Thử</h3>
               <div className="text-4xl font-extrabold text-slate-900 mb-8">
@@ -302,7 +302,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="bg-slate-900 text-white rounded-[2rem] p-10 flex flex-col relative transform md:-translate-y-4 shadow-[0_20px_50px_rgba(59,130,246,0.25)] ring-1 ring-white/10 border-none"
+              className="bg-slate-900 text-white rounded-[2rem] p-10 flex flex-col h-full relative transform md:-translate-y-4 shadow-[0_20px_50px_rgba(59,130,246,0.25)] ring-1 ring-white/10 border-none"
             >
               <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-teal-400 text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg border-none">
                 Phổ biến nhất
@@ -324,7 +324,7 @@ export default function HomePage() {
               </ul>
               <Link href="/signup">
                 {/* 3D Duolingo Button for Pro */}
-                <button className="w-full py-4 rounded-2xl bg-blue-600 text-white font-bold shadow-[0_6px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[6px] transition-all hover:brightness-105 cursor-pointer border-none text-lg">
+                <button className="bg-blue-600 text-white w-full py-4 rounded-xl font-bold mt-8 shadow-[0_4px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[4px] transition-all hover:brightness-105 cursor-pointer border-none text-lg">
                   Nâng cấp Pro ngay
                 </button>
               </Link>
