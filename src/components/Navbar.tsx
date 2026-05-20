@@ -171,7 +171,7 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm"
+        className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm ${pathname.startsWith("/learn") ? "lg:hidden" : ""}`}
         style={{ height: `${NAV_HEIGHT}px` }}
       >
         <div className="container-custom h-full flex items-center justify-between">
