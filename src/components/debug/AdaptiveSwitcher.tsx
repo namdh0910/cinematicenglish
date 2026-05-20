@@ -17,11 +17,11 @@ export default function AdaptiveSwitcher() {
   const { mode, setMode, atmosphere } = useAdaptive();
 
   return (
-    <div className="hidden md:block fixed bottom-6 left-6 z-30">
+    <div className="hidden md:block fixed bottom-6 right-6 z-30">
       <motion.div 
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="glass-card p-2 rounded-2xl border border-white/10 flex items-center gap-1 shadow-2xl"
+        className="glass-card p-2 rounded-2xl border border-white/10 flex items-center gap-1 shadow-2xl bg-black/50 backdrop-blur-md"
       >
         <div className="px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white/40 border-r border-white/5 mr-1">
           Adaptive Engine

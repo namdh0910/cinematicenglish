@@ -116,9 +116,9 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 <button
                   key={link.id}
                   onClick={() => setActiveTab(link.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                     isActive 
-                      ? "bg-[#1E1B4B]/80 text-[#818CF8] shadow-inner border border-[#312E81]" 
+                      ? "bg-[#312E81]/60 text-white shadow-inner" 
                       : "text-slate-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
@@ -165,13 +165,13 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden relative">
         
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-[#0B0C10]/90 backdrop-blur-md border-b border-white/5 px-8 h-20 flex items-center justify-between shrink-0">
-          <nav className="hidden lg:flex items-center gap-8">
+        <header className="sticky top-0 z-30 bg-[#0B0C10]/90 backdrop-blur-md border-b border-white/5 px-8 h-20 flex items-center shrink-0">
+          <nav className="hidden lg:flex items-center gap-10 mx-auto">
             {topNavLinks.map(link => (
               <button 
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
-                className={`text-sm font-semibold transition-colors relative h-20 flex items-center ${
+                className={`text-sm font-bold transition-colors relative h-20 flex items-center ${
                   activeTab === link.id ? "text-[#818CF8]" : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -187,7 +187,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
           </nav>
 
           {/* Right Stats */}
-          <div className="flex items-center gap-5 ml-auto">
+          <div className="flex items-center gap-5 absolute right-8">
             <div className="flex items-center gap-1.5 bg-[#FF9600]/10 border border-[#FF9600]/20 px-3 py-1.5 rounded-full">
               <Flame size={14} className="text-[#FF9600]" fill="currentColor" />
               <span className="text-xs font-black text-[#FF9600]">{streakCount} NGÀY</span>
@@ -306,18 +306,18 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
             {/* Quick Actions (4 Cards) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { icon: Headphones, title: "Luyện nghe", desc: "Nghe và nhại lại câu thoại", color: "#6366F1", bg: "from-[#1E1B4B]/50 to-transparent" },
-                { icon: Mic, title: "Luyện nói", desc: "AI chấm phát âm ngay", color: "#EC4899", bg: "from-[#4C1D95]/30 to-transparent" },
-                { icon: Book, title: "Từ vựng", desc: "Học từ vựng theo ngữ cảnh", color: "#10B981", bg: "from-[#064E3B]/40 to-transparent" },
-                { icon: Zap, title: "Ôn tập", desc: "Củng cố kiến thức", color: "#F59E0B", bg: "from-[#78350F]/40 to-transparent" },
+                { icon: Headphones, title: "Luyện nghe", desc: "Nghe và nhại lại câu thoại", color: "#818CF8", bg: "from-[#312E81]/30 to-transparent" },
+                { icon: Mic, title: "Luyện nói", desc: "AI chấm phát âm ngay", color: "#EC4899", bg: "from-[#831843]/30 to-transparent" },
+                { icon: Book, title: "Từ vựng", desc: "Học từ vựng theo ngữ cảnh", color: "#6366F1", bg: "from-[#312E81]/30 to-transparent" },
+                { icon: Zap, title: "Ôn tập", desc: "Củng cố kiến thức", color: "#F59E0B", bg: "from-[#78350F]/30 to-transparent" },
               ].map((action, idx) => (
-                <button key={idx} className={`bg-[#16171E] hover:bg-[#1A1D2D] border border-white/5 rounded-3xl p-5 text-left transition-all group relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
+                <button key={idx} className={`bg-[#13141C] hover:bg-[#1A1D2D] border border-white/5 rounded-3xl p-5 text-left transition-all group relative overflow-hidden flex flex-col justify-between min-h-[140px]`}>
                   <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-br ${action.bg} opacity-0 group-hover:opacity-100 transition-opacity`} />
                   <div className="flex items-start justify-between relative z-10">
-                    <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
                       <action.icon size={20} color={action.color} />
                     </div>
-                    <ChevronRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
+                    <ArrowRight size={16} className="text-slate-600 group-hover:text-white transition-colors" />
                   </div>
                   <div className="relative z-10 mt-4">
                     <h3 className="text-sm font-black text-white">{action.title}</h3>
@@ -341,10 +341,10 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                       <button 
                         key={tab}
                         onClick={() => setActiveSgkTab(tab)}
-                        className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-colors ${
+                        className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
                           activeSgkTab === tab 
                             ? "bg-[#6366F1] text-white shadow-[0_2px_10px_rgba(99,102,241,0.3)]" 
-                            : "bg-[#16171E] text-slate-400 hover:text-white hover:bg-white/5 border border-white/5"
+                            : "bg-[#13141C] text-slate-400 hover:text-white hover:bg-white/5 border border-white/5"
                         }`}
                       >
                         {tab}
@@ -361,7 +361,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               {/* Horizontal Scroll Cards */}
               <div className="flex gap-4 overflow-x-auto custom-scrollbar pb-4 -mx-8 px-8 snap-x">
                 {mockSgkUnits.map((unit, idx) => (
-                  <div key={idx} className="shrink-0 w-[280px] sm:w-[320px] bg-[#16171E] border border-white/5 rounded-3xl overflow-hidden group cursor-pointer snap-start shadow-lg">
+                  <div key={idx} className="shrink-0 w-[280px] sm:w-[320px] bg-[#13141C] border border-white/5 rounded-3xl overflow-hidden group cursor-pointer snap-start shadow-lg">
                     {/* Thumbnail */}
                     <div className="relative h-[160px] w-full overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-[#16171E] via-transparent to-transparent z-10" />
