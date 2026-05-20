@@ -58,8 +58,7 @@ export default function HomePage() {
                 </button>
               </Link>
               <Link href="/demo">
-                {/* Secondary Pastel Button */}
-                <button className="w-full sm:w-auto bg-blue-50 text-blue-600 rounded-2xl px-10 py-4 font-bold transition-all hover:bg-blue-100 text-lg cursor-pointer flex items-center justify-center gap-2 border-none">
+                <button className="w-full sm:w-auto bg-blue-50 text-blue-600 rounded-2xl px-10 py-4 font-bold transition-all hover:bg-blue-100 active:scale-95 text-lg cursor-pointer flex items-center justify-center gap-2 border-none">
                   Xem Demo <ArrowRight size={18} />
                 </button>
               </Link>
@@ -73,8 +72,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="relative w-full max-w-4xl mx-auto mt-20 h-64 md:h-[400px]"
           >
-            {/* Card 1: Chat bubbles (Left Behind) */}
-            <div className="absolute left-0 md:left-10 top-10 md:top-20 w-48 md:w-64 bg-white/90 backdrop-blur-md p-5 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)] border border-white z-10 transform -rotate-6">
+            <div className="hidden md:block absolute left-0 md:left-10 top-10 md:top-20 w-48 md:w-64 bg-white/90 backdrop-blur-md p-5 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)] border border-white z-10 transform -rotate-6">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
                   <MessageCircle size={14} className="text-amber-600" />
@@ -93,8 +91,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Card 3: Streak/Chart (Right Behind) */}
-            <div className="absolute right-0 md:right-10 top-5 md:top-12 w-48 md:w-64 bg-white/90 backdrop-blur-md p-5 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)] border border-white z-10 transform rotate-3">
+            <div className="hidden md:block absolute right-0 md:right-10 top-5 md:top-12 w-48 md:w-64 bg-white/90 backdrop-blur-md p-5 rounded-3xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.05)] border border-white z-10 transform rotate-3">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="font-bold text-slate-900 text-sm">Tiến độ tuần</h4>
                 <BarChart3 size={16} className="text-indigo-400" />
@@ -196,7 +193,7 @@ export default function HomePage() {
               {/* Content */}
               <div className="p-8">
                 <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Phát âm chuẩn xác</h3>
-                <p className="text-slate-600 font-medium leading-relaxed">
+                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
                   Công nghệ AI nhận diện giọng nói siêu việt, chỉ ra chính xác lỗi sai và cách khắc phục như một giáo viên bản ngữ.
                 </p>
               </div>
@@ -223,7 +220,7 @@ export default function HomePage() {
               {/* Content */}
               <div className="p-8">
                 <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Phản hồi thời gian thực</h3>
-                <p className="text-slate-600 font-medium leading-relaxed">
+                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
                   Nhận điểm số và nhận xét chi tiết ngay lập tức sau mỗi câu nói. Rèn luyện sự lưu loát và tự tin tuyệt đối.
                 </p>
               </div>
@@ -250,7 +247,7 @@ export default function HomePage() {
               {/* Content */}
               <div className="p-8">
                 <h3 className="text-2xl font-extrabold text-slate-900 mb-3">Lộ trình cá nhân hóa</h3>
-                <p className="text-slate-600 font-medium leading-relaxed">
+                <p className="text-slate-600 font-medium leading-relaxed line-clamp-3">
                   Hệ thống tự động phân tích điểm mạnh yếu để xây dựng lộ trình luyện nghe, chép chính tả và nói bám sát năng lực.
                 </p>
               </div>
@@ -293,8 +290,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <Link href="/signup">
-                {/* Secondary Pastel Button */}
-                <button className="w-full py-4 rounded-2xl bg-white text-blue-600 font-bold transition-all border-none shadow-sm hover:shadow-md cursor-pointer text-lg">
+                <button className="w-full py-4 rounded-2xl bg-white text-blue-600 font-bold transition-all active:scale-95 border-none shadow-sm hover:shadow-md cursor-pointer text-lg">
                   Bắt đầu miễn phí
                 </button>
               </Link>
@@ -306,7 +302,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="bg-slate-900 text-white rounded-[2rem] p-10 flex flex-col relative transform md:-translate-y-4 shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] border-none"
+              className="bg-slate-900 text-white rounded-[2rem] p-10 flex flex-col relative transform md:-translate-y-4 shadow-[0_20px_50px_rgba(59,130,246,0.25)] ring-1 ring-white/10 border-none"
             >
               <div className="absolute top-0 right-8 -translate-y-1/2 bg-gradient-to-r from-blue-500 to-teal-400 text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg border-none">
                 Phổ biến nhất

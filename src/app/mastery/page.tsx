@@ -272,7 +272,7 @@ export default function EnglishMasteryDashboard() {
           </div>
 
           {/* Horizontal Scroll Movies */}
-          <div className="flex gap-6 overflow-x-auto pb-8 pt-2 hide-scrollbar snap-x">
+          <div className="flex gap-6 overflow-x-auto pb-8 pt-2 hide-scrollbar snap-x after:content-[''] after:min-w-[24px]">
             {[
               { title: "The Godfather", year: "1972", genre: "Tâm lý", views: "12N", gradient: "from-amber-800 to-rose-900" },
               { title: "The Dark Knight", year: "2008", genre: "Hành động", views: "45N", gradient: "from-slate-800 to-slate-900" },
@@ -287,7 +287,7 @@ export default function EnglishMasteryDashboard() {
               >
                 <div className={`w-full aspect-[2/3] rounded-3xl bg-gradient-to-br ${movie.gradient} relative overflow-hidden shadow-lg mb-4 flex items-center justify-center p-6 text-center`}>
                   {/* Fake Poster Abstract */}
-                  <h3 className="text-white font-black text-2xl leading-tight opacity-80">{movie.title.toUpperCase()}</h3>
+                  <h3 className="text-white font-black text-2xl leading-tight drop-shadow-md">{movie.title.toUpperCase()}</h3>
                   
                   {/* Luyện nói Badge */}
                   <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black text-white border border-white/20 flex items-center gap-1.5">
@@ -325,8 +325,8 @@ export default function EnglishMasteryDashboard() {
                 <Flame className="text-amber-300" size={24}/>
               </div>
               <h3 className="text-2xl font-black mb-2">Thử thách Shadowing</h3>
-              <p className="font-medium text-white/80 mb-6 max-w-[80%]">Luyện phát âm đuôi -ed một cách tự nhiên như người bản xứ.</p>
-              <button className="bg-white text-indigo-600 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-slate-50 transition-colors border-none cursor-pointer">
+              <p className="font-medium text-white/80 mb-6 max-w-[80%] line-clamp-2">Luyện phát âm đuôi -ed một cách tự nhiên như người bản xứ.</p>
+              <button className="bg-white text-indigo-600 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-slate-50 active:scale-95 transition-all border-none cursor-pointer">
                 Bắt đầu thử thách
               </button>
             </div>
@@ -341,8 +341,8 @@ export default function EnglishMasteryDashboard() {
                 <BookOpen className="text-white" size={24}/>
               </div>
               <h3 className="text-2xl font-black mb-2">Luyện nghe chép chính tả</h3>
-              <p className="font-medium text-white/80 mb-6 max-w-[80%]">Phát triển tư duy ngôn ngữ qua các bài tập Dictation thiết kế chuẩn mực.</p>
-              <button className="bg-white text-emerald-600 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-slate-50 transition-colors border-none cursor-pointer">
+              <p className="font-medium text-white/80 mb-6 max-w-[80%] line-clamp-2">Phát triển tư duy ngôn ngữ qua các bài tập Dictation thiết kế chuẩn mực.</p>
+              <button className="bg-white text-emerald-600 px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-slate-50 active:scale-95 transition-all border-none cursor-pointer">
                 Vào luyện nghe
               </button>
             </div>
