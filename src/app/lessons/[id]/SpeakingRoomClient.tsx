@@ -4,16 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronLeft, 
   Mic, 
   Square, 
-  Play, 
   RefreshCw, 
   CheckCircle2, 
   Volume2, 
-  Star, 
-  Award,
-  Trophy,
   VolumeX,
   X,
   AlertCircle
@@ -24,6 +19,7 @@ import { evaluateSpeaking } from "@/app/actions/speaking";
 interface DialogLine {
   speaker: string;
   text: string;
+  translation?: string;
 }
 
 interface WordEvaluation {
@@ -73,6 +69,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
   const [waveform, setWaveform] = useState<number[]>(Array(30).fill(10));
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
+  const [lives, setLives] = useState<number>(5);
 
   // Active evaluation results for current turn
   const [currentScore, setCurrentScore] = useState<number | null>(null);
@@ -98,7 +95,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
   const analyserRef = useRef<AnalyserNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Check login session & initialize scores history array
+  // Check login session & initialize profile
   useEffect(() => {
     async function checkSession() {
       try {
@@ -133,7 +130,6 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       const newWaveform: number[] = [];
       for (let i = 0; i < 30; i++) {
         const raw = dataArray[i] || 0;
-        // Normalizing mic frequency amplitude into clean 10% - 90% heights
         const height = Math.max(10, Math.round((raw / 255) * 80) + 10);
         newWaveform.push(height);
       }
@@ -148,7 +144,6 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       if (animationFrame.current) {
         cancelAnimationFrame(animationFrame.current);
       }
-      // Defer updating state to avoid react-hooks/set-state-in-effect
       const timer = setTimeout(() => {
         setWaveform(Array(30).fill(10));
       }, 0);
@@ -217,7 +212,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
     }
   };
 
-  // Run AI Speech evaluation using Groq/OpenAI Whisper
+  // Run AI Speech evaluation
   const analyzeSpeech = async (blob: Blob) => {
     setIsAnalyzing(true);
 
@@ -242,7 +237,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
           setCurrentFeedback(result.coachFeedback);
           setCurrentWordEvaluations(result.wordEvaluations);
 
-          // Save evaluated score into the dialogue history
+          // Save evaluated score into dialogue history
           setDialogueScores((prev) => {
             const updated = [...prev];
             updated[activeTurn] = {
@@ -253,8 +248,14 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
             };
             return updated;
           });
+
+          // Deduct life if score is less than 80% (SAI)
+          if (result.accuracy < 80) {
+            setLives((prev) => Math.max(0, prev - 1));
+          }
         } else {
           setCurrentFeedback(result.coachFeedback || "Không phân tích được phát âm. Thử nói lại nhé!");
+          setLives((prev) => Math.max(0, prev - 1));
         }
       } catch (err) {
         console.error("Evaluation error:", err);
@@ -272,7 +273,7 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-US";
-      utterance.rate = 0.85; // Slower for clear comprehension
+      utterance.rate = 0.85;
 
       utterance.onend = () => {
         setIsPlayingTTS(false);
@@ -290,7 +291,6 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
   const handleNextTurn = () => {
     if (activeTurn < dialogs.length - 1) {
       setActiveTurn((prev) => prev + 1);
-      // Reset active turn states
       setAudioUrl(null);
       setCurrentScore(null);
       setCurrentFeedback(null);
@@ -322,27 +322,26 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
     };
   }, []);
 
-  // Word-by-word highlight inside bubble (ELSA style)
+  // Word-by-word highlight inside the target text area
   const renderWords = () => {
     const currentSentence = dialogs[activeTurn]?.text || "";
     
     if (currentWordEvaluations && currentWordEvaluations.length > 0) {
       return (
-        <div className="flex flex-wrap gap-x-2 gap-y-1 font-extrabold text-3xl md:text-4xl text-slate-800 leading-normal tracking-tight font-display select-text">
+        <div className="flex flex-wrap gap-x-2 gap-y-2 font-display font-extrabold text-4xl md:text-5xl text-slate-800 leading-normal tracking-tight justify-center select-text">
           {currentWordEvaluations.map((w, idx) => {
             let colorClass = "text-slate-800";
             if (w.status === "correct") {
               colorClass = "text-emerald-500 hover:text-emerald-600";
-            } else if (w.status === "imperfect") {
-              colorClass = "text-amber-500 hover:text-amber-600";
-            } else if (w.status === "missing") {
-              colorClass = "text-rose-500 line-through decoration-rose-300 hover:text-rose-600";
+            } else {
+              // Highlight incorrect / imperfect / missing in RED
+              colorClass = "text-red-500 hover:text-red-600";
             }
 
             return (
               <span 
                 key={idx}
-                className={`${colorClass} cursor-pointer transition-colors px-0.5 rounded hover:bg-slate-50`}
+                className={`${colorClass} cursor-pointer transition-colors px-1 rounded-xl hover:bg-slate-50`}
                 onClick={() => speakSentence(w.word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,""))}
                 title={`Độ chính xác: ${w.accuracy}% (Bấm để nghe từ này)`}
               >
@@ -355,130 +354,110 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
     }
 
     return (
-      <h3 className="text-3xl md:text-4xl font-extrabold text-slate-800 leading-normal tracking-tight font-display select-text">
+      <h3 className="text-4xl md:text-5xl font-extrabold text-slate-800 leading-normal tracking-tight font-display select-text text-center">
         {currentSentence}
       </h3>
     );
   };
 
   return (
-    <div className="bg-[#f8f9fa] min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+    <div className="bg-white min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden select-none pb-36 font-sans">
+      
       {/* 1. ROOM HEADER - FOCUS MODE */}
       <header className="w-full max-w-4xl mx-auto px-6 h-20 flex items-center justify-between gap-6 shrink-0 z-40">
-        {/* Exit button */}
+        {/* Grey Exit [X] button */}
         <Link 
           href="/learn"
-          className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100/80"
+          className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"
           title="Thoát"
         >
           <X size={28} className="stroke-[2.5]" />
         </Link>
 
-        {/* Duolingo progress bar */}
-        <div className="flex-1 h-4 bg-slate-200/60 rounded-full overflow-hidden border border-slate-300/30 relative">
+        {/* Thick Duolingo Green Progress Bar */}
+        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden relative">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progressPercent}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.3)] relative"
-          >
-            {/* Shiny overlay for realistic 3D feel */}
-            <div className="absolute top-0.5 inset-x-1 h-1 bg-white/20 rounded-full" />
-          </motion.div>
+            className="h-full bg-green-500 rounded-full"
+          />
         </div>
 
-        {/* Completion Stats / Hearts or Streaks (e.g. Flame emoji) */}
-        <div className="flex items-center gap-1.5 font-extrabold text-amber-500 text-base md:text-lg select-none">
-          <span>🔥</span>
-          <span>{completedCount}</span>
+        {/* Hearts/Lives corner */}
+        <div className="flex items-center gap-1.5 font-black text-rose-500 text-lg md:text-xl select-none">
+          <span>❤️</span>
+          <span>{lives}</span>
         </div>
       </header>
 
-      {/* 2. CENTERED CONTENT */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-6 flex flex-col items-center justify-center gap-8 md:gap-10">
-        <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-8 md:gap-10">
-          
-          {/* Mascot Teacher: Cute breathing/floating robot/teacher container */}
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            className="relative w-24 h-24 md:w-32 md:h-32 bg-gradient-to-tr from-blue-100 to-indigo-50 border-2 border-blue-200 rounded-3xl flex items-center justify-center shadow-lg shrink-0 select-none"
-          >
-            <span className="text-5xl md:text-6xl">🤖</span>
-            {/* Little status light */}
-            <span className="absolute -bottom-1 -right-1 bg-emerald-500 border-2 border-white w-5 h-5 rounded-full shadow-sm animate-pulse" />
-          </motion.div>
+      {/* 2. CENTRAL CONTENT (PRACTICE AREA - REDESIGNED FOCUS MODE) */}
+      <main className="flex-1 max-w-3xl w-full mx-auto px-6 py-8 flex flex-col items-center justify-center gap-10">
+        
+        {/* Breathing Mascot centered nicely above content */}
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+          className="w-24 h-24 bg-gradient-to-tr from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl flex items-center justify-center shadow-md select-none shrink-0"
+        >
+          <span className="text-5xl">🤖</span>
+        </motion.div>
 
-          {/* Chat Bubble: Contains the giant English target text and speaker icon */}
-          <div className="relative bg-white border-2 border-slate-200/80 rounded-[2.5rem] p-8 md:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] max-w-xl flex-1 flex flex-col gap-6
-            before:content-[''] before:absolute before:left-1/2 before:-top-3 before:-translate-x-1/2 before:w-6 before:h-6 before:bg-white before:border-l-2 before:border-t-2 before:border-slate-200/80 before:rotate-45 before:rounded-tl-md
-            md:before:left-auto md:before:-left-3 md:before:top-12 md:before:-translate-x-0 md:before:border-t-0 md:before:border-l-2 md:before:border-b-2 md:before:rotate-45 md:before:rounded-bl-md"
-          >
-            {/* Speaker/Speaker Role Tag */}
-            <div className="flex items-center justify-between gap-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                dialogs[activeTurn]?.speaker?.toLowerCase().includes("phong")
-                  ? "bg-blue-50 text-blue-600 border border-blue-100"
-                  : "bg-orange-50 text-orange-600 border border-orange-100"
-              }`}>
-                {dialogs[activeTurn]?.speaker}
-              </span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Câu {activeTurn + 1} / {dialogs.length}
-              </span>
+        {/* Main English target sentence & audio play trigger */}
+        <div className="w-full flex flex-col items-center gap-6">
+          <div className="flex items-center justify-center gap-4 flex-wrap w-full max-w-2xl">
+            <div className="flex-1 flex justify-center text-center">
+              {renderWords()}
             </div>
-
-            {/* Giant target sentence text display */}
-            <div className="flex gap-4 items-start justify-between">
-              <div className="flex-1 text-left">
-                {renderWords()}
-              </div>
-              
-              {/* Compact Speaker Icon */}
-              <button
-                onClick={() => speakSentence(dialogs[activeTurn]?.text)}
-                disabled={isPlayingTTS}
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all shrink-0 ${
-                  isPlayingTTS 
-                    ? "bg-slate-100 border-slate-200 text-slate-400" 
-                    : "bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 hover:scale-105 active:scale-95 shadow-sm"
-                }`}
-                title="Nghe phát âm mẫu"
-              >
-                {isPlayingTTS ? (
-                  <VolumeX size={20} className="animate-pulse" />
-                ) : (
-                  <Volume2 size={20} className="stroke-[2.5]" />
-                )}
-              </button>
-            </div>
-
-            {/* Encouraging coach advice if any */}
-            {currentFeedback && currentScore !== null && (
-              <div className="flex gap-3 items-start bg-slate-50 border border-slate-100 p-4 rounded-2xl mt-2">
-                <div className="text-xl select-none">👩‍🏫</div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider mb-0.5">Lời khuyên của Cô:</p>
-                  <p className="text-xs text-slate-600 font-bold leading-relaxed">
-                    {currentFeedback}
-                  </p>
-                </div>
-              </div>
-            )}
+            
+            {/* Loudspeaker Button placed next to the English text */}
+            <button
+              onClick={() => speakSentence(dialogs[activeTurn]?.text)}
+              disabled={isPlayingTTS}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all shrink-0 shadow-sm ${
+                isPlayingTTS
+                  ? "bg-gray-100 border-gray-200 text-gray-400 animate-pulse"
+                  : "bg-blue-50 border-blue-200 text-blue-500 hover:bg-blue-100 hover:scale-105 active:scale-95"
+              }`}
+              title="Nghe phát âm mẫu"
+            >
+              {isPlayingTTS ? (
+                <VolumeX size={24} className="animate-pulse" />
+              ) : (
+                <Volume2 size={24} className="stroke-[2.5]" />
+              )}
+            </button>
           </div>
 
+          {/* Vietnamese Translation Row */}
+          <p className="text-lg text-slate-400 font-semibold text-center max-w-xl">
+            {dialogs[activeTurn]?.translation || "Nhấn nút loa bên cạnh để nghe cách phát âm chuẩn nhé."}
+          </p>
         </div>
+
+        {/* Teacher coach feedback box inside center content */}
+        {currentFeedback && currentScore !== null && (
+          <div className="w-full max-w-xl bg-slate-50 border border-slate-100 p-5 rounded-2xl flex gap-3 text-left">
+            <div className="text-2xl select-none">👩‍🏫</div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider mb-0.5">Lời khuyên của Cô:</p>
+              <p className="text-xs text-slate-600 font-bold leading-relaxed">
+                {currentFeedback}
+              </p>
+            </div>
+          </div>
+        )}
       </main>
 
-      {/* 3. DYNAMIC STICKY BOTTOM ACTION BAR */}
-      <footer className={`fixed bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out border-t pb-8 pt-6 px-6 ${
+      {/* 3. DYNAMIC STICKY BOTTOM ACTION BAR (DUOLINGO FOCUS FOOTER) */}
+      <footer className={`fixed bottom-0 left-0 right-0 z-50 border-t p-6 transition-all duration-300 ease-in-out ${
         currentScore === null 
-          ? "bg-white border-slate-200/80 shadow-[0_-8px_30px_rgb(0,0,0,0.03)]" 
+          ? "bg-white border-gray-200" 
           : currentScore >= 80 
-            ? "bg-[#d7f5db] border-t-2 border-[#b8ebd0]" 
-            : "bg-[#ffdfe0] border-t-2 border-[#ffc4c6]"
+            ? "bg-green-100 border-green-200 shadow-[0_-8px_30px_rgba(34,197,94,0.1)]" 
+            : "bg-red-100 border-red-200 shadow-[0_-8px_30px_rgba(239,68,68,0.1)]"
       }`}>
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
+        <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 w-full">
           
           <AnimatePresence mode="wait">
             {currentScore === null ? (
@@ -488,33 +467,43 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                className="w-full flex flex-col items-center gap-4 py-2"
+                className="w-full flex items-center justify-between gap-6"
               >
-                {isAnalyzing ? (
-                  <div className="flex flex-col items-center justify-center gap-3 py-4">
-                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin shadow-sm" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 animate-pulse">
-                      AI đang phân tích giọng đọc...
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    {/* Giant 3D microphone button */}
+                {/* Left instructions */}
+                <div className="hidden md:flex flex-col items-start gap-1 flex-1">
+                  <span className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                    {isRecording ? "Đang thu âm..." : "Sẵn sàng luyện nói"}
+                  </span>
+                  <span className="text-xs text-slate-400 font-semibold">
+                    {isRecording ? "Chạm mic để dừng và chấm điểm" : "Chạm biểu tượng Micro để bắt đầu nói"}
+                  </span>
+                </div>
+
+                {/* Centered Giant Microphone Button */}
+                <div className="flex-1 flex flex-col items-center justify-center relative">
+                  {isAnalyzing ? (
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 animate-pulse">
+                        AI Đang Chấm Điểm...
+                      </span>
+                    </div>
+                  ) : (
                     <div className="relative">
-                      {/* Recording expanding waves */}
+                      {/* Recording Ping/Pulse Waves */}
                       {isRecording && (
                         <>
                           <motion.div
                             initial={{ scale: 0.9, opacity: 0.6 }}
                             animate={{ scale: 1.6, opacity: 0 }}
                             transition={{ repeat: Infinity, duration: 1.5, ease: "easeOut" }}
-                            className="absolute inset-0 bg-red-400 rounded-full z-0"
+                            className="absolute inset-0 bg-blue-400 rounded-full z-0"
                           />
                           <motion.div
                             initial={{ scale: 0.9, opacity: 0.8 }}
                             animate={{ scale: 1.3, opacity: 0 }}
                             transition={{ repeat: Infinity, duration: 1.5, delay: 0.4, ease: "easeOut" }}
-                            className="absolute inset-0 bg-red-300 rounded-full z-0"
+                            className="absolute inset-0 bg-blue-300 rounded-full z-0"
                           />
                         </>
                       )}
@@ -523,49 +512,43 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all duration-300 z-10 relative cursor-pointer text-white ${
-                          isRecording
-                            ? "bg-red-500 hover:bg-red-600 shadow-[0_6px_0_#b91c1c] active:translate-y-[6px] active:shadow-none"
-                            : "bg-blue-500 hover:bg-blue-600 shadow-[0_6px_0_#1d4ed8] active:translate-y-[6px] active:shadow-none"
-                        }`}
+                        className="w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 z-10 relative cursor-pointer text-white bg-blue-500 hover:bg-blue-600 shadow-[0_6px_0_rgb(37,99,235)] active:translate-y-[6px] active:shadow-none border-none outline-none"
                         title={isRecording ? "Dừng ghi âm" : "Bắt đầu ghi âm"}
                       >
                         {isRecording ? (
-                          <Square size={28} fill="currentColor" />
+                          <Square size={24} fill="currentColor" />
                         ) : (
-                          <Mic size={32} className="stroke-[2.5]" />
+                          <Mic size={28} className="stroke-[2.5]" />
                         )}
                       </motion.button>
                     </div>
+                  )}
 
-                    {/* Microphone input visualizer */}
-                    {isRecording && (
-                      <div className="flex items-center justify-center gap-1 h-6">
-                        {waveform.slice(0, 15).map((h, i) => (
-                          <motion.div
-                            key={i}
-                            animate={{ height: `${h * 0.25}px` }}
-                            className="w-1 bg-red-400 rounded-full"
-                            style={{ minHeight: "4px" }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                  {/* Mic visualizer / error row */}
+                  {isRecording && (
+                    <div className="flex items-center justify-center gap-1 h-4 mt-2">
+                      {waveform.slice(0, 15).map((h, i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ height: `${h * 0.15}px` }}
+                          className="w-0.5 bg-blue-400 rounded-full"
+                          style={{ minHeight: "2px" }}
+                        />
+                      ))}
+                    </div>
+                  )}
 
-                    {micError ? (
-                      <span className="text-red-500 text-xs font-bold px-4 py-1.5 bg-red-50 rounded-xl border border-red-100 max-w-sm mt-1 animate-pulse">
-                        ⚠️ {micError}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        {isRecording ? "Đang thu âm... Chạm nút đỏ để chấm điểm" : "Chạm biểu tượng Micro để bắt đầu nói"}
-                      </span>
-                    )}
-                  </div>
-                )}
+                  {micError && (
+                    <span className="text-red-500 text-xs font-bold px-4 py-1.5 bg-red-50 rounded-xl border border-red-100 max-w-sm mt-2 animate-pulse text-center">
+                      ⚠️ {micError}
+                    </span>
+                  )}
+                </div>
+
+                <div className="hidden md:block flex-1" />
               </motion.div>
             ) : currentScore >= 80 ? (
-              /* State 2: Success Graded State (>80%) */
+              /* State 2: SUCCESS DYNAMIC STATE (>80% - Green theme) */
               <motion.div
                 key="success-bar"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -573,35 +556,29 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-1"
               >
-                {/* Left message */}
-                <div className="flex items-center gap-4 text-[#155724] select-none text-center sm:text-left">
-                  <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-[0_4px_0_#0f766e] shrink-0">
+                {/* Left Congratulation message */}
+                <div className="flex items-center gap-4 text-green-800 select-none text-center sm:text-left">
+                  <div className="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-[0_4px_0_#15803d] shrink-0">
                     <CheckCircle2 size={28} className="stroke-[3]" />
                   </div>
                   <div>
                     <h4 className="text-xl font-black tracking-tight leading-tight">Tuyệt vời! ({currentScore}%)</h4>
-                    <p className="text-sm font-semibold opacity-95">
+                    <p className="text-xs font-bold opacity-95">
                       Bạn đã hoàn thành xuất sắc câu thoại này.
                     </p>
                   </div>
                 </div>
 
-                {/* Right button */}
+                {/* Duolingo style tràn viền big continue button */}
                 <button
                   onClick={handleNextTurn}
-                  className="w-full sm:w-auto px-10 py-4 bg-[#58cc02] hover:bg-[#46a302] text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_5px_0_#3fa001] active:translate-y-[5px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-12 py-4 bg-green-500 hover:bg-green-600 text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_6px_0_rgb(34,197,94)] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
                 >
-                  {activeTurn < dialogs.length - 1 ? (
-                    "Tiếp tục"
-                  ) : (
-                    <>
-                      <Trophy size={16} fill="currentColor" /> Hoàn thành bài học! 🎉
-                    </>
-                  )}
+                  {activeTurn < dialogs.length - 1 ? "Tuyệt vời, Tiếp tục!" : "Hoàn thành bài học! 🎉"}
                 </button>
               </motion.div>
             ) : (
-              /* State 3: Failure Graded State (<80%) */
+              /* State 3: FAILURE DYNAMIC STATE (<80% - Red theme) */
               <motion.div
                 key="fail-bar"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -609,25 +586,25 @@ export default function SpeakingRoomClient({ lesson }: SpeakingRoomClientProps) 
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 py-1"
               >
-                {/* Left message */}
-                <div className="flex items-center gap-4 text-[#721c24] select-none text-center sm:text-left">
-                  <div className="w-14 h-14 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-[0_4px_0_#9f1239] shrink-0">
+                {/* Left Try Again message */}
+                <div className="flex items-center gap-4 text-red-800 select-none text-center sm:text-left">
+                  <div className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center shadow-[0_4px_0_#b91c1c] shrink-0">
                     <AlertCircle size={28} className="stroke-[3]" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black tracking-tight leading-tight">Thử lại một chút nhé ({currentScore}%)</h4>
-                    <p className="text-sm font-semibold opacity-95">
-                      Cần đạt trên 80% để hoàn thành. Hãy sửa các từ màu đỏ.
+                    <h4 className="text-xl font-black tracking-tight leading-tight">Thử lại nhé ({currentScore}%)</h4>
+                    <p className="text-xs font-bold opacity-95">
+                      Cần đạt trên 80% để tiếp tục. Hãy sửa lại phát âm các từ màu đỏ.
                     </p>
                   </div>
                 </div>
 
-                {/* Right button */}
+                {/* Duolingo style Try again button */}
                 <button
                   onClick={handleResetTurn}
-                  className="w-full sm:w-auto px-10 py-4 bg-[#ff4b4b] hover:bg-[#ea4343] text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_5px_0_#ea2b2b] active:translate-y-[5px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-12 py-4 bg-red-500 hover:bg-red-600 text-white font-extrabold text-sm uppercase tracking-widest rounded-2xl shadow-[0_6px_0_rgb(239,68,68)] active:translate-y-[6px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer border-none outline-none"
                 >
-                  <RefreshCw size={16} className="stroke-[2.5]" /> Thử lại ngay
+                  <RefreshCw size={16} className="stroke-[2.5]" /> Thử lại
                 </button>
               </motion.div>
             )}
