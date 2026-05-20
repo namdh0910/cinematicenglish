@@ -72,7 +72,7 @@ export default function RootLayout({
             }}
           />
       </head>
-      <body className="antialiased bg-sage-green text-slate-900">
+      <body className="antialiased bg-[var(--bg-primary)] text-[var(--text-primary)]">
         <ObservabilityInitializer />
         <AdaptiveProvider>
           {children}
