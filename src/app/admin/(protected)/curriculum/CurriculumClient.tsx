@@ -119,14 +119,15 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
     question: string;
     options: string[];
     correctAnswer: number;
+    explanation: string;
   }>>([
-    { question: "", options: ["", "", "", ""], correctAnswer: 0 }
+    { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }
   ]);
 
   const addQuizQuestion = () => {
     setQuizQuestions([
       ...quizQuestions,
-      { question: "", options: ["", "", "", ""], correctAnswer: 0 }
+      { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }
     ]);
   };
 
@@ -141,6 +142,8 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
       updated[index].question = value;
     } else if (field === "correctAnswer") {
       updated[index].correctAnswer = Number(value);
+    } else if (field === "explanation") {
+      updated[index].explanation = value;
     }
     setQuizQuestions(updated);
   };
@@ -327,7 +330,8 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
           questions: quizQuestions.map(q => ({
             question: q.question.trim(),
             options: q.options.map(opt => opt.trim()),
-            correctAnswer: q.correctAnswer
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation.trim()
           }))
         };
       }
@@ -1034,19 +1038,30 @@ export default function CurriculumClient({ initialGrades }: CurriculumClientProp
                               ))}
                             </div>
 
-                            <div className="space-y-1">
-                              <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Đáp án đúng</label>
-                              <select
-                                value={q.correctAnswer}
-                                onChange={(e) => handleQuizQuestionChange(qIdx, "correctAnswer", e.target.value)}
-                                className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white cursor-pointer font-bold"
-                              >
-                                {optionLetters.map((letter, oIdx) => (
-                                  <option key={oIdx} value={oIdx}>
-                                    Đáp án {letter}
-                                  </option>
-                                ))}
-                              </select>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Đáp án đúng</label>
+                                <select
+                                  value={q.correctAnswer}
+                                  onChange={(e) => handleQuizQuestionChange(qIdx, "correctAnswer", e.target.value)}
+                                  className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white cursor-pointer font-bold"
+                                >
+                                  {optionLetters.map((letter, oIdx) => (
+                                    <option key={oIdx} value={oIdx}>
+                                      Đáp án {letter}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[8px] font-bold uppercase tracking-wider text-white/40">Giải thích AI (Tùy chọn)</label>
+                                <textarea
+                                  value={q.explanation}
+                                  onChange={(e) => handleQuizQuestionChange(qIdx, "explanation", e.target.value)}
+                                  placeholder="Giải thích ngữ pháp/từ vựng cho đáp án đúng..."
+                                  className="w-full bg-[#121212] border border-white/5 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-500/50 text-white resize-none h-[34px] custom-scrollbar"
+                                />
+                              </div>
                             </div>
                           </div>
                         ))}

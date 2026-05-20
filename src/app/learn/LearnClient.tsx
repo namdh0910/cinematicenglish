@@ -162,11 +162,29 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   const recoveryMissions = [
     {
       id: "rec-1",
-      title: "Phục hồi Kỹ năng Nghe Chép: Đời sống Gia đình (Household Chores)",
-      skill: "Nghe & Chép chính tả",
+      title: "Phòng Luyện Phát Âm AI (AI Virtual Speaking Room): Global citizen",
+      skill: "AI Virtual Speaking",
       difficulty: "Trung cấp",
+      xp: 200,
+      reason: "🤖 Trợ lý ảo AI: Phát âm của em đang tiến bộ rất nhanh, thực hành shadowing ngay!",
+      lessonId: "lesson-u1l2",
+      themeColor: "#10B981",
+      accentBg: "from-[#F4FDF7] via-white to-white",
+      accentBorder: "border-[#E2F7E7]",
+      hoverBorder: "hover:border-[#10B981] hover:shadow-[0_5px_0_#A7F3D0]",
+      badge: "bg-[#E6F4EA] text-[#10B981] border-2 border-[#A7F3D0]",
+      btnBg: "bg-[#10B981] shadow-[0_4px_0_#059669]",
+      leftBar: "bg-[#10B981]",
+      avatar: "🤖",
+      statsText: "🎯 Độ trôi chảy (Fluency): 85% | Độ chính xác âm thoại: 78%"
+    },
+    {
+      id: "rec-2",
+      title: "Phòng Luyện Nghe & Viết (AI Virtual Dictation Room): Household Chores",
+      skill: "AI Virtual Dictation",
+      difficulty: "Nâng cao",
       xp: 150,
-      reason: "⚠️ Độ chính xác nghe giảm xuống 68% trong bài luyện tập trước",
+      reason: "⚡ Đang kích hoạt: Sửa đổi và ôn luyện chính tả ngữ pháp để nâng cao phản xạ nghe chép",
       lessonId: "lesson-u1l2",
       themeColor: "#8B5CF6",
       accentBg: "from-[#FAF6FE] via-white to-white",
@@ -174,28 +192,18 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       hoverBorder: "hover:border-[#8B5CF6] hover:shadow-[0_5px_0_#C5A6FA]",
       badge: "bg-[#F2EDFC] text-[#8B5CF6] border-2 border-[#E1D4FB]",
       btnBg: "bg-[#8B5CF6] shadow-[0_4px_0_#7C3AED]",
-      leftBar: "bg-[#8B5CF6]"
-    },
-    {
-      id: "rec-2",
-      title: "Thử thách Shadowing: Luyện phát âm đuôi '-ed' chuẩn ngữ điệu",
-      skill: "Luyện nói / Nhịp điệu",
-      difficulty: "Cơ bản",
-      xp: 200,
-      reason: "🔥 Đang kích hoạt: Hoàn thành để nhân hệ số chuỗi học tập 5 ngày",
-      lessonId: "lesson-u1l2",
-      themeColor: "#58CC02",
-      accentBg: "from-[#F4FDF7] via-white to-white",
-      accentBorder: "border-[#E8FBEF]",
-      hoverBorder: "hover:border-[#58CC02] hover:shadow-[0_5px_0_#A6E97E]",
-      badge: "bg-[#E8F9EE] text-[#58CC02] border-2 border-[#B3F2C9]",
-      btnBg: "bg-[#58CC02] shadow-[0_4px_0_#46A302]",
-      leftBar: "bg-[#58CC02]"
+      leftBar: "bg-[#8B5CF6]",
+      avatar: "✍️",
+      statsText: "⏱️ Tốc độ gõ trung bình: 45 wpm | Tỷ lệ viết đúng: 92%"
     }
   ];
 
   return (
-    <div className="bg-sage-green min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
+    <div className="bg-[#F8FAFC] bg-gradient-to-br from-[#F8FAFC] via-[#F1F5F9] to-[#EEF2F6] min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans relative overflow-hidden">
+      {/* Background glassmorphic glow elements */}
+      <div className="absolute top-20 left-10 w-96 h-96 rounded-full bg-indigo-400/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-40 right-20 w-[400px] h-[400px] rounded-full bg-emerald-400/5 blur-[150px] pointer-events-none" />
+
       {/* Dynamic Top Navbar for mobile (automatically responsive) */}
       <Navbar />
 
@@ -209,32 +217,76 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
             {/* 1. HỌC TAB (Default Curriculum View) */}
             {activeTab === "learn" && (
               <>
-                {/* Header Greeting Banner */}
-                <div className="bg-white border-2 border-[#E5E5E5] p-6 md:p-8 rounded-[2rem] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-[0_4px_0_#E5E5E5]">
-                  <div className="space-y-1.5">
-                    <h1 className="text-2xl font-black text-[#1A1A18] tracking-tight">
-                      Chào mừng, <span className="text-[#1899D6]">{profile?.full_name || "Học viên"}</span>! 👋
-                    </h1>
-                    <p className="text-xs text-[#777777] font-semibold leading-relaxed">
-                      Hôm nay em muốn chinh phục bài học nào? Hệ thống chuẩn giáo trình phổ thông.
-                    </p>
+                {/* Header Greeting Banner - PrepEdu Dual-Pane AI Console */}
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] p-6 md:p-8 flex flex-col lg:flex-row items-stretch justify-between gap-6 border border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.35)] select-none">
+                  {/* Cybernetic visual glows */}
+                  <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
+                  <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+                  
+                  {/* Left Column: AI Status Panel */}
+                  <div className="flex flex-col md:flex-row items-center gap-6 flex-1 relative z-10">
+                    {/* Interactive Target Ring */}
+                    <div className="relative shrink-0 flex items-center justify-center w-24 h-24 bg-slate-900/60 rounded-full border border-slate-700/50 p-2 shadow-inner">
+                      <svg className="w-20 h-20 transform -rotate-90">
+                        <circle cx="40" cy="40" r="34" stroke="#334155" strokeWidth="6" fill="transparent" />
+                        <circle 
+                          cx="40" cy="40" r="34" 
+                          stroke="#10B981" strokeWidth="6" fill="transparent" 
+                          strokeDasharray={2 * Math.PI * 34}
+                          strokeDashoffset={2 * Math.PI * 34 * (1 - 0.78)}
+                          strokeLinecap="round"
+                          className="drop-shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-[8px] text-[#AFAFAF] font-black uppercase tracking-widest leading-none">TARGET</span>
+                        <span className="text-sm font-black text-white tracking-tight leading-none mt-1">9.0+</span>
+                        <span className="text-[7.5px] text-emerald-400 font-extrabold tracking-wide mt-0.5">78% Đạt</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                        <span className="bg-emerald-500/20 text-emerald-400 text-[8.5px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border border-emerald-500/30 shadow-sm flex items-center gap-1">
+                          <span className="w-1 h-1 rounded-full bg-emerald-400 animate-ping" />
+                          ⚡ PrepEdu AI Console
+                        </span>
+                        <span className="bg-indigo-500/20 text-indigo-400 text-[8.5px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border border-indigo-500/30 shadow-sm">
+                          Lộ trình cá nhân hóa
+                        </span>
+                      </div>
+                      <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-none">
+                        Chào mừng, <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 font-black">{profile?.full_name || "Học viên"}</span>! 👋
+                      </h1>
+                      <p className="text-xs text-slate-300 font-medium max-w-lg leading-relaxed">
+                        Hệ thống đã phân tích năng lực hôm nay. Em có muốn tiếp tục bứt phá điểm số với <span className="text-emerald-400 font-bold">AI Virtual Speaking Room</span> hay các game của Quizlet dưới đây?
+                      </p>
+                    </div>
                   </div>
                   
-                  {/* Search Bar */}
-                  <div className="w-full md:max-w-xs relative shrink-0">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm bài học..."
-                      className="w-full bg-[#F7F7F7] border-2 border-[#E5E5E5] rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-[#3D3D3B] placeholder:text-[#999999] focus:outline-none focus:border-[#1899D6] transition-all"
-                    />
+                  {/* Right Column: Premium Search Console */}
+                  <div className="w-full lg:max-w-xs flex flex-col justify-center gap-3 shrink-0 z-10 relative border-t lg:border-t-0 lg:border-l border-slate-800/80 pt-4 lg:pt-0 lg:pl-6">
+                    <div className="relative">
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                      <input
+                        type="text"
+                        placeholder="Tìm khóa học, phòng luyện..."
+                        className="w-full bg-slate-900/60 backdrop-blur-md border border-slate-700/60 rounded-2xl py-3 pl-10 pr-4 text-xs font-bold text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-inner"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 justify-center lg:justify-start">
+                      <span className="text-[7.5px] text-slate-400 font-black uppercase tracking-wider">Bộ lọc:</span>
+                      <button className="bg-slate-800 hover:bg-slate-750 border border-slate-700 text-white text-[8px] font-black px-2 py-1 rounded-md uppercase transition-colors">Tất cả</button>
+                      <button className="bg-slate-900 text-slate-500 text-[8px] font-black px-2 py-1 rounded-md uppercase">Phòng Thi</button>
+                      <button className="bg-slate-900 text-slate-500 text-[8px] font-black px-2 py-1 rounded-md uppercase">Lớp học</button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Student Stats Matrix */}
                 <div className="space-y-4">
                   <h3 className="text-[11px] font-black uppercase tracking-[0.12em] text-[#999999] flex items-center gap-2">
-                    <TrendingUp size={14} className="text-[#1899D6]" /> MA TRẬN CHỈ SỐ NĂNG LỰC
+                    <TrendingUp size={14} className="text-[#1899D6]" /> MA TRẬN CHỈ SỐ NĂNG LỰC CỦA EM
                   </h3>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -244,23 +296,69 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className={`bg-gradient-to-br ${stat.bgGradient} p-6 rounded-[2.2rem] border-2 ${stat.borderColor.split(' ')[2]} flex flex-col justify-between shadow-[0_5px_0_#E5E5E5] ${stat.borderColor.split(' ').slice(0, 2).join(' ')} transition-all duration-300 transform hover:-translate-y-1.5`}
+                        className={`bg-white/95 backdrop-blur-md p-6 rounded-[2.2rem] border border-slate-200/80 flex flex-col justify-between shadow-[0_12px_32px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(59,62,198,0.06)] hover:border-slate-300 transition-all duration-500 group relative overflow-hidden transform hover:-translate-y-1.5`}
                       >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.color} text-3xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-white`}>
-                            {stat.emoji}
-                          </div>
-                          <div className={`text-[9px] font-black uppercase tracking-wider ${stat.badgeBg} ${stat.trendColor} px-2.5 py-1 rounded-full border border-slate-100/50 shadow-sm flex items-center gap-1`}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                            {stat.trend}
-                          </div>
-                        </div>
                         <div>
-                          <h4 className="text-[#888888] font-black text-[10px] mb-1.5 uppercase tracking-widest leading-none">{stat.label}</h4>
+                          <div className="flex items-start justify-between mb-3.5">
+                            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${stat.color} text-2xl shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-white`}>
+                              {stat.emoji}
+                            </div>
+                            <div className={`text-[8px] font-black uppercase tracking-wider ${stat.badgeBg} ${stat.trendColor} px-2.5 py-1 rounded-full border border-slate-100/50 shadow-sm flex items-center gap-1`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                              {stat.trend}
+                            </div>
+                          </div>
+                          <h4 className="text-[#888888] font-black text-[9px] mb-1 uppercase tracking-widest leading-none">{stat.label}</h4>
                           <div className="text-3xl font-black text-[#1A1A18] tracking-tight flex items-baseline gap-1">
                             {stat.value}
                             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stat.accentColor }} />
                           </div>
+                        </div>
+                        
+                        {/* High-Fidelity SVG Miniature Area Sparklines */}
+                        <div className="w-full h-10 mt-3 relative overflow-hidden">
+                          <svg viewBox="0 0 100 30" className="w-full h-full">
+                            <defs>
+                              <linearGradient id={`grad-${i}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={stat.accentColor} stopOpacity="0.4" />
+                                <stop offset="100%" stopColor={stat.accentColor} stopOpacity="0.0" />
+                              </linearGradient>
+                            </defs>
+                            <path 
+                              d={`M 0,${25 - i*2} Q 20,${15 + i*2} 40,${10 - i*2} T 80,${20 - i} T 100,${5 + i}`} 
+                              fill="none" 
+                              stroke={stat.accentColor} 
+                              strokeWidth="2.5" 
+                              strokeLinecap="round" 
+                            />
+                            <path 
+                              d={`M 0,${25 - i*2} Q 20,${15 + i*2} 40,${10 - i*2} T 80,${20 - i} T 100,${5 + i} L 100,30 L 0,30 Z`} 
+                              fill={`url(#grad-${i})`} 
+                            />
+                          </svg>
+                        </div>
+
+                        {/* AI Insights Hover Tooltip */}
+                        <div className="absolute inset-x-4 bottom-14 bg-slate-900 text-white p-3 rounded-2xl text-[10px] font-extrabold leading-normal opacity-0 pointer-events-none translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl border border-slate-800 z-20">
+                          <p className="text-emerald-400 uppercase tracking-widest text-[7.5px] mb-1.5 flex items-center gap-1 font-black">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                            AI Insight
+                          </p>
+                          {i === 0 && "Phản xạ nghe âm gió của em đã tăng rõ rệt sau 2 bài chép ở Unit 1!"}
+                          {i === 1 && "Độ chuẩn phát âm của âm đuôi /s/, /z/ tăng nhờ shadowing."}
+                          {i === 2 && "Em đã làm chủ thêm 12 từ vựng khó về chủ đề Environment."}
+                          {i === 3 && "Điểm trung bình mock test đạt 8.4, em đã sẵn sàng thi thật."}
+                        </div>
+                        
+                        {/* Mini Sparkline Gauge */}
+                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2 border border-slate-200/50">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500" 
+                            style={{ 
+                              width: stat.value,
+                              backgroundColor: stat.accentColor 
+                            }} 
+                          />
                         </div>
                       </motion.div>
                     ))}
@@ -269,44 +367,106 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
                 {/* AI Recommendation Recovery Missions */}
                 <div className="space-y-4">
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.12em] text-[#999999] flex items-center gap-2">
-                    <Brain size={14} className="text-[#8B5CF6]" /> BÀI TẬP ÔN LUYỆN KHUYÊN DÙNG
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.12em] text-[#999999] flex items-center gap-2">
+                      <Brain size={14} className="text-[#8B5CF6]" /> PHÒNG LUYỆN ẢO AI CỐT LÕI (AI VIRTUAL PRACTICE ROOMS)
+                    </h3>
+                    <span className="text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                      Đang đồng bộ AI
+                    </span>
+                  </div>
 
-                  <div className="space-y-3">
-                    {recoveryMissions.map((rec) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {recoveryMissions.map((rec, recIdx) => (
                       <div 
                         key={rec.id}
-                        className={`relative bg-gradient-to-r ${rec.accentBg} border-2 ${rec.accentBorder} rounded-[2rem] p-5 md:p-6 shadow-[0_5px_0_#E5E5E5] flex flex-col md:flex-row md:items-center justify-between gap-6 ${rec.hoverBorder} transition-all duration-300 overflow-hidden pl-7 md:pl-8`}
+                        className={`relative bg-white border border-slate-200 rounded-[2.2rem] p-5 md:p-6 shadow-[0_12px_32px_rgba(0,0,0,0.02)] flex flex-col justify-between gap-5 hover:border-slate-350 hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)] transition-all duration-300 overflow-hidden pl-7 md:pl-8`}
                       >
                         {/* Elegant Left accent colored bar */}
                         <div className={`absolute left-0 top-0 bottom-0 w-2 ${rec.leftBar}`} />
 
-                        <div className="space-y-2 min-w-0">
+                        <div className="space-y-3.5 min-w-0">
                           <div className="flex items-center gap-2.5 flex-wrap">
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${rec.badge} px-3 py-1 rounded-full shadow-sm`}>
+                            <span className={`text-[8.5px] font-black uppercase tracking-widest ${rec.badge} px-3 py-1 rounded-full shadow-sm`}>
                               {rec.skill}
                             </span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-[#888888]">
+                            <span className="text-[9.5px] font-black uppercase tracking-widest text-slate-400">
                               • {rec.difficulty}
                             </span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 shadow-sm flex items-center gap-0.5">
+                            <span className="text-[9.5px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 shadow-sm flex items-center gap-0.5">
                               ✨ +{rec.xp} XP
                             </span>
                           </div>
-                          <h4 className="text-sm font-black text-[#1A1A18] leading-tight truncate">
+                          
+                          <h4 className="text-base font-black text-slate-800 leading-tight">
                             {rec.title}
                           </h4>
-                          <p className="text-[10px] text-[#FF9600] font-black italic flex items-center gap-1 bg-amber-50/50 px-2.5 py-1 rounded-lg border border-amber-100/50 w-fit">
-                            {rec.reason}
-                          </p>
+                          
+                          {/* Rich Interactive Mockup of Virtual Rooms based on Index */}
+                          {recIdx === 0 ? (
+                            /* speaking room: animated sound column + Teacher Bee status */
+                            <div className="space-y-2 bg-slate-50 border border-slate-100 p-3 rounded-2xl">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-1 h-6 py-1 bg-white border border-slate-200/60 rounded-xl px-2.5 shrink-0 shadow-sm">
+                                  <span className="text-[8.5px] font-black text-slate-500 uppercase tracking-widest mr-1">Phát âm AI:</span>
+                                  <div className="flex items-end gap-0.5 h-full py-0.5 shrink-0">
+                                    <span className="w-[2.5px] bg-[#10B981] rounded-full animate-[pulse_0.6s_infinite_alternate] h-[40%]" />
+                                    <span className="w-[2.5px] bg-[#10B981] rounded-full animate-[pulse_0.4s_infinite_alternate] h-[80%]" />
+                                    <span className="w-[2.5px] bg-[#10B981] rounded-full animate-[pulse_0.8s_infinite_alternate] h-[60%]" />
+                                    <span className="w-[2.5px] bg-[#10B981] rounded-full animate-[pulse_0.5s_infinite_alternate] h-[100%]" />
+                                    <span className="w-[2.5px] bg-[#10B981] rounded-full animate-[pulse_0.7s_infinite_alternate] h-[50%]" />
+                                  </div>
+                                </div>
+                                <span className="bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/20 rounded-md text-[8px] px-1.5 py-0.5 font-black uppercase tracking-wider">
+                                  Teacher Bee Online
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-2 mt-1">
+                                <div className="bg-white p-1.5 rounded-xl text-center border border-slate-150 shadow-sm">
+                                  <p className="text-[7.5px] text-slate-400 font-extrabold uppercase leading-none">Trôi chảy</p>
+                                  <p className="text-[10px] font-black text-[#10B981] mt-0.5">85%</p>
+                                </div>
+                                <div className="bg-white p-1.5 rounded-xl text-center border border-slate-150 shadow-sm">
+                                  <p className="text-[7.5px] text-slate-400 font-extrabold uppercase leading-none">Phát âm</p>
+                                  <p className="text-[10px] font-black text-[#1899D6] mt-0.5">78%</p>
+                                </div>
+                                <div className="bg-white p-1.5 rounded-xl text-center border border-slate-150 shadow-sm">
+                                  <p className="text-[7.5px] text-slate-400 font-extrabold uppercase leading-none">Ngữ điệu</p>
+                                  <p className="text-[10px] font-black text-amber-500 mt-0.5">82%</p>
+                                </div>
+                              </div>
+                              <p className="text-[#FF9600] font-black text-[9px] italic leading-tight pl-1">🤖 Trợ lý ảo AI: Phát âm rất tốt, bắt đầu luyện Shadowing ngay!</p>
+                            </div>
+                          ) : (
+                            /* dictation room: transcript sheet highlighting corrections */
+                            <div className="space-y-2">
+                              <div className="bg-slate-900 text-[#E2E8F0] p-3.5 rounded-2xl font-mono text-[9px] leading-relaxed border border-slate-800 shadow-inner relative overflow-hidden">
+                                <div className="absolute top-2 right-2 text-[7.5px] font-black text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded uppercase tracking-wider">
+                                  Dictation Sheet
+                                </div>
+                                <p className="text-[#94A3B8]">
+                                  Luyện viết chính tả câu SGK:
+                                  <span className="block mt-1 text-[#E2E8F0] border-l-2 border-slate-700 pl-2">
+                                    "I think we should do <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1 rounded font-black">household</span> tasks."
+                                  </span>
+                                </p>
+                                <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between text-[8px] text-[#AFAFAF] font-sans">
+                                  <span>⏱️ Tốc độ: <strong className="text-white font-extrabold">45 WPM</strong></span>
+                                  <span>🎯 Tỉ lệ đúng: <strong className="text-emerald-400 font-extrabold">92%</strong></span>
+                                </div>
+                              </div>
+                              <p className="text-[#FF9600] font-black text-[9px] italic leading-tight pl-1">⚡ Đang hoạt động: Thực hành nghe chép để bứt phá phản xạ viết nhanh.</p>
+                            </div>
+                          )}
                         </div>
 
                         <button 
                           onClick={() => window.location.href = `/learn/lesson/${rec.lessonId}`}
-                          className={`px-6 py-3.5 rounded-2xl ${rec.btnBg} text-white text-[10px] font-black uppercase tracking-widest shrink-0 self-start md:self-auto cursor-pointer border-none active:shadow-none active:translate-y-[4px] transition-all hover:brightness-105 hover:scale-[1.02] flex items-center gap-1.5`}
+                          className={`w-full py-3.5 rounded-2xl ${rec.btnBg} text-white text-[10px] font-black uppercase tracking-widest cursor-pointer border-none active:translate-y-[2px] transition-all hover:brightness-105 flex items-center justify-center gap-1.5 shadow-[0_4px_0_rgba(0,0,0,0.1)]`}
                         >
-                          BẮT ĐẦU NGAY <ArrowRight size={12} className="stroke-[2.5]" />
+                          VÀO PHÒNG LUYỆN ẢO <ArrowRight size={12} className="stroke-[2.5]" />
                         </button>
                       </div>
                     ))}
@@ -401,157 +561,167 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                         };
                       }
 
-                      // Visual Mockup Renderer based on Grade Type
+                      // Visual Mockup Renderer based on Grade Type - upgraded to high fidelity Quizlet & PrepEdu mockups
                       const renderVisualMockup = () => {
                         if (isLop6) {
-                          // Lớp 6 (Emerald): Matching Game Grid mockup ("Ghép thẻ")
+                          // Lớp 6 (Emerald): Match Game board mini
                           return (
-                            <div className="relative w-full h-[180px] bg-emerald-50/40 rounded-3xl border border-[#C2E7CC]/40 flex items-center justify-center p-3 overflow-hidden select-none">
-                              <div className="grid grid-cols-2 gap-2.5 w-full max-w-[220px]">
-                                <div className="bg-white border border-[#C2E7CC]/60 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[62px] transition-all">
-                                  <span className="text-xl">🎒</span>
-                                  <span className="text-[10px] font-black text-[#065F46] mt-0.5">backpack</span>
+                            <div className="relative w-full h-[180px] bg-gradient-to-br from-[#E6F4EA]/60 to-[#F4FDF7]/60 rounded-3xl border border-[#C2E7CC]/50 flex flex-col justify-between p-3.5 overflow-hidden select-none">
+                              {/* Match header with timer */}
+                              <div className="flex items-center justify-between text-[8.5px] text-[#065F46] font-black uppercase tracking-widest border-b border-[#C2E7CC]/30 pb-1.5">
+                                <span>🧩 Quizlet Match Game</span>
+                                <span className="font-mono text-emerald-600 bg-white border border-[#C2E7CC]/60 px-2 py-0.5 rounded shadow-sm">
+                                  ⏱️ 00:14.85
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2.5 w-full my-auto">
+                                <div className="bg-white border border-slate-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[58px]">
+                                  <span className="text-lg">🎒</span>
+                                  <span className="text-[9px] font-black text-slate-700 mt-0.5">backpack</span>
                                 </div>
-                                <div className="bg-white border-2 border-[#10B981] rounded-2xl p-2 flex flex-col items-center justify-center shadow-[0_4px_0_rgba(16,185,129,0.15)] h-[62px] relative overflow-hidden">
-                                  <span className="text-xl">📘</span>
-                                  <span className="text-[10px] font-black text-[#10B981] mt-0.5">book</span>
-                                  <div className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#10B981] flex items-center justify-center">
-                                    <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                <div className="bg-white border-2 border-[#10B981] rounded-2xl p-2 flex flex-col items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.15)] h-[58px] relative overflow-hidden">
+                                  <span className="text-lg">📘</span>
+                                  <span className="text-[9px] font-black text-[#10B981] mt-0.5">book</span>
+                                  <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#10B981] flex items-center justify-center shadow">
+                                    <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7" /></svg>
                                   </div>
                                 </div>
-                                <div className="bg-[#10B981] text-white rounded-2xl p-2 flex flex-col items-center justify-center shadow-md h-[62px]">
+                                <div className="bg-[#10B981] text-white rounded-2xl p-2 flex flex-col items-center justify-center shadow-md h-[58px] border border-emerald-600">
                                   <span className="text-[10px] font-black tracking-wide">sách</span>
                                 </div>
-                                <div className="bg-white border border-[#C2E7CC]/60 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[62px] transition-all">
-                                  <span className="text-xl">✏️</span>
-                                  <span className="text-[10px] font-black text-[#065F46] mt-0.5">pencil</span>
+                                <div className="bg-white border border-slate-200 rounded-2xl p-2 flex flex-col items-center justify-center shadow-sm h-[58px]">
+                                  <span className="text-lg">✏️</span>
+                                  <span className="text-[9px] font-black text-slate-700 mt-0.5">pencil</span>
                                 </div>
                               </div>
                             </div>
                           );
                         } else if (isGrade10) {
-                          // Lớp 10 (Ocean Blue): Interactive 3D Flashcard mockup ("Thẻ ghi nhớ")
+                          // Lớp 10 (Ocean Blue): Stacked 3D deck of flashcards
                           return (
-                            <div className="relative w-full h-[180px] bg-[#2E31A6]/80 rounded-3xl border border-white/10 flex items-center justify-center p-3 overflow-hidden select-none">
-                              {/* Background card tilted */}
-                              <div className="absolute w-[180px] h-[105px] bg-white/15 border border-white/20 rounded-2xl transform -rotate-[7deg] -translate-x-4 opacity-50 shadow-lg" />
+                            <div className="relative w-full h-[180px] bg-gradient-to-br from-[#2E31A6]/90 to-[#3B3EC6]/90 rounded-3xl border border-[#3B3EC6] flex items-center justify-center p-3.5 overflow-hidden select-none">
+                              {/* Background cards stacked */}
+                              <div className="absolute w-[180px] h-[110px] bg-white/10 border border-white/20 rounded-2xl transform -rotate-[10deg] -translate-y-2 -translate-x-6 opacity-30 shadow-2xl" />
+                              <div className="absolute w-[180px] h-[110px] bg-white/20 border border-white/25 rounded-2xl transform -rotate-[5deg] -translate-y-1 -translate-x-2 opacity-50 shadow-xl" />
                               
                               {/* Foreground active card */}
-                              <div className="absolute w-[180px] h-[105px] bg-white rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.15)] p-3.5 flex flex-col justify-between transform rotate-[4deg] translate-x-3 border border-white transition-all duration-300 group-hover:rotate-[8deg] group-hover:scale-[1.03]">
+                              <div className="absolute w-[190px] h-[115px] bg-white rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.22)] p-4 flex flex-col justify-between transform rotate-[3deg] translate-x-3 border border-white transition-all duration-500 group-hover:rotate-[6deg] group-hover:scale-[1.05] group-hover:translate-x-5">
                                 <div className="flex items-start justify-between">
-                                  <div className="bg-blue-50 text-blue-600 rounded-lg p-1 text-[8px] font-black leading-none">
-                                    ☘️ Environment
-                                  </div>
-                                  <span className="text-xs text-slate-400">🔊</span>
-                                </div>
-                                <div className="my-1.5 text-center">
-                                  <h5 className="text-xs font-black text-[#1A1A18] tracking-tight uppercase">Biodiversity</h5>
-                                  <p className="text-[9px] text-slate-400 font-medium leading-none mt-1">Đa dạng sinh học</p>
-                                </div>
-                                <div className="flex items-center justify-between border-t border-slate-100 pt-1">
-                                  <span className="text-[8px] text-emerald-600 font-extrabold flex items-center gap-0.5">
-                                    ✓ Đã thuộc
+                                  <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider">
+                                    ☘️ Unit 3
                                   </span>
-                                  <span className="text-[8px] text-slate-400">Card 3/20</span>
+                                  <button className="text-xs text-slate-400">🔊</button>
+                                </div>
+                                <div className="my-auto text-center">
+                                  <h5 className="text-[13px] font-black text-slate-800 tracking-tight uppercase">Biodiversity</h5>
+                                  <p className="text-[9.5px] text-[#58CC02] font-black leading-none mt-1">Đa dạng sinh học</p>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-slate-100 pt-1.5 text-[8px]">
+                                  <span className="text-[#10B981] font-black flex items-center gap-0.5">
+                                    ✓ Mastered
+                                  </span>
+                                  <span className="text-slate-400 font-bold uppercase tracking-wider">Mặt trước 🔁</span>
                                 </div>
                               </div>
                             </div>
                           );
                         } else if (isGrade11) {
-                          // Lớp 11 (Royal Purple): Test panel mockup with circular progress meter ("Kiểm tra")
+                          // Lớp 11 (Royal Purple): SVG circular score gauge diagnostics
                           return (
-                            <div className="relative w-full h-[180px] bg-[#FAF6FE] rounded-3xl border border-[#EBE2FC]/40 flex items-center justify-center p-3 overflow-hidden select-none">
-                              <div className="bg-white rounded-2xl shadow-[0_8px_16px_rgba(139,92,246,0.06)] border border-[#EBE2FC]/50 p-3.5 w-full max-w-[220px] flex items-center justify-between gap-3 transition-all duration-300 group-hover:scale-[1.02]">
-                                <div className="space-y-1.5">
-                                  <div className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Thời gian</div>
-                                  <div className="text-xs font-black text-slate-800 flex items-center gap-1">
-                                    ⏱️ 15:00
+                            <div className="relative w-full h-[180px] bg-gradient-to-br from-[#FAF6FE] to-[#F2EDFC] rounded-3xl border border-[#EBE2FC]/60 flex items-center justify-center p-3.5 overflow-hidden select-none">
+                              <div className="bg-white rounded-2xl shadow-[0_12px_24px_rgba(139,92,246,0.08)] border border-[#EBE2FC]/50 p-4 w-full max-w-[220px] flex items-center justify-between gap-3 transition-all duration-500 group-hover:scale-[1.03]">
+                                <div className="space-y-2">
+                                  <div className="text-[8.5px] text-slate-400 font-black uppercase tracking-widest">Thời gian còn lại</div>
+                                  <div className="text-[13px] font-black text-slate-800 flex items-center gap-1">
+                                    ⏱️ 14:59
                                   </div>
-                                  <div className="pt-1.5 flex flex-col gap-1">
-                                    <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-0.5">
-                                      ✓ 17 đúng
+                                  <div className="pt-1 flex flex-col gap-1">
+                                    <span className="text-[8.5px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-0.5">
+                                      ✓ 17 Đúng
                                     </span>
-                                    <span className="text-[9px] font-black text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 flex items-center gap-0.5">
-                                      ✗ 3 sai
+                                    <span className="text-[8.5px] font-black text-rose-500 bg-rose-50 px-2 py-0.5 rounded border border-rose-100 flex items-center gap-0.5">
+                                      ✗ 3 Sai
                                     </span>
                                   </div>
                                 </div>
                                 
-                                <div className="relative flex flex-col items-center justify-center shrink-0 w-24 h-24">
-                                  {/* Circular SVG Gauge */}
+                                <div className="relative flex flex-col items-center justify-center shrink-0 w-20 h-20">
                                   <svg className="w-20 h-20 transform -rotate-90">
-                                    {/* Track circle */}
-                                    <circle cx="40" cy="40" r="32" stroke="#F1F3F9" strokeWidth="7" fill="transparent" />
-                                    {/* Animated stroke progress circle */}
+                                    <circle cx="40" cy="40" r="30" stroke="#F1F3F9" strokeWidth="6" fill="transparent" />
                                     <circle 
-                                      cx="40" cy="40" r="32" 
-                                      stroke="#8B5CF6" strokeWidth="7" fill="transparent" 
-                                      strokeDasharray={2 * Math.PI * 32}
-                                      strokeDashoffset={2 * Math.PI * 32 * (1 - 0.85)}
+                                      cx="40" cy="40" r="30" 
+                                      stroke="#8B5CF6" strokeWidth="6" fill="transparent" 
+                                      strokeDasharray={2 * Math.PI * 30}
+                                      strokeDashoffset={2 * Math.PI * 30 * (1 - 0.85)}
                                       strokeLinecap="round"
+                                      className="drop-shadow-[0_0_6px_rgba(139,92,246,0.3)]"
                                     />
                                   </svg>
                                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-sm font-black text-slate-800 tracking-tight leading-none">85%</span>
-                                    <span className="text-[7px] text-[#8B5CF6] font-black uppercase tracking-widest mt-0.5">ĐẠT</span>
+                                    <span className="text-xs font-black text-slate-800 tracking-tight leading-none">85%</span>
+                                    <span className="text-[6.5px] text-[#8B5CF6] font-black uppercase tracking-widest mt-0.5">ĐẠT</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           );
                         } else if (isGrade12) {
-                          // Lớp 12 (Rose Pink): Spelling Fill-in question mockup ("Học")
+                          // Lớp 12 (Rose Pink): Interactive spelling write-in answer with blinking cursor
                           return (
-                            <div className="relative w-full h-[180px] bg-pink-50/20 rounded-3xl border border-[#FBCFE8]/40 flex items-center justify-center p-3 overflow-hidden select-none">
-                              <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_8px_16px_rgba(236,72,153,0.06)] p-3.5 w-full max-w-[230px] flex flex-col justify-between h-[130px] transition-all duration-300 group-hover:scale-[1.02]">
+                            <div className="relative w-full h-[180px] bg-gradient-to-br from-[#FFF5F5]/40 to-[#FDF2F8]/60 rounded-3xl border border-[#FBCFE8]/50 flex items-center justify-center p-3.5 overflow-hidden select-none">
+                              <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_12px_24px_rgba(236,72,153,0.08)] p-4 w-full max-w-[230px] flex flex-col justify-between h-[135px] transition-all duration-500 group-hover:scale-[1.03]">
                                 <div className="space-y-1">
-                                  <div className="flex items-center gap-1 text-[8px] font-black text-pink-500 uppercase tracking-widest leading-none mb-1">
-                                    <span>✍️ VIẾT ĐÁP ÁN</span>
+                                  <div className="flex items-center gap-1 text-[8.5px] font-black text-pink-500 uppercase tracking-widest leading-none mb-1">
+                                    <span>✍️ QUIZLET SPELL MODE</span>
                                   </div>
-                                  <h6 className="text-[10px] font-black text-[#1A1A18] leading-tight">
+                                  <h6 className="text-[10px] font-black text-slate-800 leading-tight">
                                     📚 "Cơ hội nghề nghiệp"
                                   </h6>
-                                  <p className="text-[9px] text-[#777777] font-semibold italic">
-                                    Great career <span className="border-b border-[#777777] px-1 font-black text-[#1A1A18]">_________</span> are ahead.
+                                  <p className="text-[9.5px] text-slate-500 font-semibold italic mt-0.5">
+                                    Great career <span className="border-b border-[#777777] px-1 font-black text-slate-800">_________</span> are ahead.
                                   </p>
                                 </div>
-                                <div className="space-y-1.5">
-                                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-2.5 py-1.5 text-[9px] text-emerald-800 font-black flex items-center justify-between">
-                                    <span className="flex items-center gap-1">
-                                      opportunities<span className="w-[1.5px] h-3 bg-emerald-600 animate-pulse inline-block" />
+                                <div className="space-y-1">
+                                  <div className="bg-[#E8F9EE] border border-[#B3F2C9] rounded-xl px-2.5 py-1.5 text-[9.5px] text-emerald-800 font-black flex items-center justify-between">
+                                    <span className="flex items-center gap-0.5">
+                                      opportunities<span className="w-[1.5px] h-3 bg-emerald-600 animate-[pulse_0.6s_infinite] inline-block" />
                                     </span>
-                                    <span className="text-emerald-500 font-bold">✓ Đúng rồi!</span>
+                                    <span className="text-[#58CC02] text-[8px] uppercase tracking-wider font-black flex items-center gap-0.5">
+                                      ✓ Đúng rồi!
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           );
                         } else {
-                          // Cinematic Learning (Gold Theme): Film Strip Player mockup with subtitle highlights
+                          // Cinematic Learning (Gold Carbon theme): Immersive Dark Video Player with active dictionary tooltip
                           return (
-                            <div className="relative w-full h-[180px] bg-zinc-950 rounded-3xl border border-zinc-800 flex flex-col justify-between p-3.5 overflow-hidden select-none">
+                            <div className="relative w-full h-[180px] bg-zinc-950 rounded-3xl border border-zinc-800 flex flex-col justify-between p-4 overflow-hidden select-none shadow-[0_15px_30px_rgba(0,0,0,0.5)]">
                               {/* Top Bar Player Controls */}
-                              <div className="flex items-center justify-between text-[8px] text-zinc-500 font-extrabold border-b border-zinc-900 pb-1.5">
-                                <span className="flex items-center gap-1 text-[#F59E0B]">
-                                  🎬 CINEMATIC PLAYER
+                              <div className="flex items-center justify-between text-[8px] text-zinc-500 font-extrabold border-b border-zinc-900 pb-2">
+                                <span className="flex items-center gap-1 text-[#F59E0B] drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]">
+                                  🎬 CINEMATIC PLAYER PRO
                                 </span>
-                                <span>01:42 / 03:05</span>
+                                <span className="font-mono">01:42 / 03:05</span>
                               </div>
                               
                               {/* Dialogue Subtitles block */}
-                              <div className="my-auto py-1 flex flex-col items-center justify-center text-center">
-                                <p className="text-[10px] md:text-[11px] text-zinc-100 font-black leading-tight max-w-[190px]">
-                                  "It's not about the <span className="text-[#F59E0B] font-extrabold underline decoration-wavy underline-offset-2">destination</span>..."
+                              <div className="my-auto py-1.5 flex flex-col items-center justify-center text-center">
+                                <p className="text-[11px] md:text-[11.5px] text-zinc-100 font-black leading-tight max-w-[200px]">
+                                  "It's not about the <span className="text-[#F59E0B] font-extrabold underline decoration-wavy underline-offset-2 bg-[#F59E0B]/10 px-1 rounded border border-[#F59E0B]/20">destination</span>..."
                                 </p>
-                                <p className="text-[8px] text-zinc-500 font-medium leading-none mt-1">
-                                  "Không phải là về đích đến..."
-                                </p>
+                                
+                                {/* Floating mini dictionary card */}
+                                <div className="mt-2 bg-zinc-900 border border-zinc-800 p-1.5 rounded-lg text-[7.5px] font-black text-zinc-400 flex items-center gap-1 shadow-md scale-95 opacity-90">
+                                  <span className="text-[#F59E0B]">destination (n):</span> điểm đến, đích đến
+                                </div>
                               </div>
                               
-                              {/* Seekbar and Floating dictionary card */}
-                              <div className="space-y-1">
+                              {/* Seekbar and Player details */}
+                              <div className="space-y-1.5">
                                 <div className="flex items-center gap-2">
-                                  <div className="bg-zinc-800 h-1.5 rounded-full w-full relative">
+                                  <div className="bg-zinc-900 h-1.5 rounded-full w-full relative border border-zinc-800">
                                     <div className="bg-[#F59E0B] h-full rounded-full w-[55%] relative flex items-center justify-end">
                                       <span className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-md border border-[#F59E0B]" />
                                     </div>
@@ -559,7 +729,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                                 </div>
                                 <div className="flex items-center justify-between text-[7px] text-zinc-500 font-black">
                                   <span>Tập 2: The Journey</span>
-                                  <span className="text-[#F59E0B]">HD 1080p</span>
+                                  <span className="text-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 rounded font-black border border-[#F59E0B]/20">HD 1080p</span>
                                 </div>
                               </div>
                             </div>
@@ -713,32 +883,41 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 </div>
 
                 {/* Podium Top 3 display */}
-                <div className="bg-white border-2 border-[#E5E5E5] p-6 md:p-8 rounded-[2rem] shadow-[0_4px_0_#E5E5E5] flex flex-col md:flex-row items-center justify-center gap-10">
+                <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 p-6 md:p-8 rounded-[2rem] shadow-[0_12px_32px_rgba(0,0,0,0.02)] flex flex-col md:flex-row items-end justify-center gap-6 md:gap-10 pb-10">
                   {/* Rank 2 */}
-                  <div className="flex flex-col items-center text-center order-2 md:order-1 mt-6 md:mt-0">
-                    <div className="text-4xl">🥈</div>
-                    <div className="w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 text-3xl flex items-center justify-center shadow-inner mt-2">👦</div>
-                    <p className="font-black text-sm text-[#1A1A18] mt-2">Trần Đức Nam</p>
-                    <span className="text-[10px] font-black text-[#777777] uppercase bg-slate-50 px-2.5 py-0.5 rounded-full mt-1 border border-slate-100">1,220 XP</span>
+                  <div className="flex flex-col items-center text-center order-2 md:order-1 mt-6 md:mt-0 flex-1 max-w-[150px] w-full">
+                    <div className="text-3xl mb-1">🥈</div>
+                    <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 text-2xl flex items-center justify-center shadow-inner relative z-10">👦</div>
+                    {/* 3D block platform */}
+                    <div className="w-full bg-gradient-to-t from-slate-200 to-slate-100 border border-slate-300 rounded-t-xl h-16 mt-2 flex flex-col items-center justify-center shadow-md relative">
+                      <span className="font-black text-[11px] text-slate-800 truncate px-2 w-full mt-1">Đức Nam</span>
+                      <span className="text-[9px] font-black text-slate-500 uppercase mt-0.5">1,220 XP</span>
+                    </div>
                   </div>
 
                   {/* Rank 1 */}
-                  <div className="flex flex-col items-center text-center order-1 md:order-2">
-                    <div className="text-5xl animate-bounce">🏆 🥇</div>
-                    <div className="w-20 h-20 rounded-full bg-[#FFF8E7] border-4 border-[#FFD700] text-4xl flex items-center justify-center shadow-md mt-2 relative">
+                  <div className="flex flex-col items-center text-center order-1 md:order-2 flex-1 max-w-[160px] w-full">
+                    <div className="text-4xl mb-1 select-none animate-bounce">👑 🥇</div>
+                    <div className="w-18 h-18 rounded-full bg-amber-50 border-4 border-amber-400 text-3xl flex items-center justify-center shadow-md relative z-10">
                       <span>👧</span>
-                      <span className="absolute -top-3 -right-3 text-lg animate-pulse">✨</span>
+                      <span className="absolute -top-2 -right-2 text-base animate-pulse">✨</span>
                     </div>
-                    <p className="font-black text-base text-[#1A1A18] mt-2">Nguyễn Minh Anh</p>
-                    <span className="text-xs font-black text-[#B45309] uppercase bg-[#FFF3E0] px-3 py-1 rounded-full mt-1 border border-[#FFE0B2]">1,450 XP</span>
+                    {/* 3D block platform - highest */}
+                    <div className="w-full bg-gradient-to-t from-amber-200 to-amber-100 border border-amber-300 rounded-t-xl h-24 mt-2 flex flex-col items-center justify-center shadow-lg relative">
+                      <span className="font-black text-xs text-amber-900 truncate px-2 w-full mt-1">Minh Anh</span>
+                      <span className="text-[9.5px] font-black text-amber-700 uppercase mt-0.5">1,450 XP</span>
+                    </div>
                   </div>
 
                   {/* Rank 3 */}
-                  <div className="flex flex-col items-center text-center order-3 mt-6 md:mt-0">
-                    <div className="text-4xl">🥉</div>
-                    <div className="w-16 h-16 rounded-full bg-slate-100 border-2 border-slate-200 text-3xl flex items-center justify-center shadow-inner mt-2">👩</div>
-                    <p className="font-black text-sm text-[#1A1A18] mt-2">Lê Thu Thảo</p>
-                    <span className="text-[10px] font-black text-[#777777] uppercase bg-slate-50 px-2.5 py-0.5 rounded-full mt-1 border border-slate-100">980 XP</span>
+                  <div className="flex flex-col items-center text-center order-3 flex-1 max-w-[150px] w-full">
+                    <div className="text-3xl mb-1">🥉</div>
+                    <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 text-2xl flex items-center justify-center shadow-inner relative z-10">👩</div>
+                    {/* 3D block platform - lowest */}
+                    <div className="w-full bg-gradient-to-t from-amber-100/50 to-slate-100 border border-slate-200 rounded-t-xl h-10 mt-2 flex flex-col items-center justify-center shadow-sm relative">
+                      <span className="font-black text-[11px] text-slate-800 truncate px-2 w-full mt-1">Thu Thảo</span>
+                      <span className="text-[9px] font-black text-slate-500 uppercase mt-0.5">980 XP</span>
+                    </div>
                   </div>
                 </div>
 
@@ -796,13 +975,23 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                 </div>
 
                 {/* Progress bar and chest card */}
-                <div className="bg-white border-2 border-[#E5E5E5] p-6 md:p-8 rounded-[2rem] shadow-[0_4px_0_#E5E5E5] space-y-6">
+                <div className="bg-white/90 backdrop-blur-md border border-slate-250 p-6 md:p-8 rounded-[2rem] shadow-[0_12px_32px_rgba(0,0,0,0.02)] space-y-6">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="space-y-1">
                       <h4 className="text-base font-black text-[#1A1A18]">Rương Đá Quý Hàng Ngày</h4>
                       <p className="text-xs text-[#777777] font-semibold">Hoàn thành thêm 2 nhiệm vụ nữa để mở khóa rương!</p>
                     </div>
-                    <div className="text-5xl select-none animate-pulse">🎁 🔒</div>
+                    {/* Animated shaking treasure chest using Framer Motion */}
+                    <motion.div 
+                      whileHover={{ 
+                        rotate: [0, -6, 6, -6, 6, 0],
+                        scale: 1.1
+                      }}
+                      transition={{ duration: 0.5 }}
+                      className="text-5xl select-none cursor-pointer"
+                    >
+                      🎁 🔒
+                    </motion.div>
                   </div>
 
                   <div className="space-y-2">
