@@ -137,7 +137,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
   ];
 
   return (
-    <div className="bg-[#EEF6F0] min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
+    <div className="bg-sage-green min-h-screen text-[#3D3D3B] flex flex-col w-full font-sans">
       {/* Dynamic Top Navbar for mobile (automatically responsive) */}
       <Navbar />
 

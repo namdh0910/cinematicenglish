@@ -151,3 +151,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Premium soothing Sage/Tea Green color utility */
+.bg-sage-green {
+  background-color: #E2EFE7 !important;
+}
+
