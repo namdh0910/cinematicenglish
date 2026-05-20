@@ -108,10 +108,54 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
   // Gamified metrics
   const stats = [
-    { label: "Độ chính xác Nghe", value: "87%", emoji: "🗣️", color: "bg-[#E8F4FD]", trend: "+3.2% tuần này", trendColor: "text-[#1899D6]" },
-    { label: "Độ tự tin Nói", value: "78%", emoji: "💬", color: "bg-[#E8F9EE]", trend: "+5.1% tuần này", trendColor: "text-[#58CC02]" },
-    { label: "Từ vựng làm chủ", value: "92%", emoji: "📚", color: "bg-[#FFF8E7]", trend: "140 từ mới học", trendColor: "text-[#F59E0B]" },
-    { label: "Sẵn sàng làm bài thi", value: "84%", emoji: "🏆", color: "bg-[#F2EDFC]", trend: "Chuẩn Global Success", trendColor: "text-[#8B5CF6]" }
+    { 
+      label: "Độ chính xác Nghe", 
+      value: "87%", 
+      emoji: "🗣️", 
+      color: "bg-[#E8F4FD]", 
+      trend: "+3.2% tuần này", 
+      trendColor: "text-[#1899D6]",
+      accentColor: "#1899D6",
+      borderColor: "hover:border-[#1899D6] hover:shadow-[0_6px_0_#84D8FF] border-[#E2EFFE]",
+      bgGradient: "from-white to-[#F5FAFF]",
+      badgeBg: "bg-[#E8F4FD]"
+    },
+    { 
+      label: "Độ tự tin Nói", 
+      value: "78%", 
+      emoji: "💬", 
+      color: "bg-[#E8F9EE]", 
+      trend: "+5.1% tuần này", 
+      trendColor: "text-[#58CC02]",
+      accentColor: "#58CC02",
+      borderColor: "hover:border-[#58CC02] hover:shadow-[0_6px_0_#A6E97E] border-[#E8FBEF]",
+      bgGradient: "from-white to-[#F4FDF7]",
+      badgeBg: "bg-[#E8F9EE]"
+    },
+    { 
+      label: "Từ vựng làm chủ", 
+      value: "92%", 
+      emoji: "📚", 
+      color: "bg-[#FFF8E7]", 
+      trend: "140 từ mới học", 
+      trendColor: "text-[#F59E0B]",
+      accentColor: "#F59E0B",
+      borderColor: "hover:border-[#F59E0B] hover:shadow-[0_6px_0_#FCDCA2] border-[#FFF6E2]",
+      bgGradient: "from-white to-[#FFFDF5]",
+      badgeBg: "bg-[#FFF8E7]"
+    },
+    { 
+      label: "Sẵn sàng làm bài thi", 
+      value: "84%", 
+      emoji: "🏆", 
+      color: "bg-[#F2EDFC]", 
+      trend: "Chuẩn Global Success", 
+      trendColor: "text-[#8B5CF6]",
+      accentColor: "#8B5CF6",
+      borderColor: "hover:border-[#8B5CF6] hover:shadow-[0_6px_0_#C5A6FA] border-[#F6F2FE]",
+      bgGradient: "from-white to-[#FAF6FE]",
+      badgeBg: "bg-[#F2EDFC]"
+    }
   ];
 
   // Adaptive recommended missions
@@ -123,7 +167,14 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       difficulty: "Trung cấp",
       xp: 150,
       reason: "⚠️ Độ chính xác nghe giảm xuống 68% trong bài luyện tập trước",
-      lessonId: "lesson-u1l2"
+      lessonId: "lesson-u1l2",
+      themeColor: "#8B5CF6",
+      accentBg: "from-[#FAF6FE] via-white to-white",
+      accentBorder: "border-[#E5D5FC]",
+      hoverBorder: "hover:border-[#8B5CF6] hover:shadow-[0_5px_0_#C5A6FA]",
+      badge: "bg-[#F2EDFC] text-[#8B5CF6] border-2 border-[#E1D4FB]",
+      btnBg: "bg-[#8B5CF6] shadow-[0_4px_0_#7C3AED]",
+      leftBar: "bg-[#8B5CF6]"
     },
     {
       id: "rec-2",
@@ -132,7 +183,14 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
       difficulty: "Cơ bản",
       xp: 200,
       reason: "🔥 Đang kích hoạt: Hoàn thành để nhân hệ số chuỗi học tập 5 ngày",
-      lessonId: "lesson-u1l2"
+      lessonId: "lesson-u1l2",
+      themeColor: "#58CC02",
+      accentBg: "from-[#F4FDF7] via-white to-white",
+      accentBorder: "border-[#E8FBEF]",
+      hoverBorder: "hover:border-[#58CC02] hover:shadow-[0_5px_0_#A6E97E]",
+      badge: "bg-[#E8F9EE] text-[#58CC02] border-2 border-[#B3F2C9]",
+      btnBg: "bg-[#58CC02] shadow-[0_4px_0_#46A302]",
+      leftBar: "bg-[#58CC02]"
     }
   ];
 
@@ -186,19 +244,23 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="bg-white p-6 rounded-[2rem] border-2 border-[#E5E5E5] flex flex-col justify-between shadow-[0_4px_0_#E5E5E5] hover:border-[#1899D6] hover:shadow-[0_4px_0_#84D8FF] transition-all"
+                        className={`bg-gradient-to-br ${stat.bgGradient} p-6 rounded-[2.2rem] border-2 ${stat.borderColor.split(' ')[2]} flex flex-col justify-between shadow-[0_5px_0_#E5E5E5] ${stat.borderColor.split(' ').slice(0, 2).join(' ')} transition-all duration-300 transform hover:-translate-y-1.5`}
                       >
                         <div className="flex items-start justify-between mb-4">
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stat.color} text-3xl shadow-inner`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.color} text-3xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-white`}>
                             {stat.emoji}
                           </div>
-                          <div className={`text-[9px] font-black uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded-md ${stat.trendColor}`}>
+                          <div className={`text-[9px] font-black uppercase tracking-wider ${stat.badgeBg} ${stat.trendColor} px-2.5 py-1 rounded-full border border-slate-100/50 shadow-sm flex items-center gap-1`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                             {stat.trend}
                           </div>
                         </div>
                         <div>
-                          <h4 className="text-[#777777] font-extrabold text-xs mb-1 uppercase tracking-wider">{stat.label}</h4>
-                          <div className="text-3xl font-black text-[#1A1A18] tracking-tight">{stat.value}</div>
+                          <h4 className="text-[#888888] font-black text-[10px] mb-1.5 uppercase tracking-widest leading-none">{stat.label}</h4>
+                          <div className="text-3xl font-black text-[#1A1A18] tracking-tight flex items-baseline gap-1">
+                            {stat.value}
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stat.accentColor }} />
+                          </div>
                         </div>
                       </motion.div>
                     ))}
@@ -215,22 +277,36 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                     {recoveryMissions.map((rec) => (
                       <div 
                         key={rec.id}
-                        className="bg-white border-2 border-[#E5E5E5] rounded-3xl p-5 shadow-[0_4px_0_#E5E5E5] flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-[#1899D6] transition-all"
+                        className={`relative bg-gradient-to-r ${rec.accentBg} border-2 ${rec.accentBorder} rounded-[2rem] p-5 md:p-6 shadow-[0_5px_0_#E5E5E5] flex flex-col md:flex-row md:items-center justify-between gap-6 ${rec.hoverBorder} transition-all duration-300 overflow-hidden pl-7 md:pl-8`}
                       >
-                        <div className="space-y-1.5 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[9px] font-black uppercase tracking-widest bg-[#F2EDFC] text-[#8B5CF6] border-2 border-[#E1D4FB] px-2.5 py-0.5 rounded-full">{rec.skill}</span>
-                            <span className="text-[9px] font-black uppercase tracking-widest text-[#777777]">• {rec.difficulty}</span>
+                        {/* Elegant Left accent colored bar */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-2 ${rec.leftBar}`} />
+
+                        <div className="space-y-2 min-w-0">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${rec.badge} px-3 py-1 rounded-full shadow-sm`}>
+                              {rec.skill}
+                            </span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#888888]">
+                              • {rec.difficulty}
+                            </span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 shadow-sm flex items-center gap-0.5">
+                              ✨ +{rec.xp} XP
+                            </span>
                           </div>
-                          <h4 className="text-sm font-extrabold text-[#1A1A18] leading-tight truncate">{rec.title}</h4>
-                          <p className="text-[10px] text-[#FF9600] font-black italic">{rec.reason}</p>
+                          <h4 className="text-sm font-black text-[#1A1A18] leading-tight truncate">
+                            {rec.title}
+                          </h4>
+                          <p className="text-[10px] text-[#FF9600] font-black italic flex items-center gap-1 bg-amber-50/50 px-2.5 py-1 rounded-lg border border-amber-100/50 w-fit">
+                            {rec.reason}
+                          </p>
                         </div>
 
                         <button 
                           onClick={() => window.location.href = `/learn/lesson/${rec.lessonId}`}
-                          className="px-5 py-3 rounded-2xl bg-[#1899D6] text-white text-[10px] font-black uppercase tracking-widest shrink-0 self-start md:self-auto cursor-pointer border-none shadow-[0_4px_0_#1482B5] active:shadow-none active:translate-y-[4px] transition-all hover:brightness-105"
+                          className={`px-6 py-3.5 rounded-2xl ${rec.btnBg} text-white text-[10px] font-black uppercase tracking-widest shrink-0 self-start md:self-auto cursor-pointer border-none active:shadow-none active:translate-y-[4px] transition-all hover:brightness-105 hover:scale-[1.02] flex items-center gap-1.5`}
                         >
-                          BẮT ĐẦU NGAY <ArrowRight size={12} className="inline ml-1" />
+                          BẮT ĐẦU NGAY <ArrowRight size={12} className="stroke-[2.5]" />
                         </button>
                       </div>
                     ))}
@@ -247,69 +323,133 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                     {grades.map((grade) => {
                       const titleLower = grade.title.toLowerCase();
                       const isCinematic = titleLower.includes("cinematic") || titleLower.includes("phim");
-                      const isHigh = titleLower.includes("10") || titleLower.includes("11") || titleLower.includes("12");
-                      
-                      // Grade Color Codes
-                      const barColor = isCinematic ? "#8B5CF6" : isHigh ? "#1899D6" : "#58CC02";
-                      const shadowColor = isCinematic ? "shadow-[0_4px_0_#8B5CF6]" : isHigh ? "shadow-[0_4px_0_#1899D6]" : "shadow-[0_4px_0_#58CC02]";
+                      const isLop6 = titleLower.includes("6");
+                      const isGrade10 = titleLower.includes("10");
+                      const isGrade11 = titleLower.includes("11");
+                      const isGrade12 = titleLower.includes("12");
 
-                      // Dynamic Emojis
-                      let emojiBg = "bg-[#E8F9EE]";
-                      let emoji = "🏫";
-                      
+                      // Define VIP Theme configuration
+                      let theme = {
+                        barColor: "#58CC02",
+                        emoji: "🏫",
+                        emojiBg: "bg-[#E8F9EE] border-emerald-100 text-emerald-600",
+                        gradient: "from-[#F4FDF7] via-white to-white",
+                        border: "border-[#E2F7E7]",
+                        hoverBorder: "hover:border-[#58CC02] hover:shadow-[0_6px_0_#A6E97E]",
+                        shadowColor: "shadow-[0_4px_0_#58CC02]",
+                        badgeBg: "bg-[#E8F9EE] text-[#58CC02] border-[#B3F2C9]"
+                      };
+
                       if (isCinematic) {
-                        emojiBg = "bg-[#F2EDFC]";
-                        emoji = "🎬";
-                      } else if (isHigh) {
-                        emojiBg = "bg-[#E8F4FD]";
-                        emoji = "🎒";
+                        theme = {
+                          barColor: "#F59E0B", // Luxury Gold
+                          emoji: "🎬",
+                          emojiBg: "bg-[#FFF8E7] border-amber-100 text-amber-600",
+                          gradient: "from-[#FFFDF2] via-white to-white",
+                          border: "border-[#FFF0CE]",
+                          hoverBorder: "hover:border-[#F59E0B] hover:shadow-[0_6px_0_#FCDCA2]",
+                          shadowColor: "shadow-[0_4px_0_#F59E0B]",
+                          badgeBg: "bg-[#FFF8E7] text-[#B45309] border-[#FFE0B2]"
+                        };
+                      } else if (isGrade10) {
+                        theme = {
+                          barColor: "#1899D6",
+                          emoji: "🎒",
+                          emojiBg: "bg-[#E8F4FD] border-blue-100 text-blue-600",
+                          gradient: "from-[#F5FAFF] via-white to-white",
+                          border: "border-[#D6EDFF]",
+                          hoverBorder: "hover:border-[#1899D6] hover:shadow-[0_6px_0_#84D8FF]",
+                          shadowColor: "shadow-[0_4px_0_#1899D6]",
+                          badgeBg: "bg-[#E8F4FD] text-[#1899D6] border-[#B3DFFF]"
+                        };
+                      } else if (isGrade11) {
+                        theme = {
+                          barColor: "#8B5CF6",
+                          emoji: "📚",
+                          emojiBg: "bg-[#F2EDFC] border-purple-100 text-purple-600",
+                          gradient: "from-[#FAF6FE] via-white to-white",
+                          border: "border-[#EBE2FC]",
+                          hoverBorder: "hover:border-[#8B5CF6] hover:shadow-[0_6px_0_#C5A6FA]",
+                          shadowColor: "shadow-[0_4px_0_#8B5CF6]",
+                          badgeBg: "bg-[#F2EDFC] text-[#8B5CF6] border-[#E1D4FB]"
+                        };
+                      } else if (isGrade12) {
+                        theme = {
+                          barColor: "#EC4899", // Premium Rose Pink
+                          emoji: "🎓",
+                          emojiBg: "bg-[#FDF2F8] border-pink-100 text-pink-600",
+                          gradient: "from-[#FDF2F8] via-white to-white",
+                          border: "border-[#FBCFE8]",
+                          hoverBorder: "hover:border-[#EC4899] hover:shadow-[0_6px_0_#F9A8D4]",
+                          shadowColor: "shadow-[0_4px_0_#EC4899]",
+                          badgeBg: "bg-[#FDF2F8] text-[#EC4899] border-[#FBCFE8]"
+                        };
+                      } else if (isLop6) {
+                        theme = {
+                          barColor: "#10B981", // Emerald
+                          emoji: "🏫",
+                          emojiBg: "bg-[#E6F4EA] border-emerald-100 text-emerald-600",
+                          gradient: "from-[#EAF7ED] via-white to-white",
+                          border: "border-[#C2E7CC]",
+                          hoverBorder: "hover:border-[#10B981] hover:shadow-[0_6px_0_#A7F3D0]",
+                          shadowColor: "shadow-[0_4px_0_#10B981]",
+                          badgeBg: "bg-[#E6F4EA] text-[#10B981] border-[#A7F3D0]"
+                        };
                       }
 
                       return (
                         <motion.div
                           key={grade.id}
-                          whileHover={{ y: -4 }}
-                          className="group relative flex flex-col justify-between h-[230px] bg-white border-2 border-[#E5E5E5] rounded-[2.5rem] p-6 shadow-[0_4px_0_#E5E5E5] hover:border-slate-300 transition-all duration-300 overflow-hidden"
+                          whileHover={{ y: -6, scale: 1.01 }}
+                          className={`group relative flex flex-col justify-between h-[245px] bg-gradient-to-br ${theme.gradient} border-2 ${theme.border} rounded-[2.2rem] p-6 shadow-[0_6px_0_#E5E5E5] ${theme.hoverBorder} transition-all duration-300 overflow-hidden`}
                         >
                           {/* Top Header Badge */}
                           <div className="flex items-center justify-between">
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${emojiBg} text-3xl shadow-inner`}>
-                              {emoji}
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${theme.emojiBg} border text-3xl shadow-[0_4px_12px_rgba(0,0,0,0.05)]`}>
+                              {theme.emoji}
                             </div>
-                            <span className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase bg-[#E8F9EE] text-[#58CC02] border border-[#B3F2C9]">
-                              ĐANG HỌC
-                            </span>
+                            
+                            <div className="flex flex-col items-end gap-1">
+                              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${theme.badgeBg} border shadow-sm flex items-center gap-1`}>
+                                <span className="w-1 h-1 rounded-full bg-current animate-pulse" />
+                                ĐANG HỌC
+                              </span>
+                            </div>
                           </div>
 
                           {/* Content details */}
-                          <div className="mt-4 flex-1 flex flex-col justify-end">
-                            <h4 className="text-lg font-black text-[#1A1A18] leading-tight group-hover:text-[#1899D6] transition-colors">{grade.title}</h4>
-                            <p className="text-xs text-[#777777] font-semibold mt-1 leading-snug line-clamp-2">{grade.description}</p>
+                          <div className="mt-4 flex-1 flex flex-col justify-end z-10">
+                            <h4 className="text-lg font-black text-[#1A1A18] tracking-tight leading-tight group-hover:text-blue-600 transition-colors">
+                              {grade.title}
+                            </h4>
+                            <p className="text-xs text-[#777777] font-semibold mt-1.5 leading-snug line-clamp-2">
+                              {grade.description}
+                            </p>
                             
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-                              <span className="text-[10px] text-[#777777] font-black uppercase tracking-wider flex items-center gap-1">
-                                <BookOpen size={14} className="text-[#1899D6]" /> 12 CHUYÊN ĐỀ
+                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100/80">
+                              <span className="text-[9px] text-[#888888] font-black uppercase tracking-wider flex items-center gap-1">
+                                <BookOpen size={13} style={{ color: theme.barColor }} /> 12 CHUYÊN ĐỀ
                               </span>
                               
                               <Link 
                                 href={`/learn/grade/${grade.id}`}
-                                className={`px-4 py-2.5 rounded-2xl bg-white border-2 text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 shrink-0 ${shadowColor} active:translate-y-[4px] active:shadow-none cursor-pointer`}
+                                className={`px-4.5 py-2.5 rounded-2xl bg-white border-2 text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 ${theme.shadowColor} hover:brightness-105 active:translate-y-[4px] active:shadow-none cursor-pointer`}
                                 style={{ 
-                                  color: barColor, 
-                                  borderColor: barColor + "40"
+                                  color: theme.barColor, 
+                                  borderColor: theme.barColor + "40"
                                 }}
                               >
-                                VÀO HỌC <ArrowRight size={10} />
+                                VÀO HỌC <ArrowRight size={11} className="stroke-[2.5]" />
                               </Link>
                             </div>
                           </div>
 
-                          {/* Bottom decorative color bar */}
-                          <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-slate-100">
+                          {/* Bottom decorative color progress bar */}
+                          <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-slate-100/80">
                             <div 
                               className="h-full rounded-r-full"
                               style={{ 
-                                backgroundColor: barColor, 
+                                backgroundColor: theme.barColor, 
                                 width: "60%" 
                               }}
                             />
