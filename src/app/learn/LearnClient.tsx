@@ -66,10 +66,10 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
   // Premium Simulated Student Metrics (Localized to premium Vietnamese)
   const stats = [
-    { label: "Độ chính xác Nghe", value: "87%", icon: Volume2, color: "text-blue-400 bg-blue-500/10", trend: "+3.2% tuần này" },
-    { label: "Độ tự tin Nói", value: "78%", icon: Mic, color: "text-emerald-400 bg-emerald-500/10", trend: "+5.1% tuần này" },
-    { label: "Từ vựng làm chủ", value: "92%", icon: Bookmark, color: "text-amber-400 bg-amber-500/10", trend: "Đã học 140 từ mới" },
-    { label: "Sẵn sàng làm bài thi", value: "84%", icon: Award, color: "text-violet-400 bg-violet-500/10", trend: "Chuẩn Global Success" }
+    { label: "Độ chính xác Nghe", value: "87%", emoji: "🗣️", color: "bg-blue-100", trend: "+3.2% tuần này" },
+    { label: "Độ tự tin Nói", value: "78%", emoji: "💬", color: "bg-emerald-100", trend: "+5.1% tuần này" },
+    { label: "Từ vựng làm chủ", value: "92%", emoji: "📚", color: "bg-amber-100", trend: "Đã học 140 từ mới" },
+    { label: "Sẵn sàng làm bài thi", value: "84%", emoji: "🏆", color: "bg-violet-100", trend: "Chuẩn Global Success" }
   ];
 
   // Adaptive recommendation system (Localized to premium Vietnamese)
@@ -139,19 +139,19 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="rounded-3xl border border-slate-100 bg-[#FFFFFF] p-6 space-y-4 hover:border-blue-100 hover:shadow-[0_8px_24px_rgba(59,130,246,0.04)] transition-all relative overflow-hidden shadow-sm"
+                  className="bg-white p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-between hover:border-blue-100 hover:shadow-[0_12px_40px_rgba(59,130,246,0.08)] transition-all relative overflow-hidden"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black text-[#6B7280] uppercase tracking-[0.07em]">{stat.label}</span>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 text-[#3B82F6]">
-                      <stat.icon size={16} />
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={`w-16 h-16 rounded-full flex items-center justify-center ${stat.color} text-4xl shadow-sm`}>
+                      {stat.emoji}
+                    </div>
+                    <div className={`text-[10px] font-black uppercase tracking-wider bg-slate-50 px-2 py-1 rounded-md ${trendColor}`}>
+                      {trendIcon}{stat.trend}
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <h4 className="text-[28px] font-black text-[#1A1A18] font-mono">{stat.value}</h4>
-                    <p className={`text-[10px] font-black uppercase tracking-wider ${trendColor}`}>
-                      {trendIcon}{stat.trend}
-                    </p>
+                  <div>
+                    <h3 className="text-[#6B7280] font-bold text-base mb-2">{stat.label}</h3>
+                    <div className="text-5xl font-black text-[#1A1A18] tracking-tight">{stat.value}</div>
                   </div>
                 </motion.div>
               );
@@ -183,7 +183,7 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
 
                   <button 
                     onClick={() => window.location.href = `/learn/lesson/${rec.lessonId}`}
-                    className="px-5 py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer border-none shadow-md shadow-blue-500/10"
+                    className="px-6 py-3.5 rounded-2xl bg-[#3B82F6] text-white text-xs font-black uppercase tracking-wider flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer border-none shadow-[0_4px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[4px] transition-all hover:brightness-105"
                   >
                     Nhận nhiệm vụ <ArrowRight size={14} />
                   </button>
@@ -232,19 +232,16 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               const isHigh = titleLower.includes("10") || titleLower.includes("11") || titleLower.includes("12");
               const barColor = isCinematic ? "#8B5CF6" : isHigh ? "#3B82F6" : "#22C55E";
 
-              // Thumbnail configuration
-              let thumbBg = "#E1F5EE";
-              let thumbIconColor = "#22C55E";
-              let ThumbIcon = School;
+              // Emoji configuration
+              let emojiBg = "bg-green-100";
+              let emoji = "🏫";
               
               if (isCinematic) {
-                thumbBg = "#EEEDFE";
-                thumbIconColor = "#8B5CF6";
-                ThumbIcon = Play;
+                emojiBg = "bg-purple-100";
+                emoji = "🎬";
               } else if (isHigh) {
-                thumbBg = "#E6F1FB";
-                thumbIconColor = "#3B82F6";
-                ThumbIcon = BookOpen;
+                emojiBg = "bg-blue-100";
+                emoji = "🎒";
               }
               
               const statusText = "Đang học";
@@ -253,52 +250,45 @@ export default function LearnClient({ initialGrades }: LearnClientProps) {
               return (
                 <motion.div
                   key={grade.id}
-                  whileHover={{ y: -4, borderColor: '#3B82F6/20', boxShadow: '0 12px 30px rgba(59,130,246,0.06)' }}
-                  className="group relative rounded-[28px] bg-white border border-slate-100 overflow-hidden flex flex-col justify-between min-h-[14rem] h-auto shadow-sm transition-all duration-300 pb-[4px]"
+                  whileHover={{ y: -6, borderColor: '#3B82F6/30', boxShadow: '0 20px 40px rgba(59,130,246,0.1)' }}
+                  className="group relative flex flex-col justify-end h-56 bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] p-8 overflow-hidden transition-all duration-300"
                 >
-                  {/* Thumbnail Swatch */}
-                  <div 
-                    className="w-full h-[120px] rounded-t-[28px] flex items-center justify-center shrink-0 shadow-inner" 
-                    style={{ backgroundColor: thumbBg }}
-                  >
-                    <ThumbIcon size={36} style={{ color: thumbIconColor }} />
+                  <div className="absolute top-6 right-6 flex items-center gap-2">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${statusBg}`}>
+                      {statusText}
+                    </span>
+                    <span className="text-[#6B7280] bg-slate-50 px-2 py-1 rounded-md font-mono text-[10px] font-bold">#{grade.order_index}</span>
                   </div>
 
-                  {/* Card Body */}
-                  <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                    <div className="space-y-3 relative z-10">
-                      <div className="flex items-center justify-between">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${statusBg}`}>
-                          {statusText}
-                        </span>
-                        <span className="text-[#6B7280] font-mono text-[10px] font-bold">#{grade.order_index}</span>
-                      </div>
-                      <h3 className="text-xl font-black text-[#1A1A18] group-hover:text-[#3B82F6] transition-colors leading-tight">{grade.title}</h3>
-                      <p className="text-xs text-[#6B7280] leading-relaxed font-medium line-clamp-2">{grade.description}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between relative z-10 pt-3.5 border-t border-slate-100">
-                      {/* Unit count row with icon */}
-                      <span className="text-xs text-[#6B7280] font-bold flex items-center gap-1">
-                        <BookOpen size={13} className="text-[#3B82F6]" />
-                        12 Unit • Đang học
+                  <div className={`absolute top-6 left-6 w-20 h-20 rounded-full flex items-center justify-center ${emojiBg} text-5xl shadow-inner`}>
+                    {emoji}
+                  </div>
+                  
+                  <div className="mt-24 relative z-10 flex flex-col h-full justify-end">
+                    <h4 className="text-3xl font-extrabold text-[#1A1A18] group-hover:text-[#3B82F6] transition-colors leading-tight line-clamp-1">{grade.title}</h4>
+                    <p className="text-base text-[#6B7280] font-medium mt-2 line-clamp-2 leading-relaxed">{grade.description}</p>
+                    
+                    <div className="flex items-center justify-between mt-6 pt-5 border-t border-slate-100">
+                      <span className="text-sm text-[#6B7280] font-bold flex items-center gap-1.5">
+                        <BookOpen size={16} className="text-[#3B82F6]" />
+                        12 Unit
                       </span>
                       <Link 
                         href={`/learn/grade/${grade.id}`}
-                        className="px-4 py-2 rounded-xl bg-blue-50 border border-blue-100 text-xs font-black text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white hover:border-[#3B82F6] transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        className="px-5 py-3 rounded-2xl bg-blue-50 text-xs font-black text-[#3B82F6] hover:bg-[#3B82F6] hover:text-white transition-all flex items-center gap-1.5 shadow-[0_4px_0_rgb(219,234,254)] hover:shadow-[0_4px_0_rgb(37,99,235)] active:shadow-[0_0px_0_rgb(37,99,235)] active:translate-y-[4px] cursor-pointer border-none"
                       >
-                        Vào học <ArrowRight size={12} />
+                        Vào học <ArrowRight size={14} />
                       </Link>
                     </div>
                   </div>
 
-                  {/* 4px Progress Bar at card bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#EFF6FF]">
+                  {/* 6px Progress Bar at card bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 h-[6px] bg-[#EFF6FF]">
                     <div 
                       className="h-full rounded-r-full"
                       style={{ 
                         backgroundColor: barColor, 
-                        width: "50%" // progress indicator
+                        width: "50%" 
                       }}
                     />
                   </div>
